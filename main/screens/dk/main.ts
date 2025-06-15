@@ -8,23 +8,28 @@ import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
+import { Title } from "./title.js";
+
 export class ScreenDk extends BaseScreen {
     private screenManager: ScreenManager;
     
     private rotation: number = 0.0;
     private speed: number = 1.0;
 
-    private size: [number, number] = [1, 1];
     private setSize: { w: number, h: number} = { 
         w: 3.0, 
         h: 3.0
     }
 
+    private size: [number, number] = [1, 1];
     private color: [number, number, number, number] = [0, 0, 0, 1];
 
     private gridSize: [number, number] = [8, 8];
     private gridDimensions: [number, number] = [300, 300];
     private tileMap: number[][] = [];
+
+    //Elements
+    private title: Title;
 
     constructor(
         state: State,
@@ -36,18 +41,13 @@ export class ScreenDk extends BaseScreen {
     ) {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
+
+        this.title = new Title(buffers, programInfo, this);
     }
 
     //Background
     private drawBackground(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
-        
-        mat4.rotate(
-            modelViewMatrix,
-            modelViewMatrix,
-            this.rotation,
-            [0, 0, 0]
-        );
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -84,6 +84,10 @@ export class ScreenDk extends BaseScreen {
 
         //Tile
         this.drawTile(projectionMatrix);
+
+        //Elements
+            this.title.drawTitle(projectionMatrix);
+        //
 
         this.gl.enable(this.gl.DEPTH_TEST);
     }

@@ -9,26 +9,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { BaseScreen } from "../../screen.interface.js";
+import { Title } from "./title.js";
 export class ScreenDk extends BaseScreen {
     constructor(state, screenManager, tick, gl, programInfo, buffers) {
         super(state, gl, programInfo, buffers, tick);
         this.rotation = 0.0;
         this.speed = 1.0;
-        this.size = [1, 1];
         this.setSize = {
             w: 3.0,
             h: 3.0
         };
+        this.size = [1, 1];
         this.color = [0, 0, 0, 1];
         this.gridSize = [8, 8];
         this.gridDimensions = [300, 300];
         this.tileMap = [];
         this.screenManager = screenManager;
+        this.title = new Title(buffers, programInfo, this);
     }
     //Background
     drawBackground(projectionMatrix) {
         const modelViewMatrix = mat4.create();
-        mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [0, 0, 0]);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
@@ -51,6 +52,9 @@ export class ScreenDk extends BaseScreen {
         this.setBackground();
         //Tile
         this.drawTile(projectionMatrix);
+        //Elements
+        this.title.drawTitle(projectionMatrix);
+        //
         this.gl.enable(this.gl.DEPTH_TEST);
     }
     setBackground() {
