@@ -19,8 +19,7 @@ export class Camera {
         const projectionMatrix = mat4.create();
         mat4.perspective(projectionMatrix, fov, aspect, zNear, zFar);
         const modelViewMatrix = mat4.create();
-        mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -6.0]);
-        mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [0, 0, 1]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -1.0]);
         this.setPositionAttribute();
         this.setColorAttribute();
         this.gl.useProgram(this.programInfo.program);

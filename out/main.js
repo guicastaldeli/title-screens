@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { initBuffers } from "./init-buffers.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
+import { ScreenDk } from "./screens/dk/main.js";
 const canvas = (document.getElementById('container'));
 const gl = (canvas.getContext('webgl'));
 canvas.width = window.innerWidth;
@@ -18,6 +19,8 @@ const tick = new Tick();
 //Renders
 //Camera
 let renderCamera;
+//Dk
+let renderScreenDk;
 //
 function initShaders() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -80,15 +83,19 @@ function main() {
                 modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix')
             }
         };
+        gl.useProgram(programInfo.program);
         const buffers = initBuffers(gl);
         if (!buffers)
             return;
         //Renders
-        //Scene
-        initScene(gl, programInfo, buffers);
+        //Dk
+        renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
+        renderScreenDk.init();
         //Camera
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
+        //Scene
+        initScene(gl, programInfo, buffers);
         //
     });
 }
@@ -97,13 +104,16 @@ function initScene(gl, programInfo, buffers) {
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
-function resizeRenderer() {
+function handleResize(gl) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    window.addEventListener('resize', resizeRenderer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
 }
+window.addEventListener('resize', () => {
+    handleResize(gl);
+    renderScreenDk.init();
+});
 //Render
 let initialized = false;
 let then = 0;
@@ -120,12 +130,13 @@ function render() {
         }
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
+        renderScreenDk.update(deltaTime);
         requestAnimationFrame(render);
     });
 }
 //
 function init() {
-    resizeRenderer();
+    handleResize(gl);
     render();
 }
 init();

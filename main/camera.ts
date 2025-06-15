@@ -1,23 +1,8 @@
 import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
 
+import { Buffers } from "./init-buffers.js";
+import { ProgramInfo } from "./main.js";
 import { Tick } from "./tick.js";
-
-interface ProgramInfo {
-    program: WebGLProgram,
-    attribLocations: {
-        vertexPosition: number;
-        vertexColor: number;
-    }
-    uniformLocations: {
-        projectionMatrix: WebGLUniformLocation | null;
-        modelViewMatrix: WebGLUniformLocation | null
-    }
-}
-
-interface Buffers {
-    position: WebGLBuffer;
-    color: WebGLBuffer;
-}
 
 export class Camera {
     private tick: Tick;
@@ -58,15 +43,8 @@ export class Camera {
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [-0.0, 0.0, -6.0]
+            [-0.0, 0.0, -1.0]
         );
-        
-        mat4.rotate(
-            modelViewMatrix,
-            modelViewMatrix,
-            this.rotation,
-            [0, 0, 1]
-        )
 
         this.setPositionAttribute();
         this.setColorAttribute();

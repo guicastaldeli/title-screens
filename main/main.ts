@@ -3,6 +3,20 @@ import { initBuffers } from "./init-buffers.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 
+import { ScreenDk } from "./screens/dk/main.js";
+
+export interface ProgramInfo {
+    program: WebGLProgram,
+    attribLocations: {
+        vertexPosition: number;
+        vertexColor: number;
+    }
+    uniformLocations: {
+        projectionMatrix: WebGLUniformLocation | null;
+        modelViewMatrix: WebGLUniformLocation | null
+    }
+}
+
 const canvas = <HTMLCanvasElement>(document.getElementById('container'));
 const gl = <WebGLRenderingContext>(canvas.getContext('webgl'));
 
@@ -14,6 +28,9 @@ const tick = new Tick();
 //Renders
     //Camera
     let renderCamera: Camera;
+
+    //Dk
+    let renderScreenDk: ScreenDk;
 //
 
 async function initShaders(): Promise<WebGLProgram | null> {
@@ -76,18 +93,23 @@ async function main(): Promise<void> {
         }
     }
 
+    gl.useProgram(programInfo.program);
+
     const buffers = initBuffers(gl);
     if(!buffers) return;
 
     //Renders
-        //Scene
-        initScene(gl, programInfo, buffers);
+        //Dk
+        renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
+        renderScreenDk.init();
 
         //Camera
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
-    //
 
+        //Scene
+        initScene(gl, programInfo, buffers);
+    //
 }
 
 function initScene(
@@ -99,15 +121,18 @@ function initScene(
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-function resizeRenderer() {
+function handleResize(gl: WebGLRenderingContext) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    window.addEventListener('resize', resizeRenderer);
+    gl.viewport(0, 0, canvas.width, canvas.height);
 }
+
+window.addEventListener('resize', () => {
+    handleResize(gl);
+    renderScreenDk.init();
+});
 
 //Render
     let initialized = false;
@@ -127,13 +152,14 @@ function resizeRenderer() {
 
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
+        renderScreenDk.update(deltaTime);
 
         requestAnimationFrame(render);
     }
 //
 
 function init(): void {
-    resizeRenderer();
+    handleResize(gl);
     render();
 }
 
