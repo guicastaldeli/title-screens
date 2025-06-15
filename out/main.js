@@ -58,7 +58,7 @@ function initShaders() {
             gl.attachShader(shaderProgram, fragShader);
             gl.linkProgram(shaderProgram);
             if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                console.log(gl.getProgramInfoLog);
+                console.log(gl.getProgramInfoLog(shaderProgram));
                 return null;
             }
             return shaderProgram;
@@ -86,11 +86,14 @@ function main() {
             program: shaderProgram,
             attribLocations: {
                 vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-                vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor')
+                vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+                textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord')
             },
             uniformLocations: {
                 projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix')
+                modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+                uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+                uTex: gl.getUniformLocation(shaderProgram, 'uTex')
             }
         };
         gl.useProgram(programInfo.program);
@@ -152,6 +155,7 @@ function render() {
         if (!initialized) {
             yield main();
             initialized = true;
+            return;
         }
         tick.update(deltaTime);
         renderCamera.update(deltaTime);

@@ -42,7 +42,7 @@ export class ScreenDk extends BaseScreen {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
 
-        this.title = new Title(buffers, programInfo, this);
+        this.title = new Title(gl, buffers, programInfo, this);
     }
 
     //Background
@@ -59,6 +59,8 @@ export class ScreenDk extends BaseScreen {
 
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -193,7 +195,52 @@ export class ScreenDk extends BaseScreen {
 
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
+        
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    //Texture
+    public loadTexture(gl: WebGLRenderingContext, url: string): Promise<WebGLTexture> {
+        return new Promise((res, rej) => {
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+
+            const level = 0;
+            const internalFormat = gl.RGBA;
+            const width = 1;
+            const height = 1;
+            const border = 0;
+            const srcFormat = gl.RGBA;
+            const srcType = gl.UNSIGNED_BYTE;
+            const pixel = new Uint8Array([255, 255, 255, 255]);
+            gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
+
+            const img = new Image();
+
+            img.onload = () => {
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, img);
+
+                if(this.isPowerOf2(img.width) && this.isPowerOf2(img.height)) {
+                    gl.generateMipmap(gl.TEXTURE_2D);
+                } else {
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                }
+
+                res(texture);
+            }
+
+            img.onerror = rej;
+            img.src = url;
+        });
+    }
+
+    private isPowerOf2(value: number): boolean {
+        return (value & (value - 1)) === 0;
     }
 
     private setColor(color: string | [number, number, number, number]): void {
@@ -239,6 +286,10 @@ export class ScreenDk extends BaseScreen {
         return [0, 0, 0, 1];
     }
 
+    private async loadAssets(): Promise<void> {
+        await this.title.getTex();
+    }
+
     public update(deltaTime: number) {
         if(this.state.isLoading()) return;
 
@@ -246,14 +297,10 @@ export class ScreenDk extends BaseScreen {
         this.createBackground();
     }
 
-    public async init(): Promise<void[]> {
+    public async init(): Promise<void> {
         this.initGrid();
-
-        const onInit = [
-            this.createBackground()
-        ];
-
+        await this.loadAssets();
+        this.createBackground();
         this.state.markInit('dk');
-        return onInit;
     }
 }

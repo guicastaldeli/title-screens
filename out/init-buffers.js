@@ -2,6 +2,8 @@ import { dkInitBackgroundPositionBuffer } from "./screens/dk/buffers.js";
 import { dkInitBackgroundColorBuffer } from "./screens/dk/buffers.js";
 import { dkInitTilePositionBuffer } from "./screens/dk/buffers.js";
 import { dkInitTileColorBuffer } from "./screens/dk/buffers.js";
+import { dkInitTextureCoordBuffer } from "./screens/dk/buffers.js";
+import { dkInitTextureBuffer } from "./screens/dk/buffers.js";
 import { smbInitBackgroundPositionBuffer } from "./screens/smb2/buffer.js";
 import { smbInitBackgroundColorBuffer } from "./screens/smb2/buffer.js";
 export function initBuffers(gl) {
@@ -13,6 +15,8 @@ export function initBuffers(gl) {
     const dkBackgroundColorBuffer = dkInitBackgroundColorBuffer(gl);
     const dkTilePositionBuffer = dkInitTilePositionBuffer(gl);
     const dkTileColorBuffer = dkInitTileColorBuffer(gl);
+    const dkTitleTextureCoordBuffer = dkInitTextureCoordBuffer(gl);
+    const dkTitleTextureBuffer = dkInitTextureBuffer(gl);
     //SMB
     const smbBackgroundPositionBuffer = smbInitBackgroundPositionBuffer(gl);
     const smbBackgroundColorBuffer = smbInitBackgroundColorBuffer(gl);
@@ -24,6 +28,8 @@ export function initBuffers(gl) {
         dkBackgroundColor: dkBackgroundColorBuffer,
         dkTilePosition: dkTilePositionBuffer,
         dkTileColor: dkTileColorBuffer,
+        dkTitleTextureCoord: dkTitleTextureCoordBuffer,
+        dkTitleTexture: dkTitleTextureBuffer,
         smbBackgroundPosition: smbBackgroundPositionBuffer,
         smbBackgroundColor: smbBackgroundColorBuffer
     };

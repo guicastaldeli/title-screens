@@ -16,10 +16,13 @@ export interface ProgramInfo {
     attribLocations: {
         vertexPosition: number;
         vertexColor: number;
+        textureCoord: number;
     }
     uniformLocations: {
         projectionMatrix: WebGLUniformLocation | null;
-        modelViewMatrix: WebGLUniformLocation | null
+        modelViewMatrix: WebGLUniformLocation | null;
+        uSampler: WebGLUniformLocation | null;
+        uTex: WebGLUniformLocation | null;
     }
 }
 
@@ -74,7 +77,7 @@ async function initShaders(): Promise<WebGLProgram | null> {
         gl.linkProgram(shaderProgram);
     
         if(!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            console.log(gl.getProgramInfoLog);
+            console.log(gl.getProgramInfoLog(shaderProgram));
             return null;
         }
     
@@ -99,11 +102,14 @@ async function main(): Promise<void> {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-            vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor')
+            vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+            textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord')
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix')
+            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+            uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+            uTex: gl.getUniformLocation(shaderProgram, 'uTex')
         }
     }
 
@@ -181,6 +187,7 @@ window.addEventListener('resize', () => {
         if(!initialized) {
             await main();
             initialized = true;
+            return;
         }
 
         tick.update(deltaTime);
