@@ -1,6 +1,11 @@
 import { initBuffers } from "./init-buffers.js";
 
+import { State } from "./state.js";
+import { ScreenManager } from "./screen-manager.js";
+
+import { Contoller } from "./controller.js";
 import { Tick } from "./tick.js";
+
 import { Camera } from "./camera.js";
 
 import { ScreenDk } from "./screens/dk/main.js";
@@ -25,6 +30,11 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const tick = new Tick();
+
+//State
+let state: State;
+let screenManager: ScreenManager;
+let controller: Contoller;
 
 //Renders
     //Camera
@@ -102,22 +112,37 @@ async function main(): Promise<void> {
     const buffers = initBuffers(gl);
     if(!buffers) return;
 
+    //State
+    state = new State();
+    screenManager = new ScreenManager(state, gl, programInfo, buffers, tick);
+
     //Renders
         //Camera
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
 
         //Dk
-        renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
-        renderScreenDk.init();
+        renderScreenDk = new ScreenDk(state, screenManager, tick, gl, programInfo, buffers);
+        screenManager.registerScreen('dk', renderScreenDk);
 
         //Smb
-        renderScreenSmb = new ScreenSmb(tick, gl, programInfo, buffers);
-        renderScreenSmb.init();
-
-        //Scene
-        initScene(gl, programInfo, buffers);
+        renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers);
+        screenManager.registerScreen('smb', renderScreenSmb);
     //
+
+    await screenManager.switch('dk');
+    controller = new Contoller(state, screenManager);
+    state.setLoading(false);
+    state.setRunning(true);
+
+    //Scene
+    initScene(gl, programInfo, buffers);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === '1') {
+            controller.toggleScreen();
+        }
+    });
 }
 
 function initScene(
@@ -160,9 +185,7 @@ window.addEventListener('resize', () => {
 
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
-
-        renderScreenDk.update(deltaTime);
-        renderScreenSmb.update(deltaTime)
+        screenManager.update(deltaTime);
 
         requestAnimationFrame(render);
     }

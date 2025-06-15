@@ -1,14 +1,15 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { State } from "../../state.js";
+import { ScreenManager } from "../../screen-manager.js";
+import { BaseScreen } from "../../screen.interface.js";
+
 import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
-export class ScreenSmb {
-    private tick: Tick;
-    private gl: WebGLRenderingContext;
-    private programInfo: ProgramInfo;
-    private buffers: Buffers;
+export class ScreenSmb extends BaseScreen {
+    private screenManager: ScreenManager;
 
     private rotation: number = 0.0;
     private speed: number = 1.0;
@@ -17,15 +18,15 @@ export class ScreenSmb {
     private color: [number, number, number, number] = [0, 0, 0, 1];
 
     constructor(
+        state: State,
+        screenManager: ScreenManager,
         tick: Tick,
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
         buffers: Buffers
     ) {
-        this.tick = tick;
-        this.gl = gl;
-        this.programInfo = programInfo;
-        this.buffers = buffers;
+        super(state, gl, programInfo, buffers, tick);
+        this.screenManager = screenManager;
     }
 
     private createBackground(): void {
@@ -134,12 +135,13 @@ export class ScreenSmb {
         this.createBackground();
     }
 
-    public init(): void[] {
+    public async init(): Promise<void[]> {
         const onInit = [
             this.setBackground(),
             this.createBackground()
         ];
 
+        await this.state.markInit('smb')
         return onInit;
     }
 }

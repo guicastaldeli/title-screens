@@ -1,14 +1,22 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
-export class ScreenSmb {
-    constructor(tick, gl, programInfo, buffers) {
+import { BaseScreen } from "../../screen.interface.js";
+export class ScreenSmb extends BaseScreen {
+    constructor(state, screenManager, tick, gl, programInfo, buffers) {
+        super(state, gl, programInfo, buffers, tick);
         this.rotation = 0.0;
         this.speed = 1.0;
         this.size = [1, 1];
         this.color = [0, 0, 0, 1];
-        this.tick = tick;
-        this.gl = gl;
-        this.programInfo = programInfo;
-        this.buffers = buffers;
+        this.screenManager = screenManager;
     }
     createBackground() {
         this.gl.useProgram(this.programInfo.program);
@@ -83,10 +91,13 @@ export class ScreenSmb {
         this.createBackground();
     }
     init() {
-        const onInit = [
-            this.setBackground(),
-            this.createBackground()
-        ];
-        return onInit;
+        return __awaiter(this, void 0, void 0, function* () {
+            const onInit = [
+                this.setBackground(),
+                this.createBackground()
+            ];
+            yield this.state.markInit('smb');
+            return onInit;
+        });
     }
 }
