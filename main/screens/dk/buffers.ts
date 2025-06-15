@@ -1,3 +1,4 @@
+//Position
 export function dkInitBackgroundPositionBuffer(gl: WebGLRenderingContext): WebGLBuffer {
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -13,6 +14,14 @@ export function dkInitBackgroundPositionBuffer(gl: WebGLRenderingContext): WebGL
     return buffer;
 }
 
+export function dkInitTilePositionBuffer(gl: WebGLRenderingContext): WebGLBuffer {
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(8), gl.DYNAMIC_DRAW);
+    return buffer;
+}
+
+//Color
 export function dkInitBackgroundColorBuffer(gl: WebGLRenderingContext): WebGLBuffer {
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -25,5 +34,12 @@ export function dkInitBackgroundColorBuffer(gl: WebGLRenderingContext): WebGLBuf
     ];
 
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    return buffer;
+}
+
+export function dkInitTileColorBuffer(gl: WebGLRenderingContext): WebGLBuffer {
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(16), gl.DYNAMIC_DRAW);
     return buffer;
 }

@@ -15,16 +15,18 @@ export class ScreenDk extends BaseScreen {
         this.rotation = 0.0;
         this.speed = 1.0;
         this.size = [1, 1];
+        this.setSize = {
+            w: 3.0,
+            h: 3.0
+        };
         this.color = [0, 0, 0, 1];
+        this.gridSize = [8, 8];
+        this.gridDimensions = [300, 300];
+        this.tileMap = [];
         this.screenManager = screenManager;
     }
-    createBackground() {
-        this.gl.useProgram(this.programInfo.program);
-        this.gl.disable(this.gl.DEPTH_TEST);
-        const projectionMatrix = mat4.create();
-        const canvas = this.gl.canvas;
-        const aspect = canvas.width / canvas.height;
-        mat4.ortho(projectionMatrix, -aspect, aspect, -1.0, 1.0, -1.0, 1.0);
+    //Background
+    drawBackground(projectionMatrix) {
         const modelViewMatrix = mat4.create();
         mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [0, 0, 0]);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
@@ -36,12 +38,23 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
-        this.gl.enable(this.gl.DEPTH_TEST);
+    }
+    createBackground() {
+        this.gl.useProgram(this.programInfo.program);
+        this.gl.disable(this.gl.DEPTH_TEST);
+        const projectionMatrix = mat4.create();
+        const canvas = this.gl.canvas;
+        const aspect = canvas.width / canvas.height;
+        mat4.ortho(projectionMatrix, -aspect, aspect, -1.0, 1.0, -1.0, 1.0);
+        //Background
+        this.drawBackground(projectionMatrix);
         this.setBackground();
+        //Tile
+        this.drawTile(projectionMatrix);
+        this.gl.enable(this.gl.DEPTH_TEST);
     }
     setBackground() {
-        const size = { w: 3, h: 0.5 };
-        this.size = [size.w, size.h];
+        this.size = [this.setSize.w, this.setSize.h];
         const positions = [
             -this.size[0], -this.size[1],
             this.size[0], -this.size[1],
@@ -51,6 +64,61 @@ export class ScreenDk extends BaseScreen {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
         this.setColor('rgb(7, 0, 111)');
+    }
+    //Tile Grid
+    initGrid() {
+        this.tileMap = Array(this.gridDimensions[1]).fill(0)
+            .map(() => Array(this.gridDimensions[0]).fill(0));
+        for (let y = 0; y < this.gridDimensions[1]; y++) {
+            for (let x = 0; x < this.gridDimensions[0]; x++) {
+                this.tileMap[y][x] = (x + y) % 2;
+            }
+        }
+    }
+    drawTile(projectionMatrix) {
+        const canvas = this.gl.canvas;
+        const aspect = canvas.width / canvas.height;
+        const backgroundWidth = this.setSize.w;
+        const backgroundHeight = this.setSize.h;
+        const tileWidth = (2 * backgroundWidth * aspect) / this.gridDimensions[0];
+        const tileHeight = (2 * backgroundHeight * aspect) / this.gridDimensions[1];
+        const startX = -backgroundWidth * aspect;
+        const startY = backgroundHeight;
+        for (let y = 0; y < this.gridDimensions[1]; y++) {
+            for (let x = 0; x < this.gridDimensions[0]; x++) {
+                const tileType = this.tileMap[y][x];
+                this.renderTile(x, y, tileType, tileWidth, tileHeight, startX, startY, projectionMatrix);
+            }
+        }
+    }
+    renderTile(gridX, gridY, tileType, tileWidth, tileHeight, startX, startY, projectionMatrix) {
+        const modelViewMatrix = mat4.create();
+        const x = startX + gridX * tileWidth;
+        const y = startY - (gridY + 1) * tileHeight;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            0, 0,
+            tileWidth, 0,
+            0, tileHeight,
+            tileWidth, tileHeight
+        ];
+        const color = tileType === 0 ?
+            this.parseColor('rgb(0, 0, 0)') :
+            this.parseColor('rgb(41, 41, 41)');
+        const colors = [
+            ...color, ...color, ...color, ...color
+        ];
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkTilePosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkTileColor);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.DYNAMIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexColor, 4, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexColor);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     setColor(color) {
         this.color = this.parseColor(color);
@@ -89,13 +157,12 @@ export class ScreenDk extends BaseScreen {
         if (this.state.isLoading())
             return;
         this.rotation += this.tick['speed'] * deltaTime;
-        this.setBackground();
         this.createBackground();
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.initGrid();
             const onInit = [
-                this.setBackground(),
                 this.createBackground()
             ];
             this.state.markInit('dk');

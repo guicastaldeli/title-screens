@@ -40,7 +40,7 @@ export class ScreenSmb extends BaseScreen {
         this.setBackground();
     }
     setBackground() {
-        const size = { w: 1.0, h: 0.8 };
+        const size = { w: 0.5, h: 0.5 };
         this.size = [size.w, size.h];
         const positions = [
             -this.size[0], -this.size[1],

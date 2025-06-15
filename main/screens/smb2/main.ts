@@ -70,7 +70,7 @@ export class ScreenSmb extends BaseScreen {
     }
 
     private setBackground(): void {
-        const size = { w: 1.0, h: 0.8 }
+        const size = { w: 0.5, h: 0.5 }
         this.size = [size.w, size.h];
 
         const positions = [
@@ -141,7 +141,7 @@ export class ScreenSmb extends BaseScreen {
             this.createBackground()
         ];
 
-        await this.state.markInit('smb')
+        await this.state.markInit('smb');
         return onInit;
     }
 }
