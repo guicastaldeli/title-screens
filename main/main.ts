@@ -168,9 +168,10 @@ function handleResize(gl: WebGLRenderingContext) {
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', async () => {
     handleResize(gl);
-    renderScreenDk.init();
+    await renderScreenDk.init();
+    renderScreenSmb.init();
 });
 
 //Render
@@ -187,7 +188,6 @@ window.addEventListener('resize', () => {
         if(!initialized) {
             await main();
             initialized = true;
-            return;
         }
 
         tick.update(deltaTime);

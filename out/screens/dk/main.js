@@ -209,8 +209,8 @@ export class ScreenDk extends BaseScreen {
         return __awaiter(this, void 0, void 0, function* () {
             this.initGrid();
             yield this.loadAssets();
-            this.createBackground();
             this.state.markInit('dk');
+            return this.createBackground();
         });
     }
 }

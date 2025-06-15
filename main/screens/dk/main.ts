@@ -300,7 +300,8 @@ export class ScreenDk extends BaseScreen {
     public async init(): Promise<void> {
         this.initGrid();
         await this.loadAssets();
-        this.createBackground();
+        
         this.state.markInit('dk');
+        return this.createBackground();
     }
 }

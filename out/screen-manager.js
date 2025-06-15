@@ -35,7 +35,6 @@ export class ScreenManager {
                     this.state.markInit(name);
                 }
                 this.state.setCurrentState(name);
-                this.state.markInit(name);
             }
             catch (err) {
                 console.log(err);

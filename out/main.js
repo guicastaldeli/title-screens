@@ -138,10 +138,11 @@ function handleResize(gl) {
     canvas.height = window.innerHeight;
     gl.viewport(0, 0, canvas.width, canvas.height);
 }
-window.addEventListener('resize', () => {
+window.addEventListener('resize', () => __awaiter(void 0, void 0, void 0, function* () {
     handleResize(gl);
-    renderScreenDk.init();
-});
+    yield renderScreenDk.init();
+    renderScreenSmb.init();
+}));
 //Render
 let initialized = false;
 let then = 0;
@@ -155,7 +156,6 @@ function render() {
         if (!initialized) {
             yield main();
             initialized = true;
-            return;
         }
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
