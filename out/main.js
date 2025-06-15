@@ -11,6 +11,7 @@ import { initBuffers } from "./init-buffers.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 import { ScreenDk } from "./screens/dk/main.js";
+import { ScreenSmb } from "./screens/smb2/main.js";
 const canvas = (document.getElementById('container'));
 const gl = (canvas.getContext('webgl'));
 canvas.width = window.innerWidth;
@@ -21,6 +22,8 @@ const tick = new Tick();
 let renderCamera;
 //Dk
 let renderScreenDk;
+//Smb
+let renderScreenSmb;
 //
 function initShaders() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -88,12 +91,15 @@ function main() {
         if (!buffers)
             return;
         //Renders
-        //Dk
-        renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
-        renderScreenDk.init();
         //Camera
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
+        //Dk
+        renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
+        renderScreenDk.init();
+        //Smb
+        renderScreenSmb = new ScreenSmb(tick, gl, programInfo, buffers);
+        renderScreenSmb.init();
         //Scene
         initScene(gl, programInfo, buffers);
         //
@@ -131,6 +137,7 @@ function render() {
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
         renderScreenDk.update(deltaTime);
+        renderScreenSmb.update(deltaTime);
         requestAnimationFrame(render);
     });
 }

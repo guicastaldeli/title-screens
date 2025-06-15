@@ -1,16 +1,25 @@
-import { initBackgroundPositionBuffer } from "./screens/dk/buffers.js";
-import { initBackgroundColorBuffer } from "./screens/dk/buffers.js";
+import { dkInitBackgroundPositionBuffer } from "./screens/dk/buffers.js";
+import { dkInitBackgroundColorBuffer } from "./screens/dk/buffers.js";
+import { smbInitBackgroundPositionBuffer } from "./screens/smb2/buffer.js";
+import { smbInitBackgroundColorBuffer } from "./screens/smb2/buffer.js";
 export function initBuffers(gl) {
     const positionBuffer = initPositionBuffer(gl);
     const colorBuffer = initColorBuffer(gl);
+    //Screens
     //Dk
-    const dkBackgroundPositionBuffer = initBackgroundPositionBuffer(gl);
-    const dkBackgroundColorBuffer = initBackgroundColorBuffer(gl);
+    const dkBackgroundPositionBuffer = dkInitBackgroundPositionBuffer(gl);
+    const dkBackgroundColorBuffer = dkInitBackgroundColorBuffer(gl);
+    //SMB
+    const smbBackgroundPositionBuffer = smbInitBackgroundPositionBuffer(gl);
+    const smbBackgroundColorBuffer = smbInitBackgroundColorBuffer(gl);
+    //
     return {
         position: positionBuffer,
         color: colorBuffer,
         dkBackgroundPosition: dkBackgroundPositionBuffer,
         dkBackgroundColor: dkBackgroundColorBuffer,
+        smbBackgroundPosition: smbBackgroundPositionBuffer,
+        smbBackgroundColor: smbBackgroundColorBuffer
     };
 }
 function initPositionBuffer(gl) {

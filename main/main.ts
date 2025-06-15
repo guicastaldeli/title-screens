@@ -4,6 +4,7 @@ import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 
 import { ScreenDk } from "./screens/dk/main.js";
+import { ScreenSmb } from "./screens/smb2/main.js";
 
 export interface ProgramInfo {
     program: WebGLProgram,
@@ -31,6 +32,9 @@ const tick = new Tick();
 
     //Dk
     let renderScreenDk: ScreenDk;
+
+    //Smb
+    let renderScreenSmb: ScreenSmb;
 //
 
 async function initShaders(): Promise<WebGLProgram | null> {
@@ -99,13 +103,17 @@ async function main(): Promise<void> {
     if(!buffers) return;
 
     //Renders
+        //Camera
+        renderCamera = new Camera(tick, gl, programInfo, buffers);
+        renderCamera.init();
+
         //Dk
         renderScreenDk = new ScreenDk(tick, gl, programInfo, buffers);
         renderScreenDk.init();
 
-        //Camera
-        renderCamera = new Camera(tick, gl, programInfo, buffers);
-        renderCamera.init();
+        //Smb
+        renderScreenSmb = new ScreenSmb(tick, gl, programInfo, buffers);
+        renderScreenSmb.init();
 
         //Scene
         initScene(gl, programInfo, buffers);
@@ -152,7 +160,9 @@ window.addEventListener('resize', () => {
 
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
+
         renderScreenDk.update(deltaTime);
+        renderScreenSmb.update(deltaTime)
 
         requestAnimationFrame(render);
     }

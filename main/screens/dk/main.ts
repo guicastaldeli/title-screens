@@ -6,11 +6,11 @@ import { ProgramInfo } from "../../main.js";
 
 export class ScreenDk {
     private tick: Tick;
+    private gl: WebGLRenderingContext;
     private programInfo: ProgramInfo;
     private buffers: Buffers;
-    private gl: WebGLRenderingContext;
 
-    private rotation: number = 0;
+    private rotation: number = 0.0;
     private speed: number = 1.0;
 
     private size: [number, number] = [1, 1];
@@ -23,9 +23,9 @@ export class ScreenDk {
         buffers: Buffers
     ) {
         this.tick = tick;
+        this.gl = gl;
         this.programInfo = programInfo;
         this.buffers = buffers;
-        this.gl = gl;
     }
 
     private createBackground(): void {
@@ -49,8 +49,8 @@ export class ScreenDk {
             modelViewMatrix,
             modelViewMatrix,
             this.rotation,
-            [0, 0, 1]
-        )
+            [0, 0, 0]
+        );
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -69,13 +69,20 @@ export class ScreenDk {
     }
 
     private setBackground(): void {
-        const size = {
-            w: 0.5,
-            h: 0.5
-        }
-
+        const size = { w: 3, h: 0.5}
         this.size = [size.w, size.h];
-        this.setColor('rgb(12, 207, 55)');
+
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0],  this.size[1],
+            this.size[0],  this.size[1],
+        ];
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
+        
+        this.setColor('rgb(7, 0, 111)');
     }
 
     private setColor(color: string | [number, number, number, number]): void {
@@ -122,13 +129,17 @@ export class ScreenDk {
     }
 
     public update(deltaTime: number) {
-        this.rotation += this.speed * deltaTime;
+        this.rotation += this.tick['speed'] * deltaTime;
         this.setBackground();
         this.createBackground();
     }
 
-    public init(): void {
-        this.setBackground();
-        this.createBackground();
+    public init(): void[] {
+        const onInit = [
+            this.setBackground(),
+            this.createBackground()
+        ];
+
+        return onInit;
     }
 }

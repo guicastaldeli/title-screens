@@ -1,14 +1,14 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class ScreenDk {
     constructor(tick, gl, programInfo, buffers) {
-        this.rotation = 0;
+        this.rotation = 0.0;
         this.speed = 1.0;
         this.size = [1, 1];
         this.color = [0, 0, 0, 1];
         this.tick = tick;
+        this.gl = gl;
         this.programInfo = programInfo;
         this.buffers = buffers;
-        this.gl = gl;
     }
     createBackground() {
         this.gl.useProgram(this.programInfo.program);
@@ -18,7 +18,7 @@ export class ScreenDk {
         const aspect = canvas.width / canvas.height;
         mat4.ortho(projectionMatrix, -aspect, aspect, -1.0, 1.0, -1.0, 1.0);
         const modelViewMatrix = mat4.create();
-        mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [0, 0, 1]);
+        mat4.rotate(modelViewMatrix, modelViewMatrix, this.rotation, [0, 0, 0]);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
@@ -32,12 +32,17 @@ export class ScreenDk {
         this.setBackground();
     }
     setBackground() {
-        const size = {
-            w: 0.5,
-            h: 0.5
-        };
+        const size = { w: 3, h: 0.5 };
         this.size = [size.w, size.h];
-        this.setColor('rgb(12, 207, 55)');
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0], this.size[1],
+            this.size[0], this.size[1],
+        ];
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.dkBackgroundPosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
+        this.setColor('rgb(7, 0, 111)');
     }
     setColor(color) {
         this.color = this.parseColor(color);
@@ -73,12 +78,15 @@ export class ScreenDk {
         return [0, 0, 0, 1];
     }
     update(deltaTime) {
-        this.rotation += this.speed * deltaTime;
+        this.rotation += this.tick['speed'] * deltaTime;
         this.setBackground();
         this.createBackground();
     }
     init() {
-        this.setBackground();
-        this.createBackground();
+        const onInit = [
+            this.setBackground(),
+            this.createBackground()
+        ];
+        return onInit;
     }
 }

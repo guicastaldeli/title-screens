@@ -1,22 +1,32 @@
-
-import { initBackgroundPositionBuffer } from "./screens/dk/buffers.js";
-import { initBackgroundColorBuffer } from "./screens/dk/buffers.js";
+import { dkInitBackgroundPositionBuffer } from "./screens/dk/buffers.js";
+import { dkInitBackgroundColorBuffer } from "./screens/dk/buffers.js";
+import { smbInitBackgroundPositionBuffer } from "./screens/smb2/buffer.js";
+import { smbInitBackgroundColorBuffer } from "./screens/smb2/buffer.js";
 
 export interface Buffers {
     position: WebGLBuffer,
     color: WebGLBuffer,
 
     dkBackgroundPosition: WebGLBuffer,
-    dkBackgroundColor: WebGLBuffer
+    dkBackgroundColor: WebGLBuffer,
+
+    smbBackgroundPosition: WebGLBuffer,
+    smbBackgroundColor: WebGLBuffer
 }
 
 export function initBuffers(gl: WebGLRenderingContext): Buffers {
     const positionBuffer = initPositionBuffer(gl);
     const colorBuffer = initColorBuffer(gl);
 
-    //Dk
-    const dkBackgroundPositionBuffer = initBackgroundPositionBuffer(gl);
-    const dkBackgroundColorBuffer = initBackgroundColorBuffer(gl);
+    //Screens
+        //Dk
+        const dkBackgroundPositionBuffer = dkInitBackgroundPositionBuffer(gl);
+        const dkBackgroundColorBuffer = dkInitBackgroundColorBuffer(gl);
+
+        //SMB
+        const smbBackgroundPositionBuffer = smbInitBackgroundPositionBuffer(gl);
+        const smbBackgroundColorBuffer = smbInitBackgroundColorBuffer(gl);
+    //
 
     return { 
         position: positionBuffer,
@@ -24,6 +34,9 @@ export function initBuffers(gl: WebGLRenderingContext): Buffers {
 
         dkBackgroundPosition: dkBackgroundPositionBuffer,
         dkBackgroundColor: dkBackgroundColorBuffer,
+
+        smbBackgroundPosition: smbBackgroundPositionBuffer,
+        smbBackgroundColor: smbBackgroundColorBuffer
     }
 }
 

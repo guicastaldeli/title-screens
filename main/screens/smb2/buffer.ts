@@ -1,4 +1,4 @@
-export function dkInitBackgroundPositionBuffer(gl: WebGLRenderingContext): WebGLBuffer {
+export function smbInitBackgroundPositionBuffer(gl: WebGLRenderingContext): WebGLBuffer {
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
@@ -13,7 +13,7 @@ export function dkInitBackgroundPositionBuffer(gl: WebGLRenderingContext): WebGL
     return buffer;
 }
 
-export function dkInitBackgroundColorBuffer(gl: WebGLRenderingContext): WebGLBuffer {
+export function smbInitBackgroundColorBuffer(gl: WebGLRenderingContext): WebGLBuffer {
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
