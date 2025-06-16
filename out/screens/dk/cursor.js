@@ -9,13 +9,14 @@ export class Cursor {
         this.cursorTargetPosition = [0, 0];
         this.cursorCurrentPosition = [0, 0];
         this.cursorOffsetX = this.position[0];
+        this.selected = false;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
         this.options = options;
-        this.selectedColor = this.screen.parseColor('rgb(211, 211, 211)');
+        this.selectedColor = this.screen.parseColor('rgb(103, 103, 103)');
         this.selectedIndex = 0;
         this.setOptionPosition();
     }
@@ -135,7 +136,9 @@ export class Cursor {
                 this.moveSelection(1);
                 break;
             case 'Enter':
+                this.selected = true;
                 this.options.selectedOption();
+                setTimeout(() => this.selected = false, this.options.intervalSelected);
                 break;
         }
     }

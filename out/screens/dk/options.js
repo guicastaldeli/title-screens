@@ -8,6 +8,7 @@ export class Options {
         this.options = [];
         this.waveTime = 0.0;
         this.waveSpeed = 2.0;
+        this.intervalSelected = 1000;
         this.letterCoords = {
             ' ': [555.5, 330.5],
             '.': [552.1, 339.1],
@@ -120,14 +121,9 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, isCopyright ? 0.0 : 1.0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected ? 1 : 0);
-        if (isSelected == true) {
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected && !this.cursor.selected ? 1 : 0);
+        if (isSelected === true && !this.cursor.selected)
             this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
-        }
-        else {
-            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, 0.0, 0.0);
-        }
-        //console.log(isSelected)
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
@@ -168,7 +164,7 @@ export class Options {
             else {
                 option.color = defaultColor;
             }
-        }, 1000);
+        }, this.intervalSelected);
         this.options.forEach(opt => {
             if (opt !== option) {
                 opt.selected = false;

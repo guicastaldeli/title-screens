@@ -32,6 +32,7 @@ export class Options {
     public options: Option[] = [];
     private waveTime: number = 0.0;
     private waveSpeed: number = 2.0;
+    public intervalSelected: number = 1000;
 
     private letterCoords: Record<string, [number, number]> = {
         ' ': [555.5, 330.5],
@@ -208,15 +209,8 @@ export class Options {
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        
-        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected ? 1 : 0);
-
-        if(isSelected == true) {
-            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
-        } else {
-            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, 0.0, 0.0);
-        }
-        //console.log(isSelected)
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected  && !this.cursor.selected ? 1 : 0);
+        if(isSelected === true && !this.cursor.selected) this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
 
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
@@ -270,8 +264,8 @@ export class Options {
             } else {
                 option.color = defaultColor;
             }
-        }, 1000);
-        
+        }, this.intervalSelected);
+
         this.options.forEach(opt => {
             if(opt !== option) {
                 opt.selected = false;
@@ -280,7 +274,6 @@ export class Options {
         });
 
         option.selected = true;
-
     }
 
     public getOptionPositions(): [number, number][] {

@@ -28,6 +28,7 @@ export class Cursor {
     private readonly cursorOffsetX = this.position[0];
 
     public selectedColor: [number, number, number, number];
+    public selected: boolean = false;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -45,7 +46,7 @@ export class Cursor {
         this.sheetProps = sheetProps;
         this.options = options;
 
-        this.selectedColor = this.screen.parseColor('rgb(211, 211, 211)');
+        this.selectedColor = this.screen.parseColor('rgb(103, 103, 103)');
 
         this.selectedIndex = 0;
         this.setOptionPosition();
@@ -196,7 +197,9 @@ export class Cursor {
                 this.moveSelection(1);
                 break;
             case 'Enter':
+                this.selected = true
                 this.options.selectedOption();
+                setTimeout(() => this.selected = false, this.options.intervalSelected);
                 break;
         }
     }
