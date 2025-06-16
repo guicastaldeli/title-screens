@@ -23,7 +23,7 @@ export class ScreenDk extends BaseScreen {
         this.size = [1, 1];
         this.color = [0, 0, 0, 1];
         this.gridSize = [8, 8];
-        this.gridDimensions = [300, 300];
+        this.gridDimensions = [100, 100];
         this.tileMap = [];
         this.screenManager = screenManager;
         this.title = new Title(gl, buffers, programInfo, this);
@@ -112,7 +112,7 @@ export class ScreenDk extends BaseScreen {
         ];
         const color = tileType === 0 ?
             this.parseColor('rgb(0, 0, 0)') :
-            this.parseColor('rgb(41, 41, 41)');
+            this.parseColor('rgb(0, 0, 0)');
         const colors = [
             ...color, ...color, ...color, ...color
         ];

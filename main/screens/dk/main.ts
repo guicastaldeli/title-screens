@@ -26,7 +26,7 @@ export class ScreenDk extends BaseScreen {
     private color: [number, number, number, number] = [0, 0, 0, 1];
 
     private gridSize: [number, number] = [8, 8];
-    private gridDimensions: [number, number] = [300, 300];
+    private gridDimensions: [number, number] = [100, 100];
     private tileMap: number[][] = [];
 
     //Elements
@@ -180,7 +180,7 @@ export class ScreenDk extends BaseScreen {
         const color = 
             tileType === 0 ?
             this.parseColor('rgb(0, 0, 0)') :
-            this.parseColor('rgb(41, 41, 41)')
+            this.parseColor('rgb(0, 0, 0)')
         ;
 
         const colors = [

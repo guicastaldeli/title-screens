@@ -1,21 +1,32 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Options {
     constructor(gl, buffers, programInfo, screen, title) {
-        this.containerPosition = [0, 0];
+        this.containerPosition = [0.1, 0];
         this.options = [];
         this.letterCoords = {
-            ' ': [0, 0],
-            '1': [0, 0],
-            '2': [0, 0],
-            'A': [0, 0],
-            'B': [0, 0],
-            'E': [0, 0],
-            'G': [0, 0],
-            'L': [0, 0],
-            'M': [0, 0],
-            'P': [0, 0],
-            'R': [0, 0],
-            'Y': [0, 0],
+            ' ': [555.5, 330.1],
+            '.': [618, 321.1],
+            '.,': [618, 321.1],
+            'cr': [618, 321.1],
+            '1': [528.5, 312.1],
+            '2': [537.1, 312.1],
+            '8': [591.1, 312.1],
+            '9': [600.1, 312.1],
+            'A': [609.1, 312.1],
+            'B': [618, 312.1],
+            'C': [618, 312.1],
+            'D': [618, 312.1],
+            'E': [645, 312],
+            'G': [519.1, 321.1],
+            'I': [618, 312.1],
+            'J': [618, 312.1],
+            'L': [564.5, 321.1],
+            'M': [573, 321.1],
+            'N': [573, 321.1],
+            'P': [600, 321.09],
+            'R': [618, 321.1],
+            'T': [618, 321.1],
+            'Y': [537.5, 330.1],
         };
         this.gl = gl;
         this.buffers = buffers;
@@ -41,12 +52,20 @@ export class Options {
             {
                 text: '2 PLAYER GAME B',
                 position: [0, -0.45]
+            },
+            {
+                text: 'c 1981 NINTENDO CO.,LTD.',
+                position: [-0.2, -0.75]
+            },
+            {
+                text: 'MADE IN JAPAN',
+                position: [-0.15, -0.85]
             }
         ];
     }
     drawOptions(projectionMatrix, text, x, y) {
         const letters = text.split('');
-        const spacing = 0.2;
+        const spacing = 0.07;
         const startX = x - ((letters.length * spacing) / 2);
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
@@ -55,7 +74,7 @@ export class Options {
     }
     drawLetter(projectionMatrix, letter, x, y) {
         const modelViewMatrix = mat4.create();
-        const size = [0.05, 0.05];
+        const size = [0.03, 0.03];
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
             -size[0], -size[1],
@@ -66,7 +85,7 @@ export class Options {
         const spriteCoords = this.letterCoords[letter] || this.letterCoords[' '];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.title['spriteSheetSize'];
-        const [spriteWidth, spriteHeight] = this.title['spriteSize'];
+        const [spriteWidth, spriteHeight] = [7, 7];
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
         const top = spriteY / sheetHeight;
