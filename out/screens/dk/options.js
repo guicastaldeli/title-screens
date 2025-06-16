@@ -2,7 +2,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { Cursor } from "./cursor.js";
 export class Options {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
-        this.containerPosition = [0.1, 0];
+        this.containerPosition = [0.12, 0];
         this.options = [];
         this.letterCoords = {
             ' ': [555.5, 330.5],

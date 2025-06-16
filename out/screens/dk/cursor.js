@@ -1,9 +1,9 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
-        this.position = [-0.05, 0.2];
-        this.coords = [627, 312.1];
-        this.size = [7, 7];
+        this.position = [-0.52, 0];
+        this.coords = [519, 266];
+        this.size = [6.8, 6.8];
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;

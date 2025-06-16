@@ -17,9 +17,9 @@ export class Cursor {
     private sheetProps: SheetProps;
     private options: Options;
 
-    private position: [number, number] = [-0.05, 0.2];
-    private coords: [number, number] = [627, 312.1];
-    private size: [number, number] = [7, 7];
+    private position: [number, number] = [-0.52, 0];
+    private coords: [number, number] = [519, 266];
+    private size: [number, number] = [6.8, 6.8];
 
     constructor(
         gl: WebGLRenderingContext,

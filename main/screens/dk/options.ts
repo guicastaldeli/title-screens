@@ -18,7 +18,7 @@ export class Options {
     private sheetProps: SheetProps;
     private cursor: Cursor;
 
-    private containerPosition: [number, number] = [0.1, 0];
+    private containerPosition: [number, number] = [0.12, 0];
 
     private options: {
         text: string,
