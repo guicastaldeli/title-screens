@@ -24,6 +24,7 @@ export interface ProgramInfo {
         uSampler: WebGLUniformLocation | null;
         uTex: WebGLUniformLocation | null;
         isText: WebGLUniformLocation | null;
+        isCursor: WebGLUniformLocation | null;
         uColor: WebGLUniformLocation | null;
         uThreshold: WebGLUniformLocation | null;
     }
@@ -114,6 +115,7 @@ async function main(): Promise<void> {
             uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
             uTex: gl.getUniformLocation(shaderProgram, 'uTex'),
             isText: gl.getUniformLocation(shaderProgram, 'isText'),
+            isCursor: gl.getUniformLocation(shaderProgram, 'isCursor'),
             uColor: gl.getUniformLocation(shaderProgram, 'uColor'),
             uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold')
         }

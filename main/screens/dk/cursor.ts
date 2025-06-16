@@ -18,11 +18,11 @@ export class Cursor {
     private options: Options;
 
     private position: [number, number] = [-0.52, 0];
-    private coords: [number, number] = [519, 266];
-    private size: [number, number] = [6.8, 6.8];
+    private coords: [number, number] = [518.99, 265.5];
+    private size: [number, number] = [8, 8];
 
-    private optionPosition: [number, number][] = [];
     private selectedIndex: number = 0;
+    private optionPosition: [number, number][] = [];
     private cursorTargetPosition: [number, number] = [0, 0];
     private cursorCurrentPosition: [number, number] = [0, 0];
     private readonly cursorOffsetX = this.position[0];
@@ -96,10 +96,12 @@ export class Cursor {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 1);
 
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
 
+        this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
@@ -137,15 +139,24 @@ export class Cursor {
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
     }
 
+    public getSelectedIndex(): number {
+        return this.selectedIndex;
+    }
+
     public handleInput(key: string): void {
         if(!this.optionPosition || this.optionPosition.length === 0) this.setOptionPositions();
 
         switch(key) {
             case 'ArrowUp':
+            case 'W':
                 this.moveSelection(-1);
                 break;
             case 'ArrowDown':
+            case 'S':
                 this.moveSelection(1);
+                break;
+            case 'Enter':
+                this.options.selectedOption();
                 break;
         }
     }

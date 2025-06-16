@@ -2,10 +2,10 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.52, 0];
-        this.coords = [519, 266];
-        this.size = [6.8, 6.8];
-        this.optionPosition = [];
+        this.coords = [518.99, 265.5];
+        this.size = [8, 8];
         this.selectedIndex = 0;
+        this.optionPosition = [];
         this.cursorTargetPosition = [0, 0];
         this.cursorCurrentPosition = [0, 0];
         this.cursorOffsetX = this.position[0];
@@ -55,8 +55,10 @@ export class Cursor {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 1);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
@@ -86,15 +88,23 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
     }
+    getSelectedIndex() {
+        return this.selectedIndex;
+    }
     handleInput(key) {
         if (!this.optionPosition || this.optionPosition.length === 0)
             this.setOptionPositions();
         switch (key) {
             case 'ArrowUp':
+            case 'W':
                 this.moveSelection(-1);
                 break;
             case 'ArrowDown':
+            case 'S':
                 this.moveSelection(1);
+                break;
+            case 'Enter':
+                this.options.selectedOption();
                 break;
         }
     }

@@ -95,6 +95,7 @@ function main() {
                 uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
                 uTex: gl.getUniformLocation(shaderProgram, 'uTex'),
                 isText: gl.getUniformLocation(shaderProgram, 'isText'),
+                isCursor: gl.getUniformLocation(shaderProgram, 'isCursor'),
                 uColor: gl.getUniformLocation(shaderProgram, 'uColor'),
                 uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold')
             }

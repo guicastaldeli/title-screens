@@ -4,11 +4,9 @@ export class Options {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.containerPosition = [0.12, 0];
         this.isCopyright = false;
-        this.options = [];
-        this.copyrightOptions = [];
-        this.color = [1.0, 1.0, 1.0, 1.0];
-        this.option = [];
         this.copyrightText = [];
+        this.color = [1.0, 1.0, 1.0, 1.0];
+        this.options = [];
         this.letterCoords = {
             ' ': [555.5, 330.5],
             '.': [552.1, 339.1],
@@ -41,6 +39,10 @@ export class Options {
         this.screen = screen;
         this.sheetProps = sheetProps;
         this.cursor = new Cursor(this.gl, this.buffers, this.programInfo, this.screen, this.sheetProps, this);
+        this.color =
+            this.isCopyright ?
+                this.screen.parseColor('rgb(255, 255, 255)') :
+                this.screen.parseColor('rgb(252, 152, 56)');
         this.setOptions();
     }
     setOptions() {
@@ -50,23 +52,26 @@ export class Options {
             this.createOption('2 PLAYER GAME A', 0, -0.30),
             this.createOption('2 PLAYER GAME B', 0, -0.45)
         ];
-        this.copyrightOptions = [
+        this.copyrightText = [
             this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
             this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
         ];
     }
     drawOptions(projectionMatrix, text, x, y, isCopyright = false) {
+        var _a;
         const letters = text.split('');
         const spacing = 0.07;
         const startX = x - ((letters.length * spacing) / 2);
+        const option = this.options.find(opt => opt.position[0] === x - this.containerPosition[0] &&
+            opt.position[1] === y - this.containerPosition[1]);
+        const originalColor = [...this.color];
+        if (option)
+            this.color = (_a = option.color) !== null && _a !== void 0 ? _a : originalColor;
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
             this.drawLetter(projectionMatrix, l, letterX, y, isCopyright);
         });
-        this.color =
-            this.isCopyright ?
-                this.screen.parseColor('rgb(255, 255, 255)') :
-                this.screen.parseColor('rgb(252, 152, 56)');
+        this.color = originalColor;
     }
     drawLetter(projectionMatrix, letter, x, y, isCopyright = false) {
         const modelViewMatrix = mat4.create();
@@ -103,6 +108,7 @@ export class Options {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.dkTitleTexture);
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, isCopyright ? 0.0 : 1.0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
@@ -127,6 +133,26 @@ export class Options {
             }
         };
     }
+    selectedOption() {
+        if (this.options.length > 0 && this.cursor) {
+            const selectedIndex = this.cursor.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < this.options.length) {
+                const selectedOption = this.options[selectedIndex];
+                this.handleSelection(selectedOption);
+            }
+        }
+    }
+    handleSelection(option) {
+        const defaultColor = [...this.color];
+        option.selected = true;
+        option.color = this.screen.parseColor('rgb(255, 0, 0)');
+        this.options.forEach(opt => {
+            if (opt !== option) {
+                opt.selected = false;
+                opt.color = defaultColor;
+            }
+        });
+    }
     getOptionPositions() {
         return this.options.map(option => {
             return [
@@ -142,7 +168,7 @@ export class Options {
             const y = originalContainerPosition[1] + option.position[1];
             this.drawOptions(projectionMatrix, option.text, x, y, false);
         });
-        this.copyrightOptions.forEach(option => {
+        this.copyrightText.forEach(option => {
             this.drawOptions(projectionMatrix, option.text, option.position[0], option.position[1], true);
         });
     }

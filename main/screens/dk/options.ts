@@ -22,20 +22,14 @@ export class Options {
     private containerPosition: [number, number] = [0.12, 0];
     private isCopyright: boolean = false;
 
-    private options: {
-        text: string,
-        position: [number, number]
-    }[] = [];
-
-    private copyrightOptions: {
+    private copyrightText: {
         text: string,
         position: [number, number]
     }[] = [];
 
     private color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0]
 
-    public option: Option[] = [];
-    public copyrightText: Option[] = [];
+    public options: Option[] = [];
 
     private letterCoords: Record<string, [number, number]> = {
         ' ': [555.5, 330.5],
@@ -86,6 +80,12 @@ export class Options {
             this
         )
 
+        this.color = 
+            this.isCopyright ? 
+            this.screen.parseColor('rgb(255, 255, 255)') : 
+            this.screen.parseColor('rgb(252, 152, 56)')
+        ;
+
         this.setOptions();
     }
 
@@ -97,7 +97,7 @@ export class Options {
             this.createOption('2 PLAYER GAME B', 0, -0.45)
         ];
         
-        this.copyrightOptions = [
+        this.copyrightText = [
             this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
             this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
         ];
@@ -114,6 +114,14 @@ export class Options {
         const spacing = 0.07;
         const startX = x - ((letters.length * spacing) / 2);
 
+        const option = this.options.find(opt =>
+            opt.position[0] === x - this.containerPosition[0] &&
+            opt.position[1] === y - this.containerPosition[1]
+        );
+
+        const originalColor = [...this.color] as [number, number, number, number];
+        if(option) this.color = option.color ?? originalColor;
+
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
 
@@ -126,11 +134,7 @@ export class Options {
             );
         });
 
-        this.color = 
-            this.isCopyright ? 
-            this.screen.parseColor('rgb(255, 255, 255)') : 
-            this.screen.parseColor('rgb(252, 152, 56)')
-        ;
+        this.color = originalColor;
     }
 
     private drawLetter(
@@ -186,6 +190,7 @@ export class Options {
         this.gl.activeTexture(this.gl.TEXTURE0);
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.dkTitleTexture);
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(
             this.programInfo.uniformLocations.isText,
@@ -224,6 +229,30 @@ export class Options {
         }
     }
 
+    public selectedOption(): void {
+        if(this.options.length > 0 && this.cursor) {
+            const selectedIndex = this.cursor.getSelectedIndex();
+
+            if(selectedIndex >= 0 && selectedIndex < this.options.length) {
+                const selectedOption = this.options[selectedIndex];
+                this.handleSelection(selectedOption);
+            }
+        }
+    }
+
+    private handleSelection(option: Option) {
+        const defaultColor = [...this.color] as [number, number, number, number];
+        option.selected = true;
+        option.color = this.screen.parseColor('rgb(255, 0, 0)');
+
+        this.options.forEach(opt => {
+            if(opt !== option) {
+                opt.selected = false;
+                opt.color = defaultColor
+            }
+        });
+    }
+
     public getOptionPositions(): [number, number][] {
         return this.options.map(option => {
             return [
@@ -249,7 +278,7 @@ export class Options {
             );
         });
 
-        this.copyrightOptions.forEach(option => {
+        this.copyrightText.forEach(option => {
             this.drawOptions(
                 projectionMatrix,
                 option.text,
