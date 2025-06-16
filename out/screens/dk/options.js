@@ -1,7 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
-import { Cursor } from "./cursor.js";
 export class Options {
-    constructor(gl, buffers, programInfo, screen, sheetProps) {
+    constructor(gl, buffers, programInfo, screen, sheetProps, cursor) {
         this.containerPosition = [0.12, 0];
         this.isCopyright = false;
         this.copyrightText = [];
@@ -38,7 +37,7 @@ export class Options {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.cursor = new Cursor(this.gl, this.buffers, this.programInfo, this.screen, this.sheetProps, this);
+        this.cursor = cursor;
         this.color =
             this.isCopyright ?
                 this.screen.parseColor('rgb(255, 255, 255)') :
@@ -134,24 +133,25 @@ export class Options {
         };
     }
     selectedOption() {
-        if (this.options.length > 0 && this.cursor) {
-            const selectedIndex = this.cursor.getSelectedIndex();
-            if (selectedIndex >= 0 && selectedIndex < this.options.length) {
-                const selectedOption = this.options[selectedIndex];
-                this.handleSelection(selectedOption);
-            }
+        if (!this.cursor)
+            return;
+        const selectedIndex = this.cursor.getSelectedIndex();
+        if (selectedIndex >= 0 &&
+            selectedIndex < this.options.length) {
+            this.handleSelection(this.options[selectedIndex]);
         }
     }
     handleSelection(option) {
         const defaultColor = [...this.color];
-        option.selected = true;
-        option.color = this.screen.parseColor('rgb(255, 0, 0)');
+        option.color = this.screen.parseColor('rgb(131, 131, 131)');
+        setTimeout(() => option.color = defaultColor, 1000);
         this.options.forEach(opt => {
             if (opt !== option) {
                 opt.selected = false;
                 opt.color = defaultColor;
             }
         });
+        option.selected = true;
     }
     getOptionPositions() {
         return this.options.map(option => {

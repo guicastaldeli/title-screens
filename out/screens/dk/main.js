@@ -30,8 +30,9 @@ export class ScreenDk extends BaseScreen {
         this.screenManager = screenManager;
         this.sheetProps = new SheetProps();
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
-        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps);
-        this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps, this.options);
+        this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
+        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps, this.cursor);
+        this.cursor.setOptions(this.options);
         this.setupInput();
     }
     //Background

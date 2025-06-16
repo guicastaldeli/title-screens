@@ -15,7 +15,7 @@ export class Cursor {
 
     private screen: ScreenDk;
     private sheetProps: SheetProps;
-    private options: Options;
+    private options?: Options;
 
     private position: [number, number] = [-0.52, 0];
     private coords: [number, number] = [518.99, 265.5];
@@ -33,7 +33,7 @@ export class Cursor {
         programInfo: ProgramInfo,
         screen: ScreenDk,
         sheetProps: SheetProps,
-        options: Options
+        options?: Options
     ) {
         this.gl = gl;
         this.buffers = buffers;
@@ -42,6 +42,25 @@ export class Cursor {
         this.screen = screen;
         this.sheetProps = sheetProps;
         this.options = options;
+
+        this.setOptionPosition();
+    }
+
+    public setOptions(options: Options) {
+        this.options = options;
+    }
+
+    private setOptionPosition(): void {
+        if(this.options) {
+            this.optionPosition = this.options.getOptionPositions();
+
+            if(this.optionPosition.length > 0) {
+                this.cursorCurrentPosition = [...this.optionPosition[0]];
+                this.cursorTargetPosition = [...this.optionPosition[0]];
+                this.selectedIndex = 0;
+                this.updateCursor();
+            }
+        }
     }
 
     public drawCursor(projectionMatrix: mat4): void {
@@ -116,8 +135,8 @@ export class Cursor {
                 this.selectedIndex < this.optionPosition.length
             ) {
                 this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-                this.updateCursor();
+                this.cursorCurrentPosition = [...this.cursorTargetPosition];
+                this.getSelectedIndex();
             }
         }
     }
@@ -137,13 +156,17 @@ export class Cursor {
 
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+        this.cursorCurrentPosition = [...this.cursorTargetPosition];
+        this.getSelectedIndex();
     }
 
     public getSelectedIndex(): number {
+        this.updateCursor();    
         return this.selectedIndex;
     }
 
     public handleInput(key: string): void {
+        if(!this.options) return;
         if(!this.optionPosition || this.optionPosition.length === 0) this.setOptionPositions();
 
         switch(key) {
@@ -168,6 +191,6 @@ export class Cursor {
         this.cursorCurrentPosition[0] += dx;
         this.cursorCurrentPosition[1] += dy;
 
-        this.updateCursor();
+        this.getSelectedIndex();
     }
 }

@@ -15,6 +15,21 @@ export class Cursor {
         this.screen = screen;
         this.sheetProps = sheetProps;
         this.options = options;
+        this.setOptionPosition();
+    }
+    setOptions(options) {
+        this.options = options;
+    }
+    setOptionPosition() {
+        if (this.options) {
+            this.optionPosition = this.options.getOptionPositions();
+            if (this.optionPosition.length > 0) {
+                this.cursorCurrentPosition = [...this.optionPosition[0]];
+                this.cursorTargetPosition = [...this.optionPosition[0]];
+                this.selectedIndex = 0;
+                this.updateCursor();
+            }
+        }
     }
     drawCursor(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -69,8 +84,8 @@ export class Cursor {
             if (this.optionPosition.length > 0 &&
                 this.selectedIndex < this.optionPosition.length) {
                 this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-                this.updateCursor();
+                this.cursorCurrentPosition = [...this.cursorTargetPosition];
+                this.getSelectedIndex();
             }
         }
     }
@@ -87,11 +102,16 @@ export class Cursor {
         }
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+        this.cursorCurrentPosition = [...this.cursorTargetPosition];
+        this.getSelectedIndex();
     }
     getSelectedIndex() {
+        this.updateCursor();
         return this.selectedIndex;
     }
     handleInput(key) {
+        if (!this.options)
+            return;
         if (!this.optionPosition || this.optionPosition.length === 0)
             this.setOptionPositions();
         switch (key) {
@@ -113,6 +133,6 @@ export class Cursor {
         const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
         this.cursorCurrentPosition[0] += dx;
         this.cursorCurrentPosition[1] += dy;
-        this.updateCursor();
+        this.getSelectedIndex();
     }
 }

@@ -63,7 +63,8 @@ export class Options {
         buffers: Buffers, 
         programInfo: ProgramInfo,
         screen: ScreenDk,
-        sheetProps: SheetProps
+        sheetProps: SheetProps,
+        cursor: Cursor
     ) {
         this.gl = gl;
         this.buffers = buffers;
@@ -71,14 +72,7 @@ export class Options {
 
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.cursor = new Cursor(
-            this.gl, 
-            this.buffers, 
-            this.programInfo,
-            this.screen,
-            this.sheetProps,
-            this
-        )
+        this.cursor = cursor;
 
         this.color = 
             this.isCopyright ? 
@@ -230,27 +224,30 @@ export class Options {
     }
 
     public selectedOption(): void {
-        if(this.options.length > 0 && this.cursor) {
-            const selectedIndex = this.cursor.getSelectedIndex();
+        if(!this.cursor) return;
+        const selectedIndex = this.cursor.getSelectedIndex();
 
-            if(selectedIndex >= 0 && selectedIndex < this.options.length) {
-                const selectedOption = this.options[selectedIndex];
-                this.handleSelection(selectedOption);
-            }
+        if(selectedIndex >= 0 && 
+            selectedIndex < this.options.length
+        ) {
+            this.handleSelection(this.options[selectedIndex]);
         }
     }
 
     private handleSelection(option: Option) {
         const defaultColor = [...this.color] as [number, number, number, number];
-        option.selected = true;
-        option.color = this.screen.parseColor('rgb(255, 0, 0)');
-
+        option.color = this.screen.parseColor('rgb(131, 131, 131)');
+        setTimeout(() => option.color = defaultColor, 1000);
+        
         this.options.forEach(opt => {
             if(opt !== option) {
                 opt.selected = false;
                 opt.color = defaultColor
             }
         });
+
+        option.selected = true;
+
     }
 
     public getOptionPositions(): [number, number][] {
