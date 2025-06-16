@@ -32,6 +32,7 @@ export class ScreenDk extends BaseScreen {
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
         this.options = new Options(gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps, this.options);
+        this.setupInput();
     }
     //Background
     drawBackground(projectionMatrix) {
@@ -216,6 +217,12 @@ export class ScreenDk extends BaseScreen {
             }
         });
     }
+    setupInput() {
+        document.addEventListener('keydown', (e) => {
+            if (!this.state.isLoading())
+                this.cursor.handleInput(e.key);
+        });
+    }
     loadAssets() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.getTex();
@@ -224,6 +231,7 @@ export class ScreenDk extends BaseScreen {
     update(deltaTime) {
         if (this.state.isLoading())
             return;
+        this.cursor.update(deltaTime);
         this.rotation += this.tick['speed'] * deltaTime;
         this.createBackground();
     }

@@ -21,6 +21,13 @@ export class Cursor {
     private coords: [number, number] = [519, 266];
     private size: [number, number] = [6.8, 6.8];
 
+    private optionPosition: [number, number][] = [];
+    private selectedIndex: number = 0;
+    private cursorTargetPosition: [number, number] = [0, 0];
+    private cursorCurrentPosition: [number, number] = [0, 0];
+    private readonly cursorOffsetX = this.position[0];
+    private readonly cursorSpeed = 0.1;
+
     constructor(
         gl: WebGLRenderingContext,
         buffers: Buffers, 
@@ -98,5 +105,58 @@ export class Cursor {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    private setOptionPositions(): void {
+        if(this.options) {
+            this.optionPosition = this.options.getOptionPositions();
+
+            if(this.optionPosition.length > 0 &&
+                this.selectedIndex < this.optionPosition.length
+            ) {
+                this.cursorTargetPosition = [...this.optionPosition[0]];
+                this.cursorTargetPosition = [...this.optionPosition[1]];
+                this.updateCursor();
+            }
+        }
+    }
+
+    private updateCursor(): void {
+        this.position = [
+            this.cursorCurrentPosition[0] + this.cursorOffsetX,
+            this.cursorCurrentPosition[1]
+        ];
+    }
+
+    private moveSelection(direction: number): void {
+        if(!this.optionPosition || this.optionPosition.length === 0) {
+            this.setOptionPositions();
+            return;
+        }
+    }
+
+    public handleInput(key: string): void {
+        if(!this.optionPosition || this.optionPosition.length === 0) this.setOptionPositions();
+
+        switch(key) {
+            case 'ArrowUp':
+                this.moveSelection(-1);
+                break;
+            case 'ArrowDown':
+                this.moveSelection(1);
+                break;
+        }
+    }
+
+    public update(deltaTime: number): void {
+        const speed = deltaTime * 50;
+
+        const dx = this.cursorTargetPosition[0] - this.cursorCurrentPosition[0];
+        const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
+
+        this.cursorCurrentPosition[0] += dx * this.cursorSpeed * speed;
+        this.cursorCurrentPosition[1] += dy * this.cursorSpeed * speed;
+
+        this.updateCursor();
     }
 }

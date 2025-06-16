@@ -52,6 +52,8 @@ export class ScreenDk extends BaseScreen {
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
         this.options = new Options(gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps, this.options);
+
+        this.setupInput();
     }
 
     //Background
@@ -309,12 +311,20 @@ export class ScreenDk extends BaseScreen {
         }
     }
 
+    private setupInput(): void {
+        document.addEventListener('keydown', (e) => {
+            if(!this.state.isLoading()) this.cursor.handleInput(e.key);
+        });
+    }
+
     private async loadAssets(): Promise<void> {
         await this.getTex();
     }
 
     public update(deltaTime: number) {
         if(this.state.isLoading()) return;
+
+        this.cursor.update(deltaTime);
 
         this.rotation += this.tick['speed'] * deltaTime;
         this.createBackground();

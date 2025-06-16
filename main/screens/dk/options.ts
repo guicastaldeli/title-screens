@@ -3,6 +3,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
+import { Option } from "../option.interface.js";
 import { ScreenDk } from "./main.js";
 import { Title } from "./title.js";
 import { Cursor } from "./cursor.js";
@@ -19,12 +20,22 @@ export class Options {
     private cursor: Cursor;
 
     private containerPosition: [number, number] = [0.12, 0];
+    private isCopyright: boolean = false;
 
     private options: {
         text: string,
-        position: [number, number],
-        color?: [number, number, number, number]
+        position: [number, number]
     }[] = [];
+
+    private copyrightOptions: {
+        text: string,
+        position: [number, number]
+    }[] = [];
+
+    private color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0]
+
+    public option: Option[] = [];
+    public copyrightText: Option[] = [];
 
     private letterCoords: Record<string, [number, number]> = {
         ' ': [555.5, 330.5],
@@ -80,32 +91,16 @@ export class Options {
 
     private setOptions(): void {
         this.options = [
-            {
-                text: '1 PLAYER GAME A',
-                position: [0, 0],
-                color: [1.0, 0.0, 0.0, 1.0]
-            },
-            {
-                text: '1 PLAYER GAME B',
-                position: [0, -0.15]
-            },
-            {
-                text: '2 PLAYER GAME A',
-                position: [0, -0.30]
-            },
-            {
-                text: '2 PLAYER GAME B',
-                position: [0, -0.45]
-            },
-            {
-                text: '©1981 NINTENDO COZLTD.',
-                position: [-0.1, -0.75]
-            },
-            {
-                text: 'MADE IN JAPAN',
-                position: [0.01, -0.85]
-            }
-        ];   
+            this.createOption('1 PLAYER GAME A', 0, 0),
+            this.createOption('1 PLAYER GAME B', 0, -0.15),
+            this.createOption('2 PLAYER GAME A', 0, -0.30),
+            this.createOption('2 PLAYER GAME B', 0, -0.45)
+        ];
+        
+        this.copyrightOptions = [
+            this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
+            this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
+        ];
     }
 
     public drawOptions(
@@ -130,6 +125,12 @@ export class Options {
                 isCopyright
             );
         });
+
+        this.color = 
+            this.isCopyright ? 
+            this.screen.parseColor('rgb(255, 255, 255)') : 
+            this.screen.parseColor('rgb(252, 152, 56)')
+        ;
     }
 
     private drawLetter(
@@ -193,19 +194,43 @@ export class Options {
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-
-        const color: [number, number, number, number] = 
-            isCopyright ? 
-            this.screen.parseColor('rgb(255, 255, 255)') : 
-            this.screen.parseColor('rgb(252, 152, 56)')
-        ;
         
-        this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...color);
+        this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    private createOption(
+        text: string,
+        x: number,
+        y: number,
+        isCopyright = false
+    ): Option {
+        const width = text.length;
+        const height = 0.06;
+
+        return {
+            text,
+            position: [x, y],
+            selected: false,
+            color: this.color,
+            bounds: {
+                x: [x - width / 2, x + width / 2],
+                y: [y - height / 2, y + height / 2]
+            }
+        }
+    }
+
+    public getOptionPositions(): [number, number][] {
+        return this.options.map(option => {
+            return [
+                this.containerPosition[0] + option.position[0],
+                this.containerPosition[1] + option.position[1]
+            ];
+        });
     }
 
     public initOptions(projectionMatrix: mat4): void {
@@ -220,8 +245,17 @@ export class Options {
                 option.text,
                 x,
                 y,
-                option.text.includes('©1981') ||
-                option.text.includes('MADE')
+                false
+            );
+        });
+
+        this.copyrightOptions.forEach(option => {
+            this.drawOptions(
+                projectionMatrix,
+                option.text,
+                option.position[0],
+                option.position[1],
+                true
             );
         });
     }
