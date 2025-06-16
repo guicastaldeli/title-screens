@@ -21,11 +21,12 @@ export class Cursor {
     private coords: [number, number] = [518.99, 265.5];
     private size: [number, number] = [8, 8];
 
-    private selectedIndex: number = 0;
+    public selectedIndex: number = 0;
     private optionPosition: [number, number][] = [];
     private cursorTargetPosition: [number, number] = [0, 0];
     private cursorCurrentPosition: [number, number] = [0, 0];
     private readonly cursorOffsetX = this.position[0];
+    public selectedColor: [number, number, number, number];
 
     constructor(
         gl: WebGLRenderingContext,
@@ -43,6 +44,9 @@ export class Cursor {
         this.sheetProps = sheetProps;
         this.options = options;
 
+        this.selectedColor = this.screen.parseColor('rgb(211, 211, 211)');
+
+        this.selectedIndex = 0;
         this.setOptionPosition();
     }
 
@@ -50,7 +54,7 @@ export class Cursor {
         this.options = options;
     }
 
-    private setOptionPosition(): void {
+    public setOptionPosition(): void {
         if(this.options) {
             this.optionPosition = this.options.getOptionPositions();
 
@@ -157,6 +161,18 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
+
+        if(this.options && this.options.options[this.selectedIndex]) {
+            const defaultColor = [...this.options.color] as [number, number, number, number];
+            this.options.options[this.selectedIndex].color = this.selectedColor
+
+            this.options.options.forEach((option, i) => {
+                if(i !== this.selectedIndex) {
+                    option.color = defaultColor;
+                }
+            });
+        }
+
         this.getSelectedIndex();
     }
 

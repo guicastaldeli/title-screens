@@ -27,7 +27,7 @@ export class Options {
         position: [number, number]
     }[] = [];
 
-    private color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0]
+    public color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0]
 
     public options: Option[] = [];
 
@@ -95,6 +95,8 @@ export class Options {
             this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
             this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
         ];
+
+        if(this.options.length > 0) this.options[0].color = this.cursor.selectedColor;
     }
 
     public drawOptions(
@@ -236,8 +238,15 @@ export class Options {
 
     private handleSelection(option: Option) {
         const defaultColor = [...this.color] as [number, number, number, number];
-        option.color = this.screen.parseColor('rgb(131, 131, 131)');
-        setTimeout(() => option.color = defaultColor, 1000);
+        option.color = this.screen.parseColor('rgb(102, 102, 102)');
+
+        setTimeout(() => {
+            if(this.cursor.getSelectedIndex() === this.cursor.selectedIndex) {
+                option.color = this.cursor.selectedColor;
+            } else {
+                option.color = defaultColor;
+            }
+        }, 1000);
         
         this.options.forEach(opt => {
             if(opt !== option) {

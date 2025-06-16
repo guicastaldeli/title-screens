@@ -28,7 +28,7 @@ export class ScreenDk extends BaseScreen {
     private color: [number, number, number, number] = [0, 0, 0, 1];
 
     private gridSize: [number, number] = [8, 8];
-    private gridDimensions: [number, number] = [100, 100];
+    private gridDimensions: [number, number] = [50, 50];
     private tileMap: number[][] = [];
 
     //Elements

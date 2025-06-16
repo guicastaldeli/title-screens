@@ -25,7 +25,7 @@ export class ScreenDk extends BaseScreen {
         this.size = [1, 1];
         this.color = [0, 0, 0, 1];
         this.gridSize = [8, 8];
-        this.gridDimensions = [100, 100];
+        this.gridDimensions = [50, 50];
         this.tileMap = [];
         this.screenManager = screenManager;
         this.sheetProps = new SheetProps();

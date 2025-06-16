@@ -15,6 +15,8 @@ export class Cursor {
         this.screen = screen;
         this.sheetProps = sheetProps;
         this.options = options;
+        this.selectedColor = this.screen.parseColor('rgb(211, 211, 211)');
+        this.selectedIndex = 0;
         this.setOptionPosition();
     }
     setOptions(options) {
@@ -103,6 +105,15 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
+        if (this.options && this.options.options[this.selectedIndex]) {
+            const defaultColor = [...this.options.color];
+            this.options.options[this.selectedIndex].color = this.selectedColor;
+            this.options.options.forEach((option, i) => {
+                if (i !== this.selectedIndex) {
+                    option.color = defaultColor;
+                }
+            });
+        }
         this.getSelectedIndex();
     }
     getSelectedIndex() {
