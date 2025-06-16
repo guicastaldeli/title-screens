@@ -2,6 +2,7 @@ export class Tick {
     constructor() {
         this.lastTime = 0;
         this.time = 0;
+        this.deltaTime = 0;
         this.length = 16;
         this.speed = 0.1;
         this.tickCallback = [];

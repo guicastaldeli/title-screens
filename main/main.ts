@@ -23,6 +23,9 @@ export interface ProgramInfo {
         modelViewMatrix: WebGLUniformLocation | null;
         uSampler: WebGLUniformLocation | null;
         uTex: WebGLUniformLocation | null;
+        isText: WebGLUniformLocation | null;
+        uColor: WebGLUniformLocation | null;
+        uThreshold: WebGLUniformLocation | null;
     }
 }
 
@@ -109,7 +112,10 @@ async function main(): Promise<void> {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
             uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-            uTex: gl.getUniformLocation(shaderProgram, 'uTex')
+            uTex: gl.getUniformLocation(shaderProgram, 'uTex'),
+            isText: gl.getUniformLocation(shaderProgram, 'isText'),
+            uColor: gl.getUniformLocation(shaderProgram, 'uColor'),
+            uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold')
         }
     }
 

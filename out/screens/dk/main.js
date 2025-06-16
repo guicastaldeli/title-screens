@@ -41,6 +41,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     createBackground() {
@@ -127,6 +128,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     //Texture

@@ -93,7 +93,10 @@ function main() {
                 projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
                 modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
                 uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-                uTex: gl.getUniformLocation(shaderProgram, 'uTex')
+                uTex: gl.getUniformLocation(shaderProgram, 'uTex'),
+                isText: gl.getUniformLocation(shaderProgram, 'isText'),
+                uColor: gl.getUniformLocation(shaderProgram, 'uColor'),
+                uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold')
             }
         };
         gl.useProgram(programInfo.program);

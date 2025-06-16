@@ -1,6 +1,7 @@
 export class Tick {
     private lastTime: number = 0;
     private time: number = 0;
+    private deltaTime: number = 0;
     private length: number = 16;
     private speed: number = 0.1;
     private tickCallback: Array<(deltaTime: number) => void> = [];

@@ -64,6 +64,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -201,6 +202,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -261,7 +263,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
     }
 
-    private parseColor(
+    public parseColor(
         color: string | 
         [number, number, number, number]
     ): [number, number, number, number] {

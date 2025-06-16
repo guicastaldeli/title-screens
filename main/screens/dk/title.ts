@@ -100,6 +100,7 @@ export class Title {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.dkTitleTexture);
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
