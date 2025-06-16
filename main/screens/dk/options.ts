@@ -5,6 +5,8 @@ import { ProgramInfo } from "../../main.js";
 
 import { ScreenDk } from "./main.js";
 import { Title } from "./title.js";
+import { Cursor } from "./cursor.js";
+import { SheetProps } from "./sheet-props.js";
 
 export class Options {
     private gl: WebGLRenderingContext;
@@ -13,7 +15,8 @@ export class Options {
     private programInfo: ProgramInfo;
 
     private screen: ScreenDk;
-    private title: Title;
+    private sheetProps: SheetProps;
+    private cursor: Cursor;
 
     private containerPosition: [number, number] = [0.1, 0];
 
@@ -55,14 +58,22 @@ export class Options {
         buffers: Buffers, 
         programInfo: ProgramInfo,
         screen: ScreenDk,
-        title: Title
+        sheetProps: SheetProps
     ) {
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
 
         this.screen = screen;
-        this.title = title;
+        this.sheetProps = sheetProps;
+        this.cursor = new Cursor(
+            this.gl, 
+            this.buffers, 
+            this.programInfo,
+            this.screen,
+            this.sheetProps,
+            this
+        )
 
         this.setOptions();
     }
@@ -146,7 +157,7 @@ export class Options {
 
         const spriteCoords = this.letterCoords[letter] || this.letterCoords[' '];
         const [spriteX, spriteY] = spriteCoords;
-        const [sheetWidth, sheetHeight] = this.title['spriteSheetSize'];
+        const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
         const [spriteWidth, spriteHeight] = letter === '©' ? [8, 8] : [7, 7]
 
         const left = spriteX / sheetWidth;

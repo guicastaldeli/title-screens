@@ -8,8 +8,10 @@ import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
+import { SheetProps } from "./sheet-props.js";
 import { Title } from "./title.js";
 import { Options } from "./options.js";
+import { Cursor } from "./cursor.js";
 
 export class ScreenDk extends BaseScreen {
     private screenManager: ScreenManager;
@@ -30,8 +32,10 @@ export class ScreenDk extends BaseScreen {
     private tileMap: number[][] = [];
 
     //Elements
+    private sheetProps: SheetProps;
     private title: Title;
     private options: Options;
+    private cursor: Cursor;
 
     constructor(
         state: State,
@@ -44,8 +48,10 @@ export class ScreenDk extends BaseScreen {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
 
-        this.title = new Title(gl, buffers, programInfo, this);
-        this.options = new Options(gl, buffers, programInfo, this, this.title);
+        this.sheetProps = new SheetProps();
+        this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
+        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps);
+        this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps, this.options);
     }
 
     //Background
@@ -93,7 +99,8 @@ export class ScreenDk extends BaseScreen {
 
         //Elements
             this.title.drawTitle(projectionMatrix);
-            this.options.initOptions(projectionMatrix)
+            this.options.initOptions(projectionMatrix);
+            this.cursor.drawCursor(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);

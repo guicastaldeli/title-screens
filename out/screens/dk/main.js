@@ -9,8 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { BaseScreen } from "../../screen.interface.js";
+import { SheetProps } from "./sheet-props.js";
 import { Title } from "./title.js";
 import { Options } from "./options.js";
+import { Cursor } from "./cursor.js";
 export class ScreenDk extends BaseScreen {
     constructor(state, screenManager, tick, gl, programInfo, buffers) {
         super(state, gl, programInfo, buffers, tick);
@@ -26,8 +28,10 @@ export class ScreenDk extends BaseScreen {
         this.gridDimensions = [100, 100];
         this.tileMap = [];
         this.screenManager = screenManager;
-        this.title = new Title(gl, buffers, programInfo, this);
-        this.options = new Options(gl, buffers, programInfo, this, this.title);
+        this.sheetProps = new SheetProps();
+        this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
+        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps);
+        this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps, this.options);
     }
     //Background
     drawBackground(projectionMatrix) {
@@ -59,6 +63,7 @@ export class ScreenDk extends BaseScreen {
         //Elements
         this.title.drawTitle(projectionMatrix);
         this.options.initOptions(projectionMatrix);
+        this.cursor.drawCursor(projectionMatrix);
         //
         this.gl.enable(this.gl.DEPTH_TEST);
     }

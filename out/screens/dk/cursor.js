@@ -1,28 +1,32 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
-export class Title {
-    constructor(gl, buffers, programInfo, screen, sheetProps) {
+export class Cursor {
+    constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.05, 0.2];
-        this.size = [0.8, 0.4];
+        this.coords = [627, 312.1];
+        this.size = [7, 7];
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
+        this.options = options;
     }
-    drawTitle(projectionMatrix) {
+    drawCursor(projectionMatrix) {
         const modelViewMatrix = mat4.create();
-        const titleX = this.position[0];
-        const titleY = this.position[1] + this.screen['setSize'].h * 0.1;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [titleX, titleY, 0]);
+        const size = [0.03, 0.03];
+        const x = this.position[0];
+        const y = this.position[1];
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
-            -this.size[0], -this.size[1],
-            this.size[0], -this.size[1],
-            -this.size[0], this.size[1],
-            this.size[0], this.size[1],
+            -size[0], -size[1],
+            size[0], -size[1],
+            -size[0], size[1],
+            size[0], size[1],
         ];
-        const [spriteX, spriteY] = this.sheetProps.spriteCoords;
+        const spriteCoords = this.coords;
+        const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
-        const [spriteWidth, spriteHeight] = this.sheetProps.spriteSize;
+        const [spriteWidth, spriteHeight] = [this.size[0], this.size[1]];
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
         const top = spriteY / sheetHeight;

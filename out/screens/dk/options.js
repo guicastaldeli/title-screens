@@ -1,6 +1,7 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { Cursor } from "./cursor.js";
 export class Options {
-    constructor(gl, buffers, programInfo, screen, title) {
+    constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.containerPosition = [0.1, 0];
         this.options = [];
         this.letterCoords = {
@@ -33,7 +34,8 @@ export class Options {
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screen = screen;
-        this.title = title;
+        this.sheetProps = sheetProps;
+        this.cursor = new Cursor(this.gl, this.buffers, this.programInfo, this.screen, this.sheetProps, this);
         this.setOptions();
     }
     setOptions() {
@@ -86,7 +88,7 @@ export class Options {
         ];
         const spriteCoords = this.letterCoords[letter] || this.letterCoords[' '];
         const [spriteX, spriteY] = spriteCoords;
-        const [sheetWidth, sheetHeight] = this.title['spriteSheetSize'];
+        const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
         const [spriteWidth, spriteHeight] = letter === '©' ? [8, 8] : [7, 7];
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
