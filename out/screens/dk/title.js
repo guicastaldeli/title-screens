@@ -1,17 +1,8 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Title {
     constructor(gl, buffers, programInfo, screen) {
-        this.position = [0, 0];
-        this.size = [1, 0.5];
+        this.position = [-0.05, 0.2];
+        this.size = [0.8, 0.4];
         this.color = [1, 1, 1, 1];
         this.spriteSheetSize = [772, 507];
         this.spriteSize = [230, 100];
@@ -78,17 +69,5 @@ export class Title {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
-    }
-    getTex() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const path = './screens/dk/assets/sprites/dk-title-screen-sheet.png';
-                const tex = yield this.screen.loadTexture(this.gl, path);
-                this.buffers.dkTitleTexture = tex;
-            }
-            catch (err) {
-                console.log(err);
-            }
-        });
     }
 }

@@ -9,6 +9,7 @@ import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
 import { Title } from "./title.js";
+import { Options } from "./options.js";
 
 export class ScreenDk extends BaseScreen {
     private screenManager: ScreenManager;
@@ -30,6 +31,7 @@ export class ScreenDk extends BaseScreen {
 
     //Elements
     private title: Title;
+    private options: Options;
 
     constructor(
         state: State,
@@ -43,6 +45,7 @@ export class ScreenDk extends BaseScreen {
         this.screenManager = screenManager;
 
         this.title = new Title(gl, buffers, programInfo, this);
+        this.options = new Options(gl, buffers, programInfo, this, this.title);
     }
 
     //Background
@@ -89,6 +92,7 @@ export class ScreenDk extends BaseScreen {
 
         //Elements
             this.title.drawTitle(projectionMatrix);
+            this.options.initOptions(projectionMatrix)
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -286,8 +290,18 @@ export class ScreenDk extends BaseScreen {
         return [0, 0, 0, 1];
     }
 
+    private async getTex(): Promise<void> {
+        try {
+            const path = './screens/dk/assets/sprites/dk-title-screen-sheet.png';
+            const tex = await this.loadTexture(this.gl, path);
+            this.buffers.dkTitleTexture = tex;
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
     private async loadAssets(): Promise<void> {
-        await this.title.getTex();
+        await this.getTex();
     }
 
     public update(deltaTime: number) {

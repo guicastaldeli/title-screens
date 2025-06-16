@@ -13,12 +13,12 @@ export class Title {
     
     private screen: ScreenDk;
 
-    private position: [number, number] = [0, 0];
-    private size: [number, number] = [1, 0.5];
-    private color: [number, number, number, number] = [1, 1, 1, 1];
+    private position: [number, number] = [-0.05, 0.2];
+    public size: [number, number] = [0.8, 0.4];
+    public color: [number, number, number, number] = [1, 1, 1, 1];
 
-    private spriteSheetSize: [number, number] = [772, 507];
-    private spriteSize: [number, number] = [230, 100];
+    public spriteSheetSize: [number, number] = [772, 507];
+    public spriteSize: [number, number] = [230, 100];
 
     constructor(
         gl: WebGLRenderingContext,
@@ -38,7 +38,7 @@ export class Title {
         36
     ]
 
-    public drawTitle(projectionMatrix: mat4) {
+    public drawTitle(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
 
         const titleX = this.position[0];
@@ -108,15 +108,5 @@ export class Title {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-    public async getTex(): Promise<void> {
-        try {
-            const path = './screens/dk/assets/sprites/dk-title-screen-sheet.png';
-            const tex = await this.screen.loadTexture(this.gl, path);
-            this.buffers.dkTitleTexture = tex;
-        } catch(err) {
-            console.log(err);
-        }
     }
 }
