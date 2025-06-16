@@ -324,10 +324,8 @@ export class ScreenDk extends BaseScreen {
     public update(deltaTime: number) {
         if(this.state.isLoading()) return;
 
-        this.cursor.update(deltaTime);
-
-        this.rotation += this.tick['speed'] * deltaTime;
         this.createBackground();
+        this.cursor.update();
     }
 
     public async init(): Promise<void> {

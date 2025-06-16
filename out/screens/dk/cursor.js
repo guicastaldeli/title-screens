@@ -9,7 +9,6 @@ export class Cursor {
         this.cursorTargetPosition = [0, 0];
         this.cursorCurrentPosition = [0, 0];
         this.cursorOffsetX = this.position[0];
-        this.cursorSpeed = 0.1;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -67,15 +66,15 @@ export class Cursor {
             this.optionPosition = this.options.getOptionPositions();
             if (this.optionPosition.length > 0 &&
                 this.selectedIndex < this.optionPosition.length) {
-                this.cursorTargetPosition = [...this.optionPosition[0]];
-                this.cursorTargetPosition = [...this.optionPosition[1]];
+                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
                 this.updateCursor();
             }
         }
     }
     updateCursor() {
         this.position = [
-            this.cursorCurrentPosition[0] + this.cursorOffsetX,
+            this.cursorOffsetX,
             this.cursorCurrentPosition[1]
         ];
     }
@@ -84,6 +83,8 @@ export class Cursor {
             this.setOptionPositions();
             return;
         }
+        this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
+        this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
     }
     handleInput(key) {
         if (!this.optionPosition || this.optionPosition.length === 0)
@@ -97,12 +98,11 @@ export class Cursor {
                 break;
         }
     }
-    update(deltaTime) {
-        const speed = deltaTime * 50;
+    update() {
         const dx = this.cursorTargetPosition[0] - this.cursorCurrentPosition[0];
         const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
-        this.cursorCurrentPosition[0] += dx * this.cursorSpeed * speed;
-        this.cursorCurrentPosition[1] += dy * this.cursorSpeed * speed;
+        this.cursorCurrentPosition[0] += dx;
+        this.cursorCurrentPosition[1] += dy;
         this.updateCursor();
     }
 }
