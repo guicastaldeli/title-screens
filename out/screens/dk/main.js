@@ -233,8 +233,9 @@ export class ScreenDk extends BaseScreen {
     update(deltaTime) {
         if (this.state.isLoading())
             return;
-        this.createBackground();
+        this.options.update(deltaTime);
         this.cursor.update();
+        this.createBackground();
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {

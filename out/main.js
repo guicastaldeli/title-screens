@@ -97,7 +97,10 @@ function main() {
                 isText: gl.getUniformLocation(shaderProgram, 'isText'),
                 isCursor: gl.getUniformLocation(shaderProgram, 'isCursor'),
                 uColor: gl.getUniformLocation(shaderProgram, 'uColor'),
-                uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold')
+                uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold'),
+                uTime: gl.getUniformLocation(shaderProgram, 'uTime'),
+                uTextStartPos: gl.getUniformLocation(shaderProgram, 'uTextStartPos'),
+                isSelected: gl.getUniformLocation(shaderProgram, 'isSelected')
             }
         };
         gl.useProgram(programInfo.program);

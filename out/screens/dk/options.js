@@ -6,6 +6,8 @@ export class Options {
         this.copyrightText = [];
         this.color = [1.0, 1.0, 1.0, 1.0];
         this.options = [];
+        this.waveTime = 0.0;
+        this.waveSpeed = 2.0;
         this.letterCoords = {
             ' ': [555.5, 330.5],
             '.': [552.1, 339.1],
@@ -63,18 +65,22 @@ export class Options {
         const letters = text.split('');
         const spacing = 0.07;
         const startX = x - ((letters.length * spacing) / 2);
+        const textStartX = x;
+        const textEndX = startX + (letters.length * spacing);
         const option = this.options.find(opt => opt.position[0] === x - this.containerPosition[0] &&
             opt.position[1] === y - this.containerPosition[1]);
+        const isSelected = option !== undefined
+            && this.options.indexOf(option) === this.cursor.selectedIndex;
         const originalColor = [...this.color];
         if (option)
             this.color = (_a = option.color) !== null && _a !== void 0 ? _a : originalColor;
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
-            this.drawLetter(projectionMatrix, l, letterX, y, isCopyright);
+            this.drawLetter(projectionMatrix, l, letterX, y, isCopyright, textStartX, textEndX, isSelected);
         });
         this.color = originalColor;
     }
-    drawLetter(projectionMatrix, letter, x, y, isCopyright = false) {
+    drawLetter(projectionMatrix, letter, x, y, isCopyright = false, textStartX, textEndX, isSelected) {
         const modelViewMatrix = mat4.create();
         const size = [0.03, 0.03];
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
@@ -114,8 +120,17 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, isCopyright ? 0.0 : 1.0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected ? 1 : 0);
+        if (isSelected == true) {
+            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
+        }
+        else {
+            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, 0.0, 0.0);
+        }
+        //console.log(isSelected)
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
@@ -180,5 +195,8 @@ export class Options {
         this.copyrightText.forEach(option => {
             this.drawOptions(projectionMatrix, option.text, option.position[0], option.position[1], true);
         });
+    }
+    update(deltaTime) {
+        this.waveTime += this.waveSpeed * deltaTime;
     }
 }

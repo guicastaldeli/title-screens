@@ -26,6 +26,7 @@ export class Cursor {
     private cursorTargetPosition: [number, number] = [0, 0];
     private cursorCurrentPosition: [number, number] = [0, 0];
     private readonly cursorOffsetX = this.position[0];
+
     public selectedColor: [number, number, number, number];
 
     constructor(

@@ -1,5 +1,6 @@
 precision highp float;
 
+uniform float uTime;
 varying lowp vec4 vColor;
 
 varying highp vec2 vTextureCoord;
@@ -8,9 +9,11 @@ uniform sampler2D uSampler;
 uniform bool uTex;
 uniform bool isText;
 uniform bool isCursor;
+uniform bool isSelected;
 
 uniform vec4 uColor;
 uniform float uThreshold;
+uniform vec2 uTextStartPos;
 
 void main() {
     vec4 tex = texture2D(uSampler, vTextureCoord);
@@ -20,7 +23,26 @@ void main() {
             float brightness = (tex.r + tex.g + tex.b) / 3.0;
             vec4 backgroundColor = vec4(0.0, 0.0, 0.0, 1.0);
             float alpha = step(0.1, brightness);
-            gl_FragColor = mix(backgroundColor, uColor, alpha);
+
+            if(isSelected) {
+                vec3 darkGray = vec3(0.6431, 0.6431, 0.6431);
+                vec3 selectedColor = vec3(0.82745, 0.82745, 0.82745);
+
+                float textPos = (gl_FragCoord.x - uTextStartPos.x) / (uTextStartPos.y - uTextStartPos.x);
+
+                float waveSpeed = 1.0;
+                float waveFrequency = 10.0;
+                float waveWidth = 2.0;
+                
+                float wavePos = (textPos - uTime * waveSpeed) * waveFrequency;
+                float waveFactor = sin(wavePos) * 0.5 + 0.5;
+
+                vec3 waveColor = mix(darkGray, selectedColor, smoothstep(0.5 - waveWidth, 0.5 + waveWidth, waveFactor));
+                vec3 finalColor = mix(backgroundColor.rgb, waveColor, alpha);
+                gl_FragColor = vec4(finalColor, 1.0);
+            } else {
+                gl_FragColor = mix(backgroundColor, uColor, alpha);
+            }
         } else if(isCursor) {
             vec3 purple = vec3(0.502, 0.0, 0.502);
             float threshold = 0.1;

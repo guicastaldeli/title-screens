@@ -30,6 +30,8 @@ export class Options {
     public color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0]
 
     public options: Option[] = [];
+    private waveTime: number = 0.0;
+    private waveSpeed: number = 2.0;
 
     private letterCoords: Record<string, [number, number]> = {
         ' ': [555.5, 330.5],
@@ -109,11 +111,16 @@ export class Options {
         const letters = text.split('');
         const spacing = 0.07;
         const startX = x - ((letters.length * spacing) / 2);
+        const textStartX = x;
+        const textEndX = startX + (letters.length * spacing);
 
         const option = this.options.find(opt =>
             opt.position[0] === x - this.containerPosition[0] &&
             opt.position[1] === y - this.containerPosition[1]
         );
+
+        const isSelected = option !== undefined 
+        && this.options.indexOf(option) === this.cursor.selectedIndex;
 
         const originalColor = [...this.color] as [number, number, number, number];
         if(option) this.color = option.color ?? originalColor;
@@ -126,7 +133,10 @@ export class Options {
                 l,
                 letterX,
                 y,
-                isCopyright
+                isCopyright,
+                textStartX,
+                textEndX,
+                isSelected
             );
         });
 
@@ -138,7 +148,10 @@ export class Options {
         letter: string,
         x: number,
         y: number,
-        isCopyright: boolean = false
+        isCopyright: boolean = false,
+        textStartX: number,
+        textEndX: number,
+        isSelected: boolean
     ): void {
         const modelViewMatrix = mat4.create();
         const size = [0.03, 0.03];
@@ -196,10 +209,21 @@ export class Options {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected ? 1 : 0);
+
+        if(isSelected == true) {
+            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
+        } else {
+            this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, 0.0, 0.0);
+        }
+        //console.log(isSelected)
+
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -293,5 +317,9 @@ export class Options {
                 true
             );
         });
+    }
+
+    public update(deltaTime: number): void {
+        this.waveTime += this.waveSpeed * deltaTime;
     }
 }
