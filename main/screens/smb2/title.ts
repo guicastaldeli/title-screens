@@ -18,7 +18,7 @@ export class Title {
     private screen: ScreenSmb;
     private sheetProps: SheetProps;
     
-    private position: [number, number] = [-0.05, 0.2];
+    private position: [number, number] = [-0.05, 0.15];
     private size: [number, number] = [1.0, 0.4];
 
     private animation: Animation;
@@ -43,7 +43,7 @@ export class Title {
             sheetProps.titleProps().spriteCoords.map(group => ({
                 id: `group-${group.groupId}`,
                 coords: group.coords,
-                avaliableAnimations: ['initial'],
+                avaliableAnimations: ['flash'],
                 stars: group.stars
             }))
         );
