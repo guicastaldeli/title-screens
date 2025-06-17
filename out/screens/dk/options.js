@@ -9,6 +9,7 @@ export class Options {
         this.waveTime = 0.0;
         this.waveSpeed = 2.0;
         this.intervalSelected = 1000;
+        this.selectionTimeout = new Map();
         this.letterCoords = {
             ' ': [555.5, 330.5],
             '.': [552.1, 339.1],
@@ -55,8 +56,8 @@ export class Options {
             this.createOption('2 PLAYER GAME B', 0, -0.45)
         ];
         this.copyrightText = [
-            this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
-            this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
+            this.createOption('©1981 NINTENDO COZLTD.', 0, -0.75, true),
+            this.createOption('MADE IN JAPAN', 0.1, -0.85, true)
         ];
         if (this.options.length > 0)
             this.options[0].color = this.cursor.selectedColor;
@@ -133,7 +134,7 @@ export class Options {
     }
     createOption(text, x, y, isCopyright = false) {
         const width = text.length;
-        const height = 0.06;
+        const height = 0.05;
         return {
             text,
             position: [x, y],
@@ -141,7 +142,7 @@ export class Options {
             color: this.color,
             bounds: {
                 x: [x - width / 2, x + width / 2],
-                y: [y - height / 2, y + height / 2]
+                y: [y / 20 - height, y / 20 + height]
             }
         };
     }
@@ -156,21 +157,30 @@ export class Options {
     }
     handleSelection(option) {
         const defaultColor = [...this.color];
-        option.color = this.screen.parseColor('rgb(102, 102, 102)');
-        setTimeout(() => {
-            if (this.cursor.getSelectedIndex() === this.cursor.selectedIndex) {
-                option.color = this.cursor.selectedColor;
-            }
-            else {
-                option.color = defaultColor;
-            }
-        }, this.intervalSelected);
+        const exTimeout = this.selectionTimeout.get(option);
+        if (exTimeout) {
+            clearTimeout(exTimeout);
+            this.selectionTimeout.delete(option);
+        }
         this.options.forEach(opt => {
             if (opt !== option) {
                 opt.selected = false;
                 opt.color = defaultColor;
             }
         });
+        if (!this.cursor.isMouseControlled) {
+            setTimeout(() => {
+                if (this.options[this.cursor.selectedIndex] === option) {
+                    option.color = this.cursor.selectedColor;
+                }
+                else {
+                    option.color = defaultColor;
+                }
+                this.selectionTimeout.delete(option);
+            }, this.intervalSelected);
+            this.selectionTimeout.set(option, this.intervalSelected);
+        }
+        option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;
     }
     getOptionPositions() {

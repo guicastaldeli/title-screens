@@ -4,6 +4,7 @@ export class Cursor {
         this.position = [-0.52, 0];
         this.coords = [518.99, 265.5];
         this.size = [8, 8];
+        this.isMouseControlled = true;
         this.selectedIndex = 0;
         this.optionPosition = [];
         this.cursorTargetPosition = [0, 0];
@@ -99,22 +100,20 @@ export class Cursor {
         ];
     }
     moveSelection(direction) {
-        if (!this.optionPosition || this.optionPosition.length === 0) {
+        if (!this.options || !this.optionPosition || this.optionPosition.length === 0) {
             this.setOptionPositions();
             return;
         }
+        const defaultColor = [...this.options.color];
+        this.options.options.forEach(option => {
+            option.color = defaultColor;
+            option.selected = false;
+        });
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
-        if (this.options && this.options.options[this.selectedIndex]) {
-            const defaultColor = [...this.options.color];
+        if (this.options && this.options.options[this.selectedIndex])
             this.options.options[this.selectedIndex].color = this.selectedColor;
-            this.options.options.forEach((option, i) => {
-                if (i !== this.selectedIndex) {
-                    option.color = defaultColor;
-                }
-            });
-        }
         this.getSelectedIndex();
     }
     getSelectedIndex() {
@@ -126,6 +125,8 @@ export class Cursor {
             return;
         if (!this.optionPosition || this.optionPosition.length === 0)
             this.setOptionPositions();
+        this.selected = false;
+        this.isMouseControlled = false;
         switch (key) {
             case 'ArrowUp':
             case 'W':
@@ -142,11 +143,56 @@ export class Cursor {
                 break;
         }
     }
+    handleMouseMove(x, y) {
+        if (!this.options || !this.optionPosition || this.optionPosition.length === 0) {
+            this.setOptionPosition();
+            return;
+        }
+        this.isMouseControlled = true;
+        const canvas = (this.gl.canvas);
+        const rect = canvas.getBoundingClientRect();
+        const ndcY = -((y - rect.top) / rect.height * 2 - 1);
+        for (let i = 0; i < this.optionPosition.length; i++) {
+            const option = this.options.options[i];
+            if (!option)
+                continue;
+            const optionY = this.optionPosition[i][1];
+            const [minY, maxY] = option.bounds.y;
+            if (ndcY >= optionY + minY &&
+                ndcY <= optionY + maxY) {
+                if (this.selectedIndex !== i) {
+                    this.selectedIndex = i;
+                    this.cursorTargetPosition = [
+                        this.cursorTargetPosition[0],
+                        this.optionPosition[i][1]
+                    ];
+                    if (this.isMouseControlled) {
+                        this.selected = false;
+                        const defaultColor = [...this.options.color];
+                        this.options.options.forEach((option, idx) => {
+                            option.color = idx === i ? this.selectedColor : defaultColor;
+                        });
+                    }
+                }
+                break;
+            }
+        }
+    }
+    handleMouseClick() {
+        var _a;
+        if (!this.selected) {
+            this.selected = true;
+            if (this.options)
+                this.options.selectedOption();
+            setTimeout(() => {
+                this.selected = false;
+            }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.intervalSelected) || 1000);
+        }
+    }
     update() {
-        const dx = this.cursorTargetPosition[0] - this.cursorCurrentPosition[0];
         const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
-        this.cursorCurrentPosition[0] += dx;
-        this.cursorCurrentPosition[1] += dy;
+        const speed = this.isMouseControlled ? 1.0 : 1.0;
+        this.cursorCurrentPosition[1] += dy * speed;
         this.getSelectedIndex();
     }
 }

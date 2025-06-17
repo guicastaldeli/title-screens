@@ -21,6 +21,7 @@ export class Cursor {
     private coords: [number, number] = [518.99, 265.5];
     private size: [number, number] = [8, 8];
 
+    public isMouseControlled: boolean = true;
     public selectedIndex: number = 0;
     private optionPosition: [number, number][] = [];
     private cursorTargetPosition: [number, number] = [0, 0];
@@ -155,25 +156,22 @@ export class Cursor {
     }
 
     private moveSelection(direction: number): void {
-        if(!this.optionPosition || this.optionPosition.length === 0) {
+        if(!this.options || !this.optionPosition || this.optionPosition.length === 0) {
             this.setOptionPositions();
             return;
         }
+
+        const defaultColor = [...this.options.color] as [number, number, number, number];
+        this.options.options.forEach(option => {
+            option.color = defaultColor;
+            option.selected = false;
+        });
 
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
 
-        if(this.options && this.options.options[this.selectedIndex]) {
-            const defaultColor = [...this.options.color] as [number, number, number, number];
-            this.options.options[this.selectedIndex].color = this.selectedColor
-
-            this.options.options.forEach((option, i) => {
-                if(i !== this.selectedIndex) {
-                    option.color = defaultColor;
-                }
-            });
-        }
+        if(this.options && this.options.options[this.selectedIndex]) this.options.options[this.selectedIndex].color = this.selectedColor;
 
         this.getSelectedIndex();
     }
@@ -186,6 +184,8 @@ export class Cursor {
     public handleInput(key: string): void {
         if(!this.options) return;
         if(!this.optionPosition || this.optionPosition.length === 0) this.setOptionPositions();
+        this.selected = false;
+        this.isMouseControlled = false;
 
         switch(key) {
             case 'ArrowUp':
@@ -204,12 +204,69 @@ export class Cursor {
         }
     }
 
-    public update(): void {
-        const dx = this.cursorTargetPosition[0] - this.cursorCurrentPosition[0];
-        const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
+    public handleMouseMove(x: number, y: number): void {
+        if(!this.options || !this.optionPosition || this.optionPosition.length === 0) {
+            this.setOptionPosition();
+            return;
+        }
+        
+        this.isMouseControlled = true;
 
-        this.cursorCurrentPosition[0] += dx;
-        this.cursorCurrentPosition[1] += dy;
+        const canvas = <HTMLCanvasElement>(this.gl.canvas);
+        const rect = canvas.getBoundingClientRect();
+
+        const ndcY = -((y - rect.top) / rect.height * 2 - 1);
+
+        for(let i = 0; i < this.optionPosition.length; i++) {
+            const option = this.options.options[i];
+            if(!option) continue;
+
+            const optionY = this.optionPosition[i][1];
+            const [minY, maxY] = option.bounds.y;
+
+            if(
+                ndcY >= optionY + minY &&
+                ndcY <= optionY + maxY
+            ) {
+                if(this.selectedIndex !== i) {
+                    this.selectedIndex = i;
+
+                    this.cursorTargetPosition = [
+                        this.cursorTargetPosition[0],
+                        this.optionPosition[i][1]
+                    ];
+                    
+                    if(this.isMouseControlled) {
+                        this.selected = false;
+
+                        const defaultColor = [...this.options.color] as [number, number, number, number];
+    
+                        this.options.options.forEach((option, idx) => {
+                            option.color = idx === i ? this.selectedColor : defaultColor;
+                        });
+                    }
+                }
+
+                break;
+            }
+        }
+    }
+
+    public handleMouseClick(): void {
+        if(!this.selected) {
+            this.selected = true;
+            if(this.options) this.options.selectedOption();
+
+            setTimeout(() => {
+               this.selected = false;
+            }, this.options?.intervalSelected || 1000);
+        }
+    }
+
+    public update(): void {
+        const dy = this.cursorTargetPosition[1] - this.cursorCurrentPosition[1];
+        const speed = this.isMouseControlled ? 1.0 : 1.0;
+        this.cursorCurrentPosition[1] += dy * speed;
 
         this.getSelectedIndex();
     }

@@ -33,6 +33,7 @@ export class Options {
     private waveTime: number = 0.0;
     private waveSpeed: number = 2.0;
     public intervalSelected: number = 1000;
+    private selectionTimeout: Map<Option, number> = new Map();
 
     private letterCoords: Record<string, [number, number]> = {
         ' ': [555.5, 330.5],
@@ -95,8 +96,8 @@ export class Options {
         ];
         
         this.copyrightText = [
-            this.createOption('©1981 NINTENDO COZLTD.', -0.1, -0.75, true),
-            this.createOption('MADE IN JAPAN', 0.01, -0.85, true)
+            this.createOption('©1981 NINTENDO COZLTD.', 0, -0.75, true),
+            this.createOption('MADE IN JAPAN', 0.1, -0.85, true)
         ];
 
         if(this.options.length > 0) this.options[0].color = this.cursor.selectedColor;
@@ -209,7 +210,7 @@ export class Options {
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected  && !this.cursor.selected ? 1 : 0);
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected && !this.cursor.selected ? 1 : 0);
         if(isSelected === true && !this.cursor.selected) this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
 
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
@@ -217,7 +218,6 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
-
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -229,7 +229,7 @@ export class Options {
         isCopyright = false
     ): Option {
         const width = text.length;
-        const height = 0.06;
+        const height = 0.05;
 
         return {
             text,
@@ -238,7 +238,7 @@ export class Options {
             color: this.color,
             bounds: {
                 x: [x - width / 2, x + width / 2],
-                y: [y - height / 2, y + height / 2]
+                y: [y / 20 - height, y / 20 + height]
             }
         }
     }
@@ -256,15 +256,11 @@ export class Options {
 
     private handleSelection(option: Option) {
         const defaultColor = [...this.color] as [number, number, number, number];
-        option.color = this.screen.parseColor('rgb(102, 102, 102)');
-
-        setTimeout(() => {
-            if(this.cursor.getSelectedIndex() === this.cursor.selectedIndex) {
-                option.color = this.cursor.selectedColor;
-            } else {
-                option.color = defaultColor;
-            }
-        }, this.intervalSelected);
+        const exTimeout = this.selectionTimeout.get(option);
+        if(exTimeout) {
+            clearTimeout(exTimeout);
+            this.selectionTimeout.delete(option);
+        }
 
         this.options.forEach(opt => {
             if(opt !== option) {
@@ -273,6 +269,21 @@ export class Options {
             }
         });
 
+        if(!this.cursor.isMouseControlled) {
+            setTimeout(() => {
+                if(this.options[this.cursor.selectedIndex] === option) {
+                    option.color = this.cursor.selectedColor;
+                } else {
+                    option.color = defaultColor;
+                }
+
+                this.selectionTimeout.delete(option);
+            }, this.intervalSelected);
+
+            this.selectionTimeout.set(option, this.intervalSelected);
+        }
+
+        option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;
     }
 

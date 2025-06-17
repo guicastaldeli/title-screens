@@ -314,6 +314,18 @@ export class ScreenDk extends BaseScreen {
     }
 
     private setupInput(): void {
+        //Mouse
+        const canvas = <HTMLCanvasElement>(this.gl.canvas);
+
+        canvas.addEventListener('mousemove', (e) => {
+            this.cursor.handleMouseMove(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('click', () => {
+            if(!this.state.isLoading()) this.cursor.handleMouseClick();
+        });
+
+        //Keyboard
         document.addEventListener('keydown', (e) => {
             if(!this.state.isLoading()) this.cursor.handleInput(e.key);
         });
