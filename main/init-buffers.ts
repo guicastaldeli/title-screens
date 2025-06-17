@@ -7,6 +7,10 @@ import { dkInitTextureBuffer } from "./screens/dk/buffers.js";
 
 import { smbInitBackgroundPositionBuffer } from "./screens/smb2/buffer.js";
 import { smbInitBackgroundColorBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTilePositionBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTileColorBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTextureCoordBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTextureBuffer } from "./screens/smb2/buffer.js";
 
 export interface Buffers {
     position: WebGLBuffer,
@@ -16,11 +20,15 @@ export interface Buffers {
     dkBackgroundColor: WebGLBuffer,
     dkTilePosition: WebGLBuffer,
     dkTileColor: WebGLBuffer,
-    dkTitleTextureCoord: WebGLBuffer,
-    dkTitleTexture: WebGLTexture | null,
+    dkTileTextureCoord: WebGLBuffer,
+    dkTileTexture: WebGLTexture | null,
 
     smbBackgroundPosition: WebGLBuffer,
-    smbBackgroundColor: WebGLBuffer
+    smbBackgroundColor: WebGLBuffer,
+    smbTilePosition: WebGLBuffer,
+    smbTileColor: WebGLBuffer,
+    smbTileTextureCoord: WebGLBuffer,
+    smbTileTexture: WebGLTexture | null
 }
 
 export function initBuffers(gl: WebGLRenderingContext): Buffers {
@@ -33,12 +41,16 @@ export function initBuffers(gl: WebGLRenderingContext): Buffers {
         const dkBackgroundColorBuffer = dkInitBackgroundColorBuffer(gl);
         const dkTilePositionBuffer = dkInitTilePositionBuffer(gl);
         const dkTileColorBuffer = dkInitTileColorBuffer(gl);
-        const dkTitleTextureCoordBuffer = dkInitTextureCoordBuffer(gl);
-        const dkTitleTextureBuffer = dkInitTextureBuffer(gl);
+        const dkTileTextureCoordBuffer = dkInitTextureCoordBuffer(gl);
+        const dkTileTextureBuffer = dkInitTextureBuffer(gl);
 
         //SMB
         const smbBackgroundPositionBuffer = smbInitBackgroundPositionBuffer(gl);
         const smbBackgroundColorBuffer = smbInitBackgroundColorBuffer(gl);
+        const smbTilePositionBuffer = smbInitTilePositionBuffer(gl);
+        const smbTileColorBuffer = smbInitTileColorBuffer(gl);
+        const smbTileTextureCoordBuffer = smbInitTextureCoordBuffer(gl);
+        const smbTileTextureBuffer = smbInitTextureBuffer(gl);
     //
 
     return { 
@@ -49,11 +61,15 @@ export function initBuffers(gl: WebGLRenderingContext): Buffers {
         dkBackgroundColor: dkBackgroundColorBuffer,
         dkTilePosition: dkTilePositionBuffer,
         dkTileColor: dkTileColorBuffer,
-        dkTitleTextureCoord: dkTitleTextureCoordBuffer,
-        dkTitleTexture: dkTitleTextureBuffer,
+        dkTileTextureCoord: dkTileTextureCoordBuffer,
+        dkTileTexture: dkTileTextureBuffer,
 
         smbBackgroundPosition: smbBackgroundPositionBuffer,
-        smbBackgroundColor: smbBackgroundColorBuffer
+        smbBackgroundColor: smbBackgroundColorBuffer,
+        smbTilePosition: smbTilePositionBuffer,
+        smbTileColor: smbTileColorBuffer,
+        smbTileTextureCoord: smbTileTextureCoordBuffer,
+        smbTileTexture: smbTileTextureBuffer
     }
 }
 

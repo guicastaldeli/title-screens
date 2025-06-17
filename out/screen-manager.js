@@ -24,7 +24,7 @@ export class ScreenManager {
     registerScreen(name, screen) {
         this.screens.set(name, screen);
     }
-    switch(name) {
+    current(name) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.screens.has(name))
                 throw new Error(`Screen ${name} not registered`);

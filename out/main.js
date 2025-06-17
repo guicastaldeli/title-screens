@@ -121,7 +121,7 @@ function main() {
         renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers);
         screenManager.registerScreen('smb', renderScreenSmb);
         //
-        yield screenManager.switch('dk');
+        yield screenManager.current('smb');
         controller = new Contoller(state, screenManager);
         state.setLoading(false);
         state.setRunning(true);
@@ -150,6 +150,17 @@ window.addEventListener('resize', () => __awaiter(void 0, void 0, void 0, functi
     yield renderScreenDk.init();
     renderScreenSmb.init();
 }));
+function windowTitle() {
+    if (!state)
+        return;
+    const titles = {
+        dk: 'Donkey Kong',
+        smb: 'Super Mario Bros. 2: The Lost Levels'
+    };
+    const current = state.getCurrentState();
+    const title = titles[current];
+    document.title = title;
+}
 //Render
 let initialized = false;
 let then = 0;
@@ -164,6 +175,7 @@ function render() {
             yield main();
             initialized = true;
         }
+        windowTitle();
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);

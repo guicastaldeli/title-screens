@@ -150,7 +150,7 @@ async function main(): Promise<void> {
         screenManager.registerScreen('smb', renderScreenSmb);
     //
 
-    await screenManager.switch('dk');
+    await screenManager.current('smb');
     controller = new Contoller(state, screenManager);
     state.setLoading(false);
     state.setRunning(true);
@@ -188,6 +188,19 @@ window.addEventListener('resize', async () => {
     renderScreenSmb.init();
 });
 
+function windowTitle() {
+    if(!state) return;
+
+    const titles = {
+        dk: 'Donkey Kong',
+        smb: 'Super Mario Bros. 2: The Lost Levels'
+    }
+
+    const current = state.getCurrentState();
+    const title = titles[current];
+    document.title = title;
+}
+
 //Render
     let initialized = false;
     let then = 0;
@@ -204,6 +217,7 @@ window.addEventListener('resize', async () => {
             initialized = true;
         }
 
+        windowTitle();
         tick.update(deltaTime);
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);

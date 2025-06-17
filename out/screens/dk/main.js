@@ -212,7 +212,7 @@ export class ScreenDk extends BaseScreen {
             try {
                 const path = './screens/dk/assets/sprites/dk-title-screen-sheet.png';
                 const tex = yield this.loadTexture(this.gl, path);
-                this.buffers.dkTitleTexture = tex;
+                this.buffers.dkTileTexture = tex;
             }
             catch (err) {
                 console.log(err);

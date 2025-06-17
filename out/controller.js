@@ -19,14 +19,13 @@ export class Contoller {
             const current = this.state.getCurrentState();
             const updScreen = current === 'dk' ? 'smb' : 'dk';
             yield this.switch(updScreen);
-            console.log(updScreen);
         });
     }
     switch(screen) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.state.isLoading())
                 return;
-            yield this.screenManager.switch(screen);
+            yield this.screenManager.current(screen);
         });
     }
 }

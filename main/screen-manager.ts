@@ -26,7 +26,7 @@ export class ScreenManager {
         this.screens.set(name, screen);
     }
 
-    public async switch(name: ScreenStates): Promise<void> {
+    public async current(name: ScreenStates): Promise<void> {
         if(!this.screens.has(name)) throw new Error(`Screen ${name} not registered`);
 
         this.state.setLoading(true);

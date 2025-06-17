@@ -62,7 +62,6 @@ export function dkInitTextureCoordBuffer(gl: WebGLRenderingContext): WebGLBuffer
 
 export function dkInitTextureBuffer(gl: WebGLRenderingContext): WebGLTexture {
     const texture = gl.createTexture();
-
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     const level = 0;

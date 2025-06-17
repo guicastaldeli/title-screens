@@ -6,6 +6,10 @@ import { dkInitTextureCoordBuffer } from "./screens/dk/buffers.js";
 import { dkInitTextureBuffer } from "./screens/dk/buffers.js";
 import { smbInitBackgroundPositionBuffer } from "./screens/smb2/buffer.js";
 import { smbInitBackgroundColorBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTilePositionBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTileColorBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTextureCoordBuffer } from "./screens/smb2/buffer.js";
+import { smbInitTextureBuffer } from "./screens/smb2/buffer.js";
 export function initBuffers(gl) {
     const positionBuffer = initPositionBuffer(gl);
     const colorBuffer = initColorBuffer(gl);
@@ -15,11 +19,15 @@ export function initBuffers(gl) {
     const dkBackgroundColorBuffer = dkInitBackgroundColorBuffer(gl);
     const dkTilePositionBuffer = dkInitTilePositionBuffer(gl);
     const dkTileColorBuffer = dkInitTileColorBuffer(gl);
-    const dkTitleTextureCoordBuffer = dkInitTextureCoordBuffer(gl);
-    const dkTitleTextureBuffer = dkInitTextureBuffer(gl);
+    const dkTileTextureCoordBuffer = dkInitTextureCoordBuffer(gl);
+    const dkTileTextureBuffer = dkInitTextureBuffer(gl);
     //SMB
     const smbBackgroundPositionBuffer = smbInitBackgroundPositionBuffer(gl);
     const smbBackgroundColorBuffer = smbInitBackgroundColorBuffer(gl);
+    const smbTilePositionBuffer = smbInitTilePositionBuffer(gl);
+    const smbTileColorBuffer = smbInitTileColorBuffer(gl);
+    const smbTileTextureCoordBuffer = smbInitTextureCoordBuffer(gl);
+    const smbTileTextureBuffer = smbInitTextureBuffer(gl);
     //
     return {
         position: positionBuffer,
@@ -28,10 +36,14 @@ export function initBuffers(gl) {
         dkBackgroundColor: dkBackgroundColorBuffer,
         dkTilePosition: dkTilePositionBuffer,
         dkTileColor: dkTileColorBuffer,
-        dkTitleTextureCoord: dkTitleTextureCoordBuffer,
-        dkTitleTexture: dkTitleTextureBuffer,
+        dkTileTextureCoord: dkTileTextureCoordBuffer,
+        dkTileTexture: dkTileTextureBuffer,
         smbBackgroundPosition: smbBackgroundPositionBuffer,
-        smbBackgroundColor: smbBackgroundColorBuffer
+        smbBackgroundColor: smbBackgroundColorBuffer,
+        smbTilePosition: smbTilePositionBuffer,
+        smbTileColor: smbTileColorBuffer,
+        smbTileTextureCoord: smbTileTextureCoordBuffer,
+        smbTileTexture: smbTileTextureBuffer
     };
 }
 function initPositionBuffer(gl) {

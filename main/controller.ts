@@ -17,11 +17,10 @@ export class Contoller {
         const current = this.state.getCurrentState();
         const updScreen = current === 'dk' ? 'smb' : 'dk';
         await this.switch(updScreen);
-        console.log(updScreen)
     }
 
     public async switch(screen: ScreenStates): Promise<void> {
         if(this.state.isLoading()) return;
-        await this.screenManager.switch(screen);
+        await this.screenManager.current(screen);
     }
 }
