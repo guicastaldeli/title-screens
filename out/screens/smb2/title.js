@@ -11,7 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Title {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.position = [-0.05, 0.2];
-        this.size = [0.8, 0.4];
+        this.size = [1.0, 0.4];
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -59,6 +59,8 @@ export class Title {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     getTex() {

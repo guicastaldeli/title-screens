@@ -232,13 +232,30 @@ export class ScreenDk extends BaseScreen {
             const srcFormat = gl.RGBA;
             const srcType = gl.UNSIGNED_BYTE;
             const pixel = new Uint8Array([255, 255, 255, 255]);
-            gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
+            gl.texImage2D(
+                gl.TEXTURE_2D, 
+                level, 
+                internalFormat, 
+                width, 
+                height, 
+                border, 
+                srcFormat, 
+                srcType, 
+                pixel
+            );
 
             const img = new Image();
 
             img.onload = () => {
                 gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, img);
+                gl.texImage2D(
+                    gl.TEXTURE_2D, 
+                    level, 
+                    internalFormat, 
+                    srcFormat, 
+                    srcType, 
+                    img
+                );
 
                 if(this.isPowerOf2(img.width) && this.isPowerOf2(img.height)) {
                     gl.generateMipmap(gl.TEXTURE_2D);

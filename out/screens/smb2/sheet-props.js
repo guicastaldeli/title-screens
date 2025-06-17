@@ -4,7 +4,7 @@ export class SheetProps {
     }
     titleProps() {
         const spriteSheetSize = [2600, 528];
-        const spriteSize = [1, 1];
+        const spriteSize = [199.8, 88];
         const spriteCoords = [0, 0];
         return {
             spriteSheetSize,

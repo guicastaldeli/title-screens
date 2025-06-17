@@ -150,7 +150,7 @@ export class ScreenSmb extends BaseScreen {
             const img = new Image();
             img.onload = () => {
                 gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, img);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
                 if (this.isPowerOf2(img.width) && this.isPowerOf2(img.height)) {
                     gl.generateMipmap(gl.TEXTURE_2D);
                 }

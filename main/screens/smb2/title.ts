@@ -16,7 +16,7 @@ export class Title {
     private sheetProps: SheetProps;
     
     private position: [number, number] = [-0.05, 0.2];
-    private size: [number, number] = [0.8, 0.4];
+    private size: [number, number] = [1.0, 0.4];
 
     constructor(
         gl: WebGLRenderingContext,
@@ -90,6 +90,8 @@ export class Title {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
     }
 
