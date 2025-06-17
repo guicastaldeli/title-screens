@@ -240,7 +240,7 @@ export class ScreenDk extends BaseScreen {
                 height, 
                 border, 
                 srcFormat, 
-                srcType, 
+                srcType,
                 pixel
             );
 
