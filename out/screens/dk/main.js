@@ -119,9 +119,7 @@ export class ScreenDk extends BaseScreen {
             0, tileHeight,
             tileWidth, tileHeight
         ];
-        const color = tileType === 0 ?
-            this.parseColor('rgb(0, 0, 0)') :
-            this.parseColor('rgb(0, 0, 0)');
+        const color = this.parseColor('rgb(0, 0, 0)');
         const colors = [
             ...color, ...color, ...color, ...color
         ];

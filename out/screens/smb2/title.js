@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { Animation } from "./animation.js";
 export class Title {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.position = [-0.05, 0.2];
@@ -17,6 +18,13 @@ export class Title {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
+        this.animation = new Animation(sheetProps, sheetProps.titleProps().spriteCoords.map(group => ({
+            id: `group-${group.groupId}`,
+            coords: group.coords,
+            avaliableAnimations: ['initial'],
+            stars: group.stars
+        })));
+        this.currentFrame = this.animation.getCurrentFrame();
     }
     drawTitle(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -29,7 +37,7 @@ export class Title {
             -this.size[0], this.size[1],
             this.size[0], this.size[1],
         ];
-        const [spriteX, spriteY] = this.sheetProps.titleProps().spriteCoords;
+        const [spriteX, spriteY] = this.currentFrame.coords;
         const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().spriteSheetSize;
         const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().spriteSize;
         const left = spriteX / sheetWidth;
@@ -74,5 +82,9 @@ export class Title {
                 console.log(err);
             }
         });
+    }
+    update(deltaTime) {
+        this.animation.update(deltaTime);
+        this.currentFrame = this.animation.getCurrentFrame();
     }
 }

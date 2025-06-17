@@ -180,11 +180,7 @@ export class ScreenSmb extends BaseScreen {
             tileWidth, tileHeight
         ];
 
-        const color = 
-            tileType === 0 ?
-            this.parseColor('rgb(126, 126, 218)') :
-            this.parseColor('rgb(148, 148, 255)')
-        ;
+        const color = this.parseColor('rgb(148, 148, 255)');
 
         const colors = [
             ...color, ...color, ...color, ...color
@@ -318,6 +314,7 @@ export class ScreenSmb extends BaseScreen {
     public update(deltaTime: number) {
         if(this.state.isLoading()) return;
 
+        this.title.update(deltaTime);
         this.createBackground();
     }
 

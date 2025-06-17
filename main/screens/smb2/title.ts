@@ -6,6 +6,9 @@ import { ProgramInfo } from "../../main.js";
 import { ScreenSmb } from "./main.js";
 import { SheetProps } from "./sheet-props.js";
 
+import { Animation } from "./animation.js";
+import { FrameData } from "./animation.js";
+
 export class Title {
     private gl: WebGLRenderingContext;
 
@@ -18,12 +21,15 @@ export class Title {
     private position: [number, number] = [-0.05, 0.2];
     private size: [number, number] = [1.0, 0.4];
 
+    private animation: Animation;
+    private currentFrame: FrameData;
+
     constructor(
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
         screen: ScreenSmb,
-        sheetProps: SheetProps
+        sheetProps: SheetProps,
     ) {
         this.gl = gl;
         this.buffers = buffers;
@@ -31,6 +37,18 @@ export class Title {
 
         this.screen = screen;
         this.sheetProps = sheetProps;
+
+        this.animation = new Animation(
+            sheetProps,
+            sheetProps.titleProps().spriteCoords.map(group => ({
+                id: `group-${group.groupId}`,
+                coords: group.coords,
+                avaliableAnimations: ['initial'],
+                stars: group.stars
+            }))
+        );
+
+        this.currentFrame = this.animation.getCurrentFrame();
     }
 
     public drawTitle(projectionMatrix: mat4): void {
@@ -52,7 +70,7 @@ export class Title {
             this.size[0], this.size[1],
         ];
 
-        const [spriteX, spriteY] = this.sheetProps.titleProps().spriteCoords;
+        const [spriteX, spriteY] = this.currentFrame.coords;
         const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().spriteSheetSize;
         const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().spriteSize;
 
@@ -103,5 +121,10 @@ export class Title {
         } catch(err) {
             console.log(err);
         }
+    }
+
+    public update(deltaTime: number) {
+        this.animation.update(deltaTime);
+        this.currentFrame = this.animation.getCurrentFrame();
     }
 }
