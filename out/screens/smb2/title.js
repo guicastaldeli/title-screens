@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
-import { Animation } from "./animation.js";
+import { AnimationManager } from "./animation-manager.js";
 export class Title {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.texture = null;
@@ -19,13 +19,13 @@ export class Title {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.animation = new Animation(sheetProps, sheetProps.titleProps().spriteCoords.map(group => ({
+        this.animationManager = new AnimationManager(sheetProps, sheetProps.titleProps().spriteCoords.map(group => ({
             id: `group-${group.groupId}`,
             coords: group.coords,
             avaliableAnimations: ['flash'],
             stars: group.stars
-        })), 'title');
-        this.currentFrame = this.animation.getCurrentFrame();
+        })));
+        this.currentFrame = this.animationManager.getTitleFrame();
     }
     drawTitle(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -84,7 +84,7 @@ export class Title {
         });
     }
     update(deltaTime) {
-        this.animation.update(deltaTime);
-        this.currentFrame = this.animation.getCurrentFrame();
+        this.animationManager.update(deltaTime);
+        this.currentFrame = this.animationManager.getTitleFrame();
     }
 }

@@ -6,10 +6,10 @@ import { ProgramInfo } from "../../main.js";
 import { ScreenSmb } from "./main.js";
 import { SheetProps } from "./sheet-props.js";
 
-import { Animation } from "./animation.js";
+import { AnimationManager } from "./animation-manager.js";
 import { FrameData } from "./animation.js";
 
-export class InfoBar {
+export class Hud {
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -19,7 +19,7 @@ export class InfoBar {
     private screen: ScreenSmb;
     private sheetProps: SheetProps;
 
-    private animation: Animation;
+    private animationManager: AnimationManager;
     private currentFrame: FrameData;
 
     constructor(
@@ -36,13 +36,8 @@ export class InfoBar {
         this.screen = screen;
         this.sheetProps = sheetProps;
 
-        this.animation = new Animation(
-            sheetProps,
-            [],
-            'coin'
-        );
-
-        this.currentFrame = this.animation.getCurrentFrame();
+        this.animationManager = new AnimationManager(sheetProps, []);
+        this.currentFrame = this.animationManager.getCoinFrame();
     }
 
     public drawHud(projectionMatrix: mat4): void {
@@ -119,7 +114,7 @@ export class InfoBar {
     //Coin
     private drawCoin(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
-        const coinFrame = this.animation.getCurrentFrame();
+        const coinFrame = this.currentFrame;
 
         const position = this.sheetProps.miscProps().spriteProps.coin.position;
         const size = this.sheetProps.miscProps().spriteProps.coin.size;
@@ -195,6 +190,7 @@ export class InfoBar {
     }
 
     public update(deltaTime: number) {
-        this.animation.update(deltaTime);
+        this.animationManager.update(deltaTime);
+        this.currentFrame = this.animationManager.getCoinFrame()
     }
 }

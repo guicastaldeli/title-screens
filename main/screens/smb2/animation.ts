@@ -1,6 +1,6 @@
 import { SheetProps } from "./sheet-props.js";
 
-interface SpriteGroup {
+export interface SpriteGroup {
     id: string;
     coords: Record<string, [number, number]>;
     avaliableAnimations?: string[];
@@ -19,9 +19,15 @@ export interface FrameData {
     }
 }
 
+interface AnimationState {
+    phase: 'initial' | 'flash';
+    flashState: boolean;
+    frameIndex: number
+} 
+
 export class Animation {
-    private readonly sheetProps: SheetProps;
-    private readonly groups: SpriteGroup[];
+    private sheetProps: SheetProps;
+    private groups: SpriteGroup[];
     private currentGroup: SpriteGroup | null = null;
     private availableGroups: SpriteGroup[] = [];
 
@@ -64,7 +70,10 @@ export class Animation {
         this.coinProps = sheetProps.miscProps().spriteProps.coin;
         this.titleProps = sheetProps.titleProps();
 
-        this.groups = type === 'coin' ? this.getCoinGroups() : groups;
+        this.groups = type === 'coin' 
+        ? this.getCoinGroups() 
+        : groups;
+
         this.init();
     }
 
@@ -219,6 +228,14 @@ export class Animation {
                 phase: 'flash',
                 stars: 0
             }
+        }
+    }
+
+    public getCurrentState(): AnimationState {
+        return {
+            phase: this.currentPhase,
+            flashState: this.flashState,
+            frameIndex: this.currentFrameIndex
         }
     }
 

@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { BaseScreen } from "../../screen.interface.js";
 import { SheetProps } from "./sheet-props.js";
-import { InfoBar } from "./info-bar.js";
+import { Hud } from "./hud.js";
 import { Title } from "./title.js";
 export class ScreenSmb extends BaseScreen {
     //private options: Options;
@@ -30,7 +30,7 @@ export class ScreenSmb extends BaseScreen {
         this.tileMap = [];
         this.screenManager = screenManager;
         this.sheetProps = new SheetProps();
-        this.infoBar = new InfoBar(gl, buffers, programInfo, this, this.sheetProps);
+        this.hud = new Hud(gl, buffers, programInfo, this, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
     //Bakcground
@@ -62,7 +62,7 @@ export class ScreenSmb extends BaseScreen {
         //Tile
         this.drawTile(projectionMatrix);
         //Elements
-        this.infoBar.drawHud(projectionMatrix);
+        this.hud.drawHud(projectionMatrix);
         this.title.drawTitle(projectionMatrix);
         //
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -204,14 +204,14 @@ export class ScreenSmb extends BaseScreen {
     }
     loadAssets() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.infoBar.getTex();
+            yield this.hud.getTex();
             yield this.title.getTex();
         });
     }
     update(deltaTime) {
         if (this.state.isLoading())
             return;
-        this.infoBar.update(deltaTime);
+        this.hud.update(deltaTime);
         this.title.update(deltaTime);
         this.createBackground();
     }

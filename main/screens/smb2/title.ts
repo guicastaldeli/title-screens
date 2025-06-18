@@ -6,7 +6,7 @@ import { ProgramInfo } from "../../main.js";
 import { ScreenSmb } from "./main.js";
 import { SheetProps } from "./sheet-props.js";
 
-import { Animation } from "./animation.js";
+import { AnimationManager } from "./animation-manager.js";
 import { FrameData } from "./animation.js";
 
 export class Title {
@@ -22,7 +22,7 @@ export class Title {
     private position: [number, number] = [0, 0.12];
     private size: [number, number] = [1.0, 0.4];
 
-    private animation: Animation;
+    private animationManager: AnimationManager;
     private currentFrame: FrameData;
 
     constructor(
@@ -39,18 +39,17 @@ export class Title {
         this.screen = screen;
         this.sheetProps = sheetProps;
 
-        this.animation = new Animation(
+        this.animationManager = new AnimationManager(
             sheetProps,
             sheetProps.titleProps().spriteCoords.map(group => ({
                 id: `group-${group.groupId}`,
                 coords: group.coords,
                 avaliableAnimations: ['flash'],
                 stars: group.stars
-            })),
-            'title'
+            }))
         );
 
-        this.currentFrame = this.animation.getCurrentFrame();
+        this.currentFrame = this.animationManager.getTitleFrame();
     }
 
     public drawTitle(projectionMatrix: mat4): void {
@@ -125,7 +124,7 @@ export class Title {
     }
 
     public update(deltaTime: number) {
-        this.animation.update(deltaTime);
-        this.currentFrame = this.animation.getCurrentFrame();
+        this.animationManager.update(deltaTime);
+        this.currentFrame = this.animationManager.getTitleFrame();
     }
 }

@@ -28,7 +28,9 @@ export class Animation {
         this.type = type;
         this.coinProps = sheetProps.miscProps().spriteProps.coin;
         this.titleProps = sheetProps.titleProps();
-        this.groups = type === 'coin' ? this.getCoinGroups() : groups;
+        this.groups = type === 'coin'
+            ? this.getCoinGroups()
+            : groups;
         this.init();
     }
     //Coin
@@ -158,6 +160,13 @@ export class Animation {
                 phase: 'flash',
                 stars: 0
             }
+        };
+    }
+    getCurrentState() {
+        return {
+            phase: this.currentPhase,
+            flashState: this.flashState,
+            frameIndex: this.currentFrameIndex
         };
     }
     update(deltaTime) {
