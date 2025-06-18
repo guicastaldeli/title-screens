@@ -10,11 +10,14 @@ export class Animation {
         this.pauseTimer = 0;
         this.pauseIntervalTimer = 0;
         this.pauseInterval = 500;
-        this.lastPhase = 'initial';
+        this.pausedFrameIndex = 0;
+        this.pausedFrameTimer = 0;
+        this.pausedFrameInterval = 200;
         this.animationTimer = 0;
         this.frameKeys = ['f', 's', 't'];
+        this.lastPhase = 'initial';
         this.animationParams = {
-            initialSpeed: 100,
+            initialSpeed: 70,
             flashSpeed: 1000,
             initialCycles: 6,
             flashDuration: 1000,
@@ -72,6 +75,7 @@ export class Animation {
     startPause() {
         this.isPaused = true;
         this.pauseTimer = 0;
+        this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
     }
     endPause() {
         this.isPaused = false;
@@ -83,8 +87,10 @@ export class Animation {
         this.currentPhase = newPhase;
         this.animationTimer = 0;
         this.currentFrameIndex = 0;
-        if (newPhase === 'flash')
+        if (newPhase === 'flash') {
             this.flashState = true;
+            this.currentFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
+        }
     }
     resetAnimation() {
         this.currentPhase = 'initial';
@@ -120,7 +126,7 @@ export class Animation {
         if (!this.currentGroup)
             return 'f';
         const phaseIndex = this.currentPhase === 'flash'
-            ? Math.floor(this.currentFrameIndex / this.animationParams.initialCycles) % this.frameKeys.length
+            ? this.currentFrameIndex % this.frameKeys.length
             : this.currentFrameIndex % this.frameKeys.length;
         const baseKey = this.frameKeys[phaseIndex];
         return this.currentGroup.coords[`${baseKey}_offset`]
@@ -144,6 +150,10 @@ export class Animation {
         const time = deltaTime * 1000;
         if (this.isPaused) {
             this.pauseTimer += time;
+            if (this.pausedFrameTimer >= this.pausedFrameInterval) {
+                this.pausedFrameTimer = 0;
+                this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
+            }
             if (this.pauseTimer >= this.animationParams.pauseDuration)
                 this.endPause();
             return;
@@ -151,8 +161,8 @@ export class Animation {
         this.pauseIntervalTimer += time;
         if (this.pauseIntervalTimer >= this.pauseInterval) {
             this.lastPhase = this.currentPhase;
-            this.startPause();
             this.pauseIntervalTimer = 0;
+            this.startPause();
             return;
         }
         this.animationTimer += time;

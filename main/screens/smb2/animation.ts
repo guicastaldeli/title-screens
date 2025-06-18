@@ -34,12 +34,15 @@ export class Animation {
     private pauseTimer: number = 0;
     private pauseIntervalTimer: number = 0;
     private pauseInterval: number = 500;
-    private lastPhase: 'initial' | 'flash' = 'initial';
-
+    private pausedFrameIndex: number = 0;
+    private pausedFrameTimer: number = 0;
+    private pausedFrameInterval: number = 200;
+    
     private animationTimer: number = 0;
     private frameKeys: string[] = ['f', 's', 't'];
+    private lastPhase: 'initial' | 'flash' = 'initial';
     private animationParams = {
-        initialSpeed: 100,
+        initialSpeed: 70,
         flashSpeed: 1000,
         initialCycles: 6,
         flashDuration: 1000,
@@ -119,6 +122,7 @@ export class Animation {
     private startPause(): void {
         this.isPaused = true;
         this.pauseTimer = 0;
+        this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
     }
 
     private endPause(): void {
@@ -132,7 +136,10 @@ export class Animation {
         this.animationTimer = 0;
         this.currentFrameIndex = 0;
 
-        if(newPhase === 'flash') this.flashState = true;
+        if(newPhase === 'flash') {
+            this.flashState = true;
+            this.currentFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
+        }
     }
 
     private resetAnimation(): void {
@@ -152,7 +159,7 @@ export class Animation {
 
     public getCurrentFrame(): FrameData {
         if(!this.currentGroup) return this.getDefaultFrame();
-        const frameKey = this.determineFrameKey();
+        const frameKey = this.determineFrameKey()
 
         return {
             coords: this.currentGroup.coords[frameKey] || this.currentGroup.coords.t,
@@ -171,7 +178,7 @@ export class Animation {
         if(!this.currentGroup) return 'f'; 
 
         const phaseIndex = this.currentPhase === 'flash'
-        ? Math.floor(this.currentFrameIndex / this.animationParams.initialCycles) % this.frameKeys.length
+        ? this.currentFrameIndex % this.frameKeys.length
         : this.currentFrameIndex % this.frameKeys.length;
 
         const baseKey = this.frameKeys[phaseIndex];
@@ -201,6 +208,11 @@ export class Animation {
         if(this.isPaused) {
             this.pauseTimer += time;
             
+            if(this.pausedFrameTimer >= this.pausedFrameInterval) {
+                this.pausedFrameTimer = 0;
+                this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
+            }
+
             if(this.pauseTimer >= this.animationParams.pauseDuration) this.endPause();
             return;
         }
@@ -209,8 +221,8 @@ export class Animation {
 
         if(this.pauseIntervalTimer >= this.pauseInterval) {
             this.lastPhase = this.currentPhase;
-            this.startPause();
             this.pauseIntervalTimer = 0;
+            this.startPause();
             return;
         }
 
