@@ -11,6 +11,7 @@ import { FrameData } from "./animation.js";
 
 export class Title {
     private gl: WebGLRenderingContext;
+    private texture: WebGLTexture | null = null;
 
     private buffers: Buffers;
     private programInfo: ProgramInfo;
@@ -18,7 +19,7 @@ export class Title {
     private screen: ScreenSmb;
     private sheetProps: SheetProps;
     
-    private position: [number, number] = [-0.05, 0.15];
+    private position: [number, number] = [0, 0.12];
     private size: [number, number] = [1.0, 0.4];
 
     private animation: Animation;
@@ -45,7 +46,8 @@ export class Title {
                 coords: group.coords,
                 avaliableAnimations: ['flash'],
                 stars: group.stars
-            }))
+            })),
+            'title'
         );
 
         this.currentFrame = this.animation.getCurrentFrame();
@@ -97,7 +99,7 @@ export class Title {
         this.gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord);
 
         this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.smbTileTexture);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
@@ -116,8 +118,7 @@ export class Title {
     public async getTex(): Promise<void> {
         try {
             const path = './screens/smb2/assets/sprites/smb2-title-sprites.png';
-            const tex = await this.screen.loadTexture(this.gl, path);
-            this.buffers.smbTileTexture = tex;
+            this.texture = await this.screen.loadTexture(this.gl, path);
         } catch(err) {
             console.log(err);
         }

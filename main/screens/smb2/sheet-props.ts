@@ -1,3 +1,27 @@
+interface MiscProps {
+    spriteSheetSize: [number, number];
+    spriteProps: {
+        font: { 
+            position: [number, number];
+            coords: [number, number]; 
+            size: [number, number]; 
+            spriteSize: [number, number] 
+        },
+        hud: {
+            position: [number, number];
+            coords: [number, number]; 
+            size: [number, number]; 
+            spriteSize: [number, number] 
+        },
+        coin: {
+            position: [number, number]
+            size: [number, number]; 
+            spriteSize: [number, number] 
+            coords: Array<{ groupId: string; coords: [number, number] }>;
+        }
+    };
+}
+
 interface TitleProps {
     spriteSheetSize: [number, number];
     spriteSize: [number, number];
@@ -14,11 +38,69 @@ export class SheetProps {
         this.titleProps();
     }
 
-    public miscProps(): void {
+    //Misc
+    public miscProps(): MiscProps {
         const spriteSheetSize: [number, number] = [1172, 884];
-        const spriteSize: [number, number] = [199.8, 88];
+        const spriteProps: {
+            font: { 
+                position: [number, number];
+                coords: [number, number]; 
+                size: [number, number]; 
+                spriteSize: [number, number] 
+            },
+            hud: {
+                position: [number, number];
+                coords: [number, number]; 
+                size: [number, number]; 
+                spriteSize: [number, number] 
+            },
+            coin: {
+                position: [number, number]
+                size: [number, number]; 
+                spriteSize: [number, number] 
+                coords: Array<{ groupId: string; coords: [number, number] }>; 
+            }
+        } = {
+            font: {
+                position: [0, 0],
+                coords: [0, 0],
+                size: [0, 0],
+                spriteSize: [200, 200]
+            },
+            hud: {
+                position: [0, 0.61],
+                coords: [0, 22.8],
+                size: [1.0, 0.08],
+                spriteSize: [200, 17]
+            },
+            coin: {
+                position: [-0.08, 0.567],
+                size: [0.04, 0.038],
+                spriteSize: [7, 7],
+                coords: [
+                    {
+                        groupId: 'group-0',
+                        coords: [264, 76],
+                    },
+                    {
+                        groupId: 'group-1',
+                        coords: [274, 76],
+                    },
+                    {
+                        groupId: 'group-2',
+                        coords: [284, 76]
+                    }
+                ],
+            }
+        }
+
+        return {
+            spriteSheetSize,
+            spriteProps
+        }
     }
 
+    //Title
     public titleProps(): TitleProps {
         const spriteSheetSize: [number, number] = [2600, 528];
         const spriteSize: [number, number] = [199.8, 88];

@@ -3,7 +3,7 @@ import { SheetProps } from "./sheet-props.js";
 interface SpriteGroup {
     id: string;
     coords: Record<string, [number, number]>;
-    avaliableAnimations: string[];
+    avaliableAnimations?: string[];
     starts?: number;
 }
 
@@ -24,6 +24,10 @@ export class Animation {
     private readonly groups: SpriteGroup[];
     private currentGroup: SpriteGroup | null = null;
     private availableGroups: SpriteGroup[] = [];
+
+    private type: 'title' | 'coin';
+    private coinProps: any;
+    private titleProps: any;
 
     private currentPhase: 'initial' | 'flash' = 'initial';
     private currentFrameIndex: number = 0;
@@ -50,15 +54,30 @@ export class Animation {
         pausePhase: 'initial'
     }
 
-    //Title
-    private titleProps: any; 
-
-    constructor(sheetProps: SheetProps, groups: SpriteGroup[]) {
+    constructor(
+        sheetProps: SheetProps, 
+        groups: SpriteGroup[],
+        type: 'title' | 'coin' = 'title'
+    ) {
         this.sheetProps = sheetProps;
-        this.groups = groups;
-        
-        this.titleProps = this.sheetProps.titleProps();
+        this.type = type;
+        this.coinProps = sheetProps.miscProps().spriteProps.coin;
+        this.titleProps = sheetProps.titleProps();
+
+        this.groups = type === 'coin' ? this.getCoinGroups() : groups;
         this.init();
+    }
+
+    //Coin
+    private getCoinGroups(): SpriteGroup[] {
+        return this.coinProps.coords.map((c, i) => ({
+            id: c.groupId,
+            coords: {
+                f: this.coinProps.coords[i % this.coinProps.coords.length].coords,
+                s: this.coinProps.coords[(i + 1) % this.coinProps.coords.length].coords,
+                t: this.coinProps.coords[(i + 2) % this.coinProps.coords.length].coords
+            }
+        }));
     }
 
     private init(): void {
@@ -100,6 +119,7 @@ export class Animation {
 
     private advanceAnimation(): void {
         if(this.isPaused) return;
+        this.currentFrameIndex++;
 
         if(this.currentPhase !== 'flash') {
             this.currentFrameIndex++
@@ -226,13 +246,13 @@ export class Animation {
             return;
         }
 
+        //Animation
         this.animationTimer += time;
         const frameDuration = this.getCurrentPhaseDuration();
 
         if(this.animationTimer >= frameDuration) {
             this.animationTimer -= frameDuration;
             this.advanceAnimation();
-
             this.pauseIntervalTimer = 0;
         }
     }

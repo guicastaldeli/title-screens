@@ -3,10 +3,48 @@ export class SheetProps {
         this.miscProps();
         this.titleProps();
     }
+    //Misc
     miscProps() {
         const spriteSheetSize = [1172, 884];
-        const spriteSize = [199.8, 88];
+        const spriteProps = {
+            font: {
+                position: [0, 0],
+                coords: [0, 0],
+                size: [0, 0],
+                spriteSize: [200, 200]
+            },
+            hud: {
+                position: [0, 0.61],
+                coords: [0, 22.8],
+                size: [1.0, 0.08],
+                spriteSize: [200, 17]
+            },
+            coin: {
+                position: [-0.08, 0.567],
+                size: [0.04, 0.038],
+                spriteSize: [7, 7],
+                coords: [
+                    {
+                        groupId: 'group-0',
+                        coords: [264, 76],
+                    },
+                    {
+                        groupId: 'group-1',
+                        coords: [274, 76],
+                    },
+                    {
+                        groupId: 'group-2',
+                        coords: [284, 76]
+                    }
+                ],
+            }
+        };
+        return {
+            spriteSheetSize,
+            spriteProps
+        };
     }
+    //Title
     titleProps() {
         const spriteSheetSize = [2600, 528];
         const spriteSize = [199.8, 88];

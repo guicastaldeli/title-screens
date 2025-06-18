@@ -1,5 +1,5 @@
 export class Animation {
-    constructor(sheetProps, groups) {
+    constructor(sheetProps, groups, type = 'title') {
         this.currentGroup = null;
         this.availableGroups = [];
         this.currentPhase = 'initial';
@@ -25,9 +25,22 @@ export class Animation {
             pausePhase: 'initial'
         };
         this.sheetProps = sheetProps;
-        this.groups = groups;
-        this.titleProps = this.sheetProps.titleProps();
+        this.type = type;
+        this.coinProps = sheetProps.miscProps().spriteProps.coin;
+        this.titleProps = sheetProps.titleProps();
+        this.groups = type === 'coin' ? this.getCoinGroups() : groups;
         this.init();
+    }
+    //Coin
+    getCoinGroups() {
+        return this.coinProps.coords.map((c, i) => ({
+            id: c.groupId,
+            coords: {
+                f: this.coinProps.coords[i % this.coinProps.coords.length].coords,
+                s: this.coinProps.coords[(i + 1) % this.coinProps.coords.length].coords,
+                t: this.coinProps.coords[(i + 2) % this.coinProps.coords.length].coords
+            }
+        }));
     }
     init() {
         this.generateAvaliableGroups();
@@ -56,6 +69,7 @@ export class Animation {
     advanceAnimation() {
         if (this.isPaused)
             return;
+        this.currentFrameIndex++;
         if (this.currentPhase !== 'flash') {
             this.currentFrameIndex++;
         }
@@ -165,6 +179,7 @@ export class Animation {
             this.startPause();
             return;
         }
+        //Animation
         this.animationTimer += time;
         const frameDuration = this.getCurrentPhaseDuration();
         if (this.animationTimer >= frameDuration) {

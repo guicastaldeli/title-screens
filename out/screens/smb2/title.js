@@ -11,7 +11,8 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { Animation } from "./animation.js";
 export class Title {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
-        this.position = [-0.05, 0.15];
+        this.texture = null;
+        this.position = [0, 0.12];
         this.size = [1.0, 0.4];
         this.gl = gl;
         this.buffers = buffers;
@@ -23,7 +24,7 @@ export class Title {
             coords: group.coords,
             avaliableAnimations: ['flash'],
             stars: group.stars
-        })));
+        })), 'title');
         this.currentFrame = this.animation.getCurrentFrame();
     }
     drawTitle(projectionMatrix) {
@@ -59,7 +60,7 @@ export class Title {
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, this.gl.FLOAT, false, 0, 0);
         this.gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord);
         this.gl.activeTexture(this.gl.TEXTURE0);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.smbTileTexture);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
@@ -75,8 +76,7 @@ export class Title {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const path = './screens/smb2/assets/sprites/smb2-title-sprites.png';
-                const tex = yield this.screen.loadTexture(this.gl, path);
-                this.buffers.smbTileTexture = tex;
+                this.texture = yield this.screen.loadTexture(this.gl, path);
             }
             catch (err) {
                 console.log(err);

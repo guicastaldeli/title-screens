@@ -9,6 +9,7 @@ import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
 import { SheetProps } from "./sheet-props.js";
+import { InfoBar } from "./info-bar.js";
 import { Title } from "./title.js";
 
 export class ScreenSmb extends BaseScreen {
@@ -31,6 +32,7 @@ export class ScreenSmb extends BaseScreen {
 
     //Elements
     private sheetProps: SheetProps;
+    private infoBar: InfoBar;
     private title: Title;
     //private options: Options;
     //private cursor: Cursor;
@@ -47,6 +49,7 @@ export class ScreenSmb extends BaseScreen {
         this.screenManager = screenManager;
 
         this.sheetProps = new SheetProps();
+        this.infoBar = new InfoBar(gl, buffers, programInfo, this, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
 
@@ -95,6 +98,7 @@ export class ScreenSmb extends BaseScreen {
         this.drawTile(projectionMatrix);
 
         //Elements
+            this.infoBar.drawHud(projectionMatrix);
             this.title.drawTitle(projectionMatrix);
         //
 
@@ -308,12 +312,14 @@ export class ScreenSmb extends BaseScreen {
     }
 
     private async loadAssets(): Promise<void> {
+        await this.infoBar.getTex();
         await this.title.getTex();
     }
 
     public update(deltaTime: number) {
         if(this.state.isLoading()) return;
 
+        this.infoBar.update(deltaTime);
         this.title.update(deltaTime);
         this.createBackground();
     }
