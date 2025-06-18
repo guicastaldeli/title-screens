@@ -1,9 +1,25 @@
+interface TitleProps {
+    spriteSheetSize: [number, number];
+    spriteSize: [number, number];
+    spriteCoords: Array<{
+        groupId: string;
+        stars: number;
+        coords: Record<string, [number, number]>;
+    }>;
+}
+
 export class SheetProps {
     constructor() {
+        this.miscProps();
         this.titleProps();
     }
 
-    public titleProps() {
+    public miscProps(): void {
+        const spriteSheetSize: [number, number] = [1172, 884];
+        const spriteSize: [number, number] = [199.8, 88];
+    }
+
+    public titleProps(): TitleProps {
         const spriteSheetSize: [number, number] = [2600, 528];
         const spriteSize: [number, number] = [199.8, 88];
         const spriteCoords: Array<{

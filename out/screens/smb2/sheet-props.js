@@ -1,6 +1,11 @@
 export class SheetProps {
     constructor() {
+        this.miscProps();
         this.titleProps();
+    }
+    miscProps() {
+        const spriteSheetSize = [1172, 884];
+        const spriteSize = [199.8, 88];
     }
     titleProps() {
         const spriteSheetSize = [2600, 528];
