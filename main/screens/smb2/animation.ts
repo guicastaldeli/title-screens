@@ -4,7 +4,7 @@ export interface SpriteGroup {
     id: string;
     coords: Record<string, [number, number]>;
     availableAnimations?: string[];
-    starts?: number;
+    stars?: number;
 }
 
 export interface FrameData {
@@ -172,11 +172,7 @@ export class Animation {
             this.flashState = true;
 
             if(this.isSync) {
-                if(this.externalFrameIndex === null) {
-                    Animation.sharedFlashIndex = Math.floor(Math.random() * this.config.frameKeys.length);
-                }
-
-                this.currentFrameIndex = this.externalFrameIndex ?? Animation.sharedFlashIndex;
+               this.currentFrameIndex = 0;
             } else {
                 this.currentFrameIndex = Math.floor(Math.random() * this.config.frameKeys.length);
             }
@@ -210,7 +206,7 @@ export class Animation {
             metadata: {
                 groupId: this.currentGroup.id,
                 phase: this.currentPhase,
-                stars: this.currentGroup.starts
+                stars: this.currentGroup.stars
             }
         }
     }
@@ -235,7 +231,7 @@ export class Animation {
         if(frameIndex >= 0) this.externalFrameIndex = frameIndex;
     }
 
-    private getFrameIndex(): number {
+    public getFrameIndex(): number {
         return this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
     }
 

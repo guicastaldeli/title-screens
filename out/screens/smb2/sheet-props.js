@@ -27,7 +27,8 @@ export class SheetProps {
                     {
                         f: [264, 76],
                         s: [274, 76],
-                        t: [284, 76]
+                        t: [284, 76],
+                        stars: 0
                     }
                 ],
             }

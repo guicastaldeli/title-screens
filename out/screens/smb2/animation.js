@@ -81,16 +81,12 @@ export class Animation {
             this.resetAnimation();
     }
     transitionPhase(newPhase) {
-        var _a;
         this.currentPhase = newPhase;
         this.animationTimer = 0;
         if (newPhase === 'flash') {
             this.flashState = true;
             if (this.isSync) {
-                if (this.externalFrameIndex === null) {
-                    Animation.sharedFlashIndex = Math.floor(Math.random() * this.config.frameKeys.length);
-                }
-                this.currentFrameIndex = (_a = this.externalFrameIndex) !== null && _a !== void 0 ? _a : Animation.sharedFlashIndex;
+                this.currentFrameIndex = 0;
             }
             else {
                 this.currentFrameIndex = Math.floor(Math.random() * this.config.frameKeys.length);
@@ -123,7 +119,7 @@ export class Animation {
             metadata: {
                 groupId: this.currentGroup.id,
                 phase: this.currentPhase,
-                stars: this.currentGroup.starts
+                stars: this.currentGroup.stars
             }
         };
     }

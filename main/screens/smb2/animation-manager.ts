@@ -3,9 +3,13 @@ import { Animation } from "./animation.js"
 import { SpriteGroup } from "./animation.js";
 
 export class AnimationManager {
+    private sheetProps: SheetProps;
     private animations: Record<string, Animation> = {};
+    private currentStars: number = 0;
 
     constructor(sheetProps: SheetProps, titleGroups: SpriteGroup[], coinGroups: SpriteGroup[]) {
+        this.sheetProps = sheetProps;
+        
         this.animations.title = new Animation(sheetProps, titleGroups, {
             frameKeys: ['f', 's', 't'],
             spriteSize: sheetProps.titleProps().spriteSize,
@@ -27,11 +31,13 @@ export class AnimationManager {
     private syncAnimation() {
         const state = this.animations.title.getCurrentState();
         const frameKey = this.animations.title.getCurrentFrameKey();
+        const frameIndex = this.animations.title.getFrameIndex();
     
         this.animations.coin.setExternalFrameIndex(frameKey);
         this.animations.coin['currentPhase'] = state.phase;
         this.animations.coin['flashState'] = state.flashState;
         this.animations.coin['isPaused'] = this.animations.title['isPaused'];
+        this.animations.coin.setFrameIndex(frameIndex);
     }
 
     public getTitleFrame() {
