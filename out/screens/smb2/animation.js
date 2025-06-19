@@ -128,9 +128,10 @@ export class Animation {
         };
     }
     getCurrentFrameKey() {
-        const externalIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
-        const phaseIndex = externalIndex % this.config.frameKeys.length;
-        return this.config.frameKeys[phaseIndex];
+        const index = this.externalFrameIndex !== null
+            ? this.externalFrameIndex
+            : this.currentFrameIndex % this.config.frameKeys.length;
+        return this.config.frameKeys[index];
     }
     setFrameIndex(i) {
         this.currentFrameIndex = i;
@@ -138,8 +139,10 @@ export class Animation {
     setSync(sync) {
         this.isSync = sync;
     }
-    setExternalFrameIndex(i) {
-        this.externalFrameIndex = i;
+    setExternalFrameIndex(key) {
+        const frameIndex = this.config.frameKeys.indexOf(key);
+        if (frameIndex >= 0)
+            this.externalFrameIndex = frameIndex;
     }
     getFrameIndex() {
         return this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;

@@ -21,7 +21,11 @@ export class Title {
         this.sheetProps = sheetProps;
         this.animationManager = new AnimationManager(sheetProps, sheetProps.titleProps().spriteCoords.map(group => ({
             id: group.groupId,
-            coords: group.coords,
+            coords: {
+                f: group.coords.f,
+                s: group.coords.s,
+                t: group.coords.t
+            },
             availableAnimations: ['flash'],
             stars: group.stars
         })), []);

@@ -19,7 +19,8 @@ export class AnimationManager {
     }
     syncAnimation() {
         const state = this.animations.title.getCurrentState();
-        this.animations.coin.setExternalFrameIndex(state.frameIndex);
+        const frameKey = this.animations.title.getCurrentFrameKey();
+        this.animations.coin.setExternalFrameIndex(frameKey);
         this.animations.coin['currentPhase'] = state.phase;
         this.animations.coin['flashState'] = state.flashState;
         this.animations.coin['isPaused'] = this.animations.title['isPaused'];

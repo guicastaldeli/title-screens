@@ -23,7 +23,9 @@ export class Hud {
                 f: c.f,
                 s: c.s,
                 t: c.t
-            }
+            },
+            availableAnimations: ['flash'],
+            stars: 0
         })));
         this.currentFrame = this.animationManager.getCoinFrame();
     }

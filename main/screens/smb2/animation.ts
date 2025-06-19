@@ -216,9 +216,10 @@ export class Animation {
     }
 
     public getCurrentFrameKey(): string {
-        const externalIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
-        const phaseIndex = externalIndex % this.config.frameKeys.length;
-        return this.config.frameKeys[phaseIndex];
+        const index = this.externalFrameIndex !== null
+            ? this.externalFrameIndex
+            : this.currentFrameIndex % this.config.frameKeys.length;
+        return this.config.frameKeys[index];
     }
 
     public setFrameIndex(i: number): void {
@@ -229,8 +230,9 @@ export class Animation {
         this.isSync = sync;
     }
 
-    public setExternalFrameIndex(i: number): void {
-        this.externalFrameIndex = i;
+    public setExternalFrameIndex(key: string): void {
+        const frameIndex = this.config.frameKeys.indexOf(key);
+        if(frameIndex >= 0) this.externalFrameIndex = frameIndex;
     }
 
     private getFrameIndex(): number {
