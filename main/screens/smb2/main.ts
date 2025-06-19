@@ -32,6 +32,7 @@ export class ScreenSmb extends BaseScreen {
 
     //Elements
     private sheetProps: SheetProps;
+
     private hud: Hud;
     private title: Title;
     //private options: Options;
@@ -49,6 +50,7 @@ export class ScreenSmb extends BaseScreen {
         this.screenManager = screenManager;
 
         this.sheetProps = new SheetProps();
+
         this.hud = new Hud(gl, buffers, programInfo, this, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }

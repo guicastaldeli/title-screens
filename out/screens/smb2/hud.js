@@ -17,7 +17,14 @@ export class Hud {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.animationManager = new AnimationManager(sheetProps, []);
+        this.animationManager = new AnimationManager(sheetProps, [], sheetProps.miscProps().spriteProps.coin.coords.map((c, i) => ({
+            id: `coin-${i}`,
+            coords: {
+                f: c.f,
+                s: c.s,
+                t: c.t
+            }
+        })));
         this.currentFrame = this.animationManager.getCoinFrame();
     }
     drawHud(projectionMatrix) {

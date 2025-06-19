@@ -17,9 +17,15 @@ interface MiscProps {
             position: [number, number]
             size: [number, number]; 
             spriteSize: [number, number] 
-            coords: Array<{ groupId: string; coords: [number, number] }>;
+            coords: CoinCoords[]
         }
     };
+}
+
+interface CoinCoords {
+    f: [number, number]
+    s: [number, number]
+    t: [number, number]
 }
 
 interface TitleProps {
@@ -58,7 +64,7 @@ export class SheetProps {
                 position: [number, number]
                 size: [number, number]; 
                 spriteSize: [number, number] 
-                coords: Array<{ groupId: string; coords: [number, number] }>; 
+                coords: CoinCoords[]
             }
         } = {
             font: {
@@ -79,16 +85,9 @@ export class SheetProps {
                 spriteSize: [7, 7],
                 coords: [
                     {
-                        groupId: 'group-0',
-                        coords: [264, 76],
-                    },
-                    {
-                        groupId: 'group-1',
-                        coords: [274, 76],
-                    },
-                    {
-                        groupId: 'group-2',
-                        coords: [284, 76]
+                        f: [264, 76],
+                        s: [274, 76],
+                        t: [284, 76]
                     }
                 ],
             }

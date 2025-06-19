@@ -42,11 +42,12 @@ export class Title {
         this.animationManager = new AnimationManager(
             sheetProps,
             sheetProps.titleProps().spriteCoords.map(group => ({
-                id: `group-${group.groupId}`,
+                id: group.groupId,
                 coords: group.coords,
-                avaliableAnimations: ['flash'],
+                availableAnimations: ['flash'],
                 stars: group.stars
-            }))
+            })),
+            []
         );
 
         this.currentFrame = this.animationManager.getTitleFrame();

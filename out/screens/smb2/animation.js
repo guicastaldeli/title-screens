@@ -1,7 +1,9 @@
 export class Animation {
-    constructor(sheetProps, groups, type = 'title') {
+    constructor(sheetProps, groups, config = {}) {
         this.currentGroup = null;
         this.availableGroups = [];
+        this.isSync = false;
+        this.externalFrameIndex = null;
         this.currentPhase = 'initial';
         this.currentFrameIndex = 0;
         this.flashState = false;
@@ -11,44 +13,27 @@ export class Animation {
         this.pauseIntervalTimer = 0;
         this.pauseInterval = 500;
         this.pausedFrameIndex = 0;
-        this.pausedFrameTimer = 0;
-        this.pausedFrameInterval = 200;
         this.animationTimer = 0;
-        this.frameKeys = ['f', 's', 't'];
         this.lastPhase = 'initial';
-        this.animationParams = {
-            initialSpeed: 70,
-            flashSpeed: 1000,
-            initialCycles: 6,
-            flashDuration: 1000,
-            pauseDuration: 2000,
-            pausePhase: 'initial'
-        };
         this.sheetProps = sheetProps;
-        this.type = type;
-        this.coinProps = sheetProps.miscProps().spriteProps.coin;
-        this.titleProps = sheetProps.titleProps();
-        this.groups = type === 'coin'
-            ? this.getCoinGroups()
-            : groups;
+        this.groups = groups;
+        this.config = Object.assign({ frameKeys: ['f', 's', 't'], initialSpeed: 70, flashSpeed: 1000, initialCycles: 6, flashDuration: 1000, pauseDuration: 2000, pauseInterval: 500, spriteSize: [0, 0], spriteSheetSize: [0, 0], defaultCoords: [0, 0] }, config);
         this.init();
     }
-    //Coin
-    getCoinGroups() {
-        return this.coinProps.coords.map((c, i) => ({
-            id: c.groupId,
-            coords: {
-                f: this.coinProps.coords[i % this.coinProps.coords.length].coords,
-                s: this.coinProps.coords[(i + 1) % this.coinProps.coords.length].coords,
-                t: this.coinProps.coords[(i + 2) % this.coinProps.coords.length].coords
-            }
-        }));
+    generateAnimationId() {
+        var _a;
+        const effectiveIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
+        const frameKey = this.getCurrentFrameKey();
+        const syncStatus = this.externalFrameIndex !== null ? ' [SYNCED]' : '';
+        return `${((_a = this.currentGroup) === null || _a === void 0 ? void 0 : _a.id) || 'animation'}: ${frameKey}-${effectiveIndex} [${this.currentPhase}]${syncStatus}`;
     }
     init() {
-        this.generateAvaliableGroups();
+        this.generateAvailableGroups();
         this.selectRandomGroup();
     }
-    generateAvaliableGroups() {
+    generateAvailableGroups() {
+        if (!this.groups)
+            return;
         this.availableGroups = this.groups.map(group => {
             const dynamicFrames = this.createDynamicFrames(group);
             return Object.assign(Object.assign({}, group), { coords: Object.assign(Object.assign({}, group.coords), dynamicFrames) });
@@ -63,26 +48,23 @@ export class Animation {
     }
     getCurrentPhaseDuration() {
         switch (this.currentPhase) {
-            case 'initial': return this.animationParams.initialSpeed;
-            case 'flash': return this.animationParams.flashSpeed;
-            default: return this.animationParams.initialSpeed;
+            case 'initial': return this.config.initialSpeed;
+            case 'flash': return this.config.flashSpeed;
+            default: return this.config.initialSpeed;
         }
     }
     advanceAnimation() {
-        if (this.isPaused)
+        if (this.isPaused || this.isSync)
             return;
         this.currentFrameIndex++;
-        if (this.currentPhase !== 'flash') {
-            this.currentFrameIndex++;
-        }
         if (this.currentPhase === 'initial') {
-            const initialFramesComplete = this.frameKeys.length * this.animationParams.initialCycles;
+            const initialFramesComplete = this.config.frameKeys.length * this.config.initialCycles;
             if (this.currentFrameIndex >= initialFramesComplete) {
                 this.transitionPhase('flash');
             }
         }
         else if (this.currentPhase === 'flash') {
-            if (this.currentFrameIndex >= this.animationParams.flashDuration) {
+            if (this.currentFrameIndex >= this.config.flashDuration) {
                 this.transitionPhase('initial');
                 this.resetAnimation();
             }
@@ -91,7 +73,6 @@ export class Animation {
     startPause() {
         this.isPaused = true;
         this.pauseTimer = 0;
-        this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
     }
     endPause() {
         this.isPaused = false;
@@ -100,12 +81,20 @@ export class Animation {
             this.resetAnimation();
     }
     transitionPhase(newPhase) {
+        var _a;
         this.currentPhase = newPhase;
         this.animationTimer = 0;
-        this.currentFrameIndex = 0;
         if (newPhase === 'flash') {
             this.flashState = true;
-            this.currentFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
+            if (this.isSync) {
+                if (this.externalFrameIndex === null) {
+                    Animation.sharedFlashIndex = Math.floor(Math.random() * this.config.frameKeys.length);
+                }
+                this.currentFrameIndex = (_a = this.externalFrameIndex) !== null && _a !== void 0 ? _a : Animation.sharedFlashIndex;
+            }
+            else {
+                this.currentFrameIndex = Math.floor(Math.random() * this.config.frameKeys.length);
+            }
         }
     }
     resetAnimation() {
@@ -128,8 +117,8 @@ export class Animation {
         const frameKey = this.determineFrameKey();
         return {
             coords: this.currentGroup.coords[frameKey] || this.currentGroup.coords.t,
-            size: this.titleProps.spriteSize,
-            sheetSize: this.titleProps.spriteSheetSize,
+            size: this.config.spriteSize,
+            sheetSize: this.config.spriteSheetSize,
             effects: { flash: this.currentPhase === 'flash' },
             metadata: {
                 groupId: this.currentGroup.id,
@@ -138,13 +127,29 @@ export class Animation {
             }
         };
     }
+    getCurrentFrameKey() {
+        const externalIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
+        const phaseIndex = externalIndex % this.config.frameKeys.length;
+        return this.config.frameKeys[phaseIndex];
+    }
+    setFrameIndex(i) {
+        this.currentFrameIndex = i;
+    }
+    setSync(sync) {
+        this.isSync = sync;
+    }
+    setExternalFrameIndex(i) {
+        this.externalFrameIndex = i;
+    }
+    getFrameIndex() {
+        return this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
+    }
     determineFrameKey() {
         if (!this.currentGroup)
-            return 'f';
-        const phaseIndex = this.currentPhase === 'flash'
-            ? this.currentFrameIndex % this.frameKeys.length
-            : this.currentFrameIndex % this.frameKeys.length;
-        const baseKey = this.frameKeys[phaseIndex];
+            return this.config.frameKeys[0];
+        const externalIndex = this.getFrameIndex();
+        const phaseIndex = externalIndex % this.config.frameKeys.length;
+        const baseKey = this.config.frameKeys[phaseIndex];
         return this.currentGroup.coords[`${baseKey}_offset`]
             ? `${baseKey}_offset`
             : baseKey;
@@ -152,8 +157,8 @@ export class Animation {
     getDefaultFrame() {
         return {
             coords: [0, 0],
-            size: this.titleProps.spriteSize,
-            sheetSize: this.titleProps.spriteSheetSize,
+            size: this.config.spriteSize,
+            sheetSize: this.config.spriteSheetSize,
             effects: { flash: false },
             metadata: {
                 groupId: '',
@@ -166,23 +171,19 @@ export class Animation {
         return {
             phase: this.currentPhase,
             flashState: this.flashState,
-            frameIndex: this.currentFrameIndex
+            frameIndex: this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex
         };
     }
     update(deltaTime) {
         const time = deltaTime * 1000;
         if (this.isPaused) {
             this.pauseTimer += time;
-            if (this.pausedFrameTimer >= this.pausedFrameInterval) {
-                this.pausedFrameTimer = 0;
-                this.pausedFrameIndex = Math.floor(Math.random() * this.frameKeys.length);
-            }
-            if (this.pauseTimer >= this.animationParams.pauseDuration)
+            if (this.pauseTimer >= this.config.pauseDuration)
                 this.endPause();
             return;
         }
         this.pauseIntervalTimer += time;
-        if (this.pauseIntervalTimer >= this.pauseInterval) {
+        if (this.pauseIntervalTimer >= this.config.pauseInterval) {
             this.lastPhase = this.currentPhase;
             this.pauseIntervalTimer = 0;
             this.startPause();
@@ -198,3 +199,4 @@ export class Animation {
         }
     }
 }
+Animation.sharedFlashIndex = 0;

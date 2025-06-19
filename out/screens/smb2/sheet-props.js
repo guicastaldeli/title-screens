@@ -25,16 +25,9 @@ export class SheetProps {
                 spriteSize: [7, 7],
                 coords: [
                     {
-                        groupId: 'group-0',
-                        coords: [264, 76],
-                    },
-                    {
-                        groupId: 'group-1',
-                        coords: [274, 76],
-                    },
-                    {
-                        groupId: 'group-2',
-                        coords: [284, 76]
+                        f: [264, 76],
+                        s: [274, 76],
+                        t: [284, 76]
                     }
                 ],
             }
