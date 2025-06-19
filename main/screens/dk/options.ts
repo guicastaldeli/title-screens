@@ -8,6 +8,7 @@ import { ScreenDk } from "./main.js";
 import { Title } from "./title.js";
 import { Cursor } from "./cursor.js";
 import { SheetProps } from "./sheet-props.js";
+import { LetterMap } from "./letter-map.js";
 
 export class Options {
     private gl: WebGLRenderingContext;
@@ -18,6 +19,7 @@ export class Options {
     private screen: ScreenDk;
     private sheetProps: SheetProps;
     private cursor: Cursor;
+    private letterMap: typeof LetterMap;
 
     private containerPosition: [number, number] = [0.12, 0];
     private isCopyright: boolean = false;
@@ -34,33 +36,6 @@ export class Options {
     private waveSpeed: number = 2.0;
     public intervalSelected: number = 1000;
     private selectionTimeout: Map<Option, number> = new Map();
-
-    private letterCoords: Record<string, [number, number]> = {
-        ' ': [555.5, 330.5],
-        '.': [552.1, 339.1],
-        'Z': [561, 339.1],
-        '©': [612.9, 339],
-        '1': [528.5, 312.2],
-        '2': [537.1, 312.1],
-        '8': [591.1, 312.1],
-        '9': [600.1, 312.1],
-        'A': [609.1, 312.2],
-        'B': [618, 312.1],
-        'C': [627, 312.1],
-        'D': [636, 312.1],
-        'E': [645, 312],
-        'G': [519.1, 321.1],
-        'I': [537.1, 321.1],
-        'J': [546.1, 321.1],
-        'L': [564.5, 321.2],
-        'M': [573, 321.1],
-        'N': [582, 321.1],
-        'O': [591.1, 321.1],
-        'P': [600, 321],
-        'R': [618, 321.1],
-        'T': [636.5, 321.1],
-        'Y': [537.5, 330.1],
-    }
 
     constructor(
         gl: WebGLRenderingContext,
@@ -85,6 +60,8 @@ export class Options {
         ;
 
         this.setOptions();
+
+        this.letterMap = LetterMap;
     }
 
     private setOptions(): void {
@@ -171,7 +148,7 @@ export class Options {
             size[0], size[1],
         ];
 
-        const spriteCoords = this.letterCoords[letter] || this.letterCoords[' '];
+        const spriteCoords = this.letterMap[letter] || this.letterMap[' '];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
         const [spriteWidth, spriteHeight] = letter === '©' ? [8, 8] : [7, 7]

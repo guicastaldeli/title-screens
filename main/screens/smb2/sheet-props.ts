@@ -71,7 +71,7 @@ export class SheetProps {
             font: {
                 position: [0, 0],
                 coords: [0, 0],
-                size: [0, 0],
+                size: [0.04, 0.038],
                 spriteSize: [200, 200]
             },
             hud: {

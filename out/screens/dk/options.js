@@ -1,4 +1,5 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { LetterMap } from "./letter-map.js";
 export class Options {
     constructor(gl, buffers, programInfo, screen, sheetProps, cursor) {
         this.containerPosition = [0.12, 0];
@@ -10,32 +11,6 @@ export class Options {
         this.waveSpeed = 2.0;
         this.intervalSelected = 1000;
         this.selectionTimeout = new Map();
-        this.letterCoords = {
-            ' ': [555.5, 330.5],
-            '.': [552.1, 339.1],
-            'Z': [561, 339.1],
-            '©': [612.9, 339],
-            '1': [528.5, 312.2],
-            '2': [537.1, 312.1],
-            '8': [591.1, 312.1],
-            '9': [600.1, 312.1],
-            'A': [609.1, 312.2],
-            'B': [618, 312.1],
-            'C': [627, 312.1],
-            'D': [636, 312.1],
-            'E': [645, 312],
-            'G': [519.1, 321.1],
-            'I': [537.1, 321.1],
-            'J': [546.1, 321.1],
-            'L': [564.5, 321.2],
-            'M': [573, 321.1],
-            'N': [582, 321.1],
-            'O': [591.1, 321.1],
-            'P': [600, 321],
-            'R': [618, 321.1],
-            'T': [636.5, 321.1],
-            'Y': [537.5, 330.1],
-        };
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -47,6 +22,7 @@ export class Options {
                 this.screen.parseColor('rgb(255, 255, 255)') :
                 this.screen.parseColor('rgb(252, 152, 56)');
         this.setOptions();
+        this.letterMap = LetterMap;
     }
     setOptions() {
         this.options = [
@@ -92,7 +68,7 @@ export class Options {
             -size[0], size[1],
             size[0], size[1],
         ];
-        const spriteCoords = this.letterCoords[letter] || this.letterCoords[' '];
+        const spriteCoords = this.letterMap[letter] || this.letterMap[' '];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
         const [spriteWidth, spriteHeight] = letter === '©' ? [8, 8] : [7, 7];
