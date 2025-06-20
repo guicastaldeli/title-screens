@@ -13,12 +13,31 @@ uniform bool isShadowText;
 uniform bool isCursor;
 uniform bool isSelected;
 
+uniform float uState;
+
 uniform vec4 uColor;
 uniform float uThreshold;
 uniform vec2 uTextStartPos;
 
 void main() {
     vec4 tex = texture2D(uSampler, vTextureCoord);
+
+    if(!uTex && !isText && !isHud && !isCursor) {
+        vec4 tileColor = vColor;
+
+        if(uState < 0.1) {
+            tileColor = vec4(0.580, 0.580, 1.0, 1.0);
+        } else if(uState < 1.1) {
+            tileColor = vec4(0.0, 0.0, 0.0, 1.0);
+        } else if(uState < 2.1) {
+            tileColor = vec4(0.2588, 0.2588, 1.0, 1.0);
+        } else {
+            tileColor = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+
+        gl_FragColor = tileColor;
+        return;
+    }
 
     if(isHud) discard;
     

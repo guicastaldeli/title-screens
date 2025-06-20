@@ -4,6 +4,7 @@ import { State } from "../../state.js";
 import { ScreenManager } from "../../screen-manager.js";
 import { BaseScreen } from "../../screen.interface.js";
 import { LevelState } from "./level-state.js";
+import { States } from "./texture-map.interface.js";
 
 import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
@@ -15,6 +16,7 @@ import { Title } from "./title.js";
 
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
+    private levelState: LevelState;
 
     private rotation: number = 0.0;
     private speed: number = 1.0;
@@ -50,10 +52,11 @@ export class ScreenSmb extends BaseScreen {
     ) {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
+        this.levelState = levelState;
 
         this.sheetProps = new SheetProps();
 
-        this.hud = new Hud(gl, buffers, programInfo, this, levelState, this.sheetProps);
+        this.hud = new Hud(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
 
@@ -189,6 +192,12 @@ export class ScreenSmb extends BaseScreen {
             tileWidth, tileHeight
         ];
 
+        const currentState = this.levelState.getCurrentState();
+        const stateValue = currentState === States.Overworld ? 0 :
+                            currentState === States.Underground ? 1 :
+                            currentState === States.Underwater ? 2 :
+                            3
+
         const color = this.parseColor('rgb(56, 56, 56)');
 
         const colors = [
@@ -211,6 +220,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }

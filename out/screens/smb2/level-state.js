@@ -18,6 +18,9 @@ export class LevelState {
                 this.state = States.Underground;
                 break;
             case States.Underground:
+                this.state = States.Underwater;
+                break;
+            case States.Underwater:
                 this.state = States.Castle;
                 break;
             case States.Castle:

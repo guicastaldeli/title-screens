@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { BaseScreen } from "../../screen.interface.js";
+import { States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { Hud } from "./hud.js";
 import { Title } from "./title.js";
@@ -29,8 +30,9 @@ export class ScreenSmb extends BaseScreen {
         this.gridDimensions = [50, 50];
         this.tileMap = [];
         this.screenManager = screenManager;
+        this.levelState = levelState;
         this.sheetProps = new SheetProps();
-        this.hud = new Hud(gl, buffers, programInfo, this, levelState, this.sheetProps);
+        this.hud = new Hud(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
     //Bakcground
@@ -117,6 +119,11 @@ export class ScreenSmb extends BaseScreen {
             0, tileHeight,
             tileWidth, tileHeight
         ];
+        const currentState = this.levelState.getCurrentState();
+        const stateValue = currentState === States.Overworld ? 0 :
+            currentState === States.Underground ? 1 :
+                currentState === States.Underwater ? 2 :
+                    3;
         const color = this.parseColor('rgb(56, 56, 56)');
         const colors = [
             ...color, ...color, ...color, ...color
@@ -134,6 +141,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     //Texture

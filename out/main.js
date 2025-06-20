@@ -104,7 +104,8 @@ function main() {
                 uTextStartPos: gl.getUniformLocation(shaderProgram, 'uTextStartPos'),
                 isSelected: gl.getUniformLocation(shaderProgram, 'isSelected'),
                 isHud: gl.getUniformLocation(shaderProgram, 'isHud'),
-                isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText')
+                isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText'),
+                uState: gl.getUniformLocation(shaderProgram, 'uState')
             }
         };
         gl.useProgram(programInfo.program);
