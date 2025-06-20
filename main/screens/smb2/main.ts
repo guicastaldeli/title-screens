@@ -3,6 +3,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { State } from "../../state.js";
 import { ScreenManager } from "../../screen-manager.js";
 import { BaseScreen } from "../../screen.interface.js";
+import { LevelState } from "./level-state.js";
 
 import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
@@ -44,14 +45,15 @@ export class ScreenSmb extends BaseScreen {
         tick: Tick,
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
-        buffers: Buffers
+        buffers: Buffers,
+        levelState: LevelState
     ) {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
 
         this.sheetProps = new SheetProps();
 
-        this.hud = new Hud(gl, buffers, programInfo, this, this.sheetProps);
+        this.hud = new Hud(gl, buffers, programInfo, this, levelState, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
 
@@ -73,6 +75,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -186,7 +189,7 @@ export class ScreenSmb extends BaseScreen {
             tileWidth, tileHeight
         ];
 
-        const color = this.parseColor('rgb(148, 148, 255)');
+        const color = this.parseColor('rgb(56, 56, 56)');
 
         const colors = [
             ...color, ...color, ...color, ...color
@@ -207,6 +210,7 @@ export class ScreenSmb extends BaseScreen {
 
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -316,6 +320,10 @@ export class ScreenSmb extends BaseScreen {
     private async loadAssets(): Promise<void> {
         await this.hud.getTex();
         await this.title.getTex();
+    }
+
+    public updateLevelState(): void {
+        this.hud.updateState();
     }
 
     public update(deltaTime: number) {

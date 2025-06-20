@@ -15,7 +15,7 @@ import { Title } from "./title.js";
 export class ScreenSmb extends BaseScreen {
     //private options: Options;
     //private cursor: Cursor;
-    constructor(state, screenManager, tick, gl, programInfo, buffers) {
+    constructor(state, screenManager, tick, gl, programInfo, buffers, levelState) {
         super(state, gl, programInfo, buffers, tick);
         this.rotation = 0.0;
         this.speed = 1.0;
@@ -30,7 +30,7 @@ export class ScreenSmb extends BaseScreen {
         this.tileMap = [];
         this.screenManager = screenManager;
         this.sheetProps = new SheetProps();
-        this.hud = new Hud(gl, buffers, programInfo, this, this.sheetProps);
+        this.hud = new Hud(gl, buffers, programInfo, this, levelState, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
     }
     //Bakcground
@@ -47,6 +47,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     createBackground() {
@@ -116,7 +117,7 @@ export class ScreenSmb extends BaseScreen {
             0, tileHeight,
             tileWidth, tileHeight
         ];
-        const color = this.parseColor('rgb(148, 148, 255)');
+        const color = this.parseColor('rgb(56, 56, 56)');
         const colors = [
             ...color, ...color, ...color, ...color
         ];
@@ -132,6 +133,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     //Texture
@@ -207,6 +209,9 @@ export class ScreenSmb extends BaseScreen {
             yield this.hud.getTex();
             yield this.title.getTex();
         });
+    }
+    updateLevelState() {
+        this.hud.updateState();
     }
     update(deltaTime) {
         if (this.state.isLoading())

@@ -1,3 +1,11 @@
+//States
+export enum States { 
+    Overworld = 'overworld',
+    Underground = 'underground',
+    Castle = 'castle',
+    Info = 'info'
+}
+
 //Title
 interface TitleCoords {
     f: [number, number];

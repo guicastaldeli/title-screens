@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { initBuffers } from "./init-buffers.js";
 import { State } from "./state.js";
+import { LevelState } from "./screens/smb2/level-state.js";
 import { ScreenManager } from "./screen-manager.js";
 import { Contoller } from "./controller.js";
 import { Tick } from "./tick.js";
@@ -22,6 +23,7 @@ canvas.height = window.innerHeight;
 const tick = new Tick();
 //State
 let state;
+let levelState;
 let screenManager;
 let controller;
 //Renders
@@ -100,7 +102,9 @@ function main() {
                 uThreshold: gl.getUniformLocation(shaderProgram, 'uThreshold'),
                 uTime: gl.getUniformLocation(shaderProgram, 'uTime'),
                 uTextStartPos: gl.getUniformLocation(shaderProgram, 'uTextStartPos'),
-                isSelected: gl.getUniformLocation(shaderProgram, 'isSelected')
+                isSelected: gl.getUniformLocation(shaderProgram, 'isSelected'),
+                isHud: gl.getUniformLocation(shaderProgram, 'isHud'),
+                isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText')
             }
         };
         gl.useProgram(programInfo.program);
@@ -109,6 +113,7 @@ function main() {
             return;
         //State
         state = new State();
+        levelState = new LevelState();
         screenManager = new ScreenManager(state, gl, programInfo, buffers, tick);
         //Renders
         //Camera
@@ -118,7 +123,7 @@ function main() {
         renderScreenDk = new ScreenDk(state, screenManager, tick, gl, programInfo, buffers);
         screenManager.registerScreen('dk', renderScreenDk);
         //Smb
-        renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers);
+        renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers, levelState);
         screenManager.registerScreen('smb', renderScreenSmb);
         //
         yield screenManager.current('smb');
@@ -130,6 +135,12 @@ function main() {
         document.addEventListener('keydown', (event) => {
             if (event.key === '1') {
                 controller.toggleScreen();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '2') {
+                levelState.toggleState();
+                renderScreenSmb.updateLevelState();
             }
         });
     });

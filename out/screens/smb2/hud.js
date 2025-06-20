@@ -10,17 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { AnimationManager } from "./animation-manager.js";
 import { TextureMap } from "./texture-map.js";
+import { States } from "./texture-map.interface.js";
 export class Hud {
-    constructor(gl, buffers, programInfo, screen, sheetProps) {
+    constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
         this.hudProps = [];
         this.color = [1.0, 1.0, 1.0, 1.0];
-        this.containerPosition = [0, -0.15];
+        this.containerPosition = [-0.075, -0.15];
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screen = screen;
+        this.levelState = levelState;
         this.sheetProps = sheetProps;
+        this.currentState = this.levelState.getCurrentState();
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
         this.updateCoin();
@@ -33,7 +36,7 @@ export class Hud {
         const spriteCoords = this.sheetProps.miscProps().spriteProps.hud.coords;
         const spriteSize = this.sheetProps.miscProps().spriteProps.hud.spriteSize;
         const sheetSize = this.sheetProps.miscProps().spriteSheetSize;
-        const hudX = position[0];
+        const hudX = position[0] + this.containerPosition[0];
         const hudY = position[1] + this.screen['setSize'].h * 0.1;
         mat4.translate(modelViewMatrix, modelViewMatrix, [hudX, hudY, 0]);
         const positions = [
@@ -68,6 +71,8 @@ export class Hud {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -80,7 +85,7 @@ export class Hud {
         this.initHudProps(projectionMatrix);
         this.drawCoin(projectionMatrix);
     }
-    drawHudProps(projectionMatrix, text, x, y) {
+    drawHudProps(projectionMatrix, text, x, y, type) {
         const letters = text.split('');
         const spacing = 0.08;
         const startX = x - ((letters.length * spacing) / 2);
@@ -88,7 +93,7 @@ export class Hud {
         const textEndX = startX + (letters.length * spacing);
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
-            this.drawLetter(projectionMatrix, l, letterX, y, textStartX, textEndX);
+            this.drawLetter(projectionMatrix, l, letterX, y, textStartX, textEndX, type);
         });
     }
     setHud() {
@@ -97,24 +102,27 @@ export class Hud {
         const paddedScore = score.toString().padStart(6, '0').substring(0, 6);
         this.hudProps = [
             //Player
-            this.createHudProps('MARIO', -0.72, 1.09),
-            this.createHudProps('000000', -0.68, 1.014),
+            this.createHudProps('MARIO', -0.72, 1.09, this.currentState),
+            this.createHudProps('000000', -0.68, 1.014, this.currentState),
             //Coin
-            this.createHudProps('x', -0.16, 1.014),
-            this.createHudProps('00', -0.04, 1.014),
+            this.createHudProps('x', -0.16, 1.014, this.currentState),
+            this.createHudProps('00', -0.04, 1.014, this.currentState),
             //World
-            this.createHudProps('WORLD', 0.48, 1.09),
-            this.createHudProps('1-1', 0.48, 1.01),
+            this.createHudProps('WORLD', 0.48, 1.09, this.currentState),
+            this.createHudProps('1-1', 0.48, 1.01, this.currentState),
             //Time
-            this.createHudProps('TIME', 1.0, 1.09),
-            this.createHudProps('000', 1.04, 1.01)
+            this.createHudProps('TIME', 1.0, 1.09, this.currentState),
+            this.createHudProps('000', 1.04, 1.01, this.currentState),
+            //Copyright
+            this.createHudProps('©1986 NINTENDO', 0.55, 0.13, States.Info)
         ];
     }
-    createHudProps(text, x, y) {
+    createHudProps(text, x, y, type) {
         return {
             text,
             position: [x, y],
             color: this.color,
+            type
         };
     }
     initHudProps(projectionMatrix) {
@@ -122,10 +130,12 @@ export class Hud {
         this.hudProps.forEach(props => {
             const x = originalContainerPosition[0] + props.position[0];
             const y = originalContainerPosition[1] + props.position[1];
-            this.drawHudProps(projectionMatrix, props.text, x, y);
+            this.drawHudProps(projectionMatrix, props.text, x, y, props.type);
         });
     }
-    drawLetter(projectionMatrix, letter, x, y, textStartX, textEndX) {
+    drawLetter(projectionMatrix, letter, x, y, textStartX, textEndX, type) {
+        if (!type)
+            return;
         const modelViewMatrix = mat4.create();
         const size = [0.04, 0.04];
         const map = this.textureMap.letters;
@@ -136,7 +146,7 @@ export class Hud {
             -size[0], size[1],
             size[0], size[1],
         ];
-        const spriteCoords = map.overworld[letter] || map.overworld[' '];
+        const spriteCoords = map[type][letter] || map[type][' '];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
         const [spriteWidth, spriteHeight] = this.sheetProps.miscProps().spriteProps.letter.spriteSize;
@@ -163,6 +173,8 @@ export class Hud {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -178,8 +190,8 @@ export class Hud {
         const size = this.sheetProps.miscProps().spriteProps.coin.size;
         const spriteSize = this.sheetProps.miscProps().spriteProps.coin.spriteSize;
         const sheetSize = this.sheetProps.miscProps().spriteSheetSize;
-        const hudX = position[0];
-        const hudY = position[1] + this.screen['setSize'].h * 0.1;
+        const hudX = position[0] + this.containerPosition[0];
+        const hudY = position[1] + this.screen['setSize'].h * 0.1 + this.containerPosition[1];
         mat4.translate(modelViewMatrix, modelViewMatrix, [hudX, hudY, 0]);
         const positions = [
             -size[0], -size[1],
@@ -213,6 +225,8 @@ export class Hud {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -226,13 +240,13 @@ export class Hud {
         const coinEntries = Object.entries(coinCoords);
         this.animationManager = new AnimationManager(this.sheetProps, [], coinEntries.map(i => ({
             id: `coin-${i}`,
+            stars: 0,
             coords: {
                 f: coinCoords.f,
                 s: coinCoords.s,
                 t: coinCoords.t
             },
             availableAnimations: ['flash'],
-            stars: 0
         })));
         this.currentFrame = this.animationManager.getCoinFrame();
     }
@@ -247,6 +261,10 @@ export class Hud {
                 console.log(err);
             }
         });
+    }
+    updateState() {
+        this.currentState = this.levelState.getCurrentState();
+        this.setHud();
     }
     update(deltaTime) {
         var _a, _b;

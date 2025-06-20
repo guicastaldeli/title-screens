@@ -106,6 +106,141 @@ export class TextureMap {
                     s: [1800, 88],
                     t: [1800, 176]
                 }
+            },
+            {
+                groupId: 'group-10',
+                stars: 10,
+                coords: {
+                    f: [2000, 0],
+                    s: [2000, 88],
+                    t: [2000, 176]
+                }
+            },
+            {
+                groupId: 'group-11',
+                stars: 11,
+                coords: {
+                    f: [2200, 0],
+                    s: [2200, 88],
+                    t: [2200, 176]
+                }
+            },
+            {
+                groupId: 'group-12',
+                stars: 12,
+                coords: {
+                    f: [2400, 0],
+                    s: [2400, 88],
+                    t: [2400, 176]
+                }
+            },
+            {
+                groupId: 'group-13',
+                stars: 13,
+                coords: {
+                    f: [0, 264],
+                    s: [0, 352],
+                    t: [0, 440]
+                }
+            },
+            {
+                groupId: 'group-14',
+                stars: 14,
+                coords: {
+                    f: [200, 264],
+                    s: [200, 352],
+                    t: [200, 440]
+                }
+            },
+            {
+                groupId: 'group-15',
+                stars: 15,
+                coords: {
+                    f: [400, 264],
+                    s: [400, 352],
+                    t: [400, 440]
+                }
+            },
+            {
+                groupId: 'group-16',
+                stars: 16,
+                coords: {
+                    f: [600, 264],
+                    s: [600, 352],
+                    t: [600, 440]
+                }
+            },
+            {
+                groupId: 'group-17',
+                stars: 17,
+                coords: {
+                    f: [800, 264],
+                    s: [800, 352],
+                    t: [800, 440]
+                }
+            },
+            {
+                groupId: 'group-18',
+                stars: 18,
+                coords: {
+                    f: [1000, 264],
+                    s: [1000, 352],
+                    t: [1000, 440]
+                }
+            },
+            {
+                groupId: 'group-19',
+                stars: 19,
+                coords: {
+                    f: [1200, 264],
+                    s: [1200, 352],
+                    t: [1200, 440]
+                }
+            },
+            {
+                groupId: 'group-20',
+                stars: 20,
+                coords: {
+                    f: [1400, 264],
+                    s: [1400, 352],
+                    t: [1400, 440]
+                }
+            },
+            {
+                groupId: 'group-21',
+                stars: 21,
+                coords: {
+                    f: [1600, 264],
+                    s: [1600, 352],
+                    t: [1600, 440]
+                }
+            },
+            {
+                groupId: 'group-22',
+                stars: 22,
+                coords: {
+                    f: [1800, 264],
+                    s: [1800, 352],
+                    t: [1800, 440]
+                }
+            },
+            {
+                groupId: 'group-23',
+                stars: 23,
+                coords: {
+                    f: [2000, 264],
+                    s: [2000, 352],
+                    t: [2000, 440]
+                }
+            },
+            {
+                groupId: 'group-24',
+                stars: 24,
+                coords: {
+                    f: [2200, 264],
+                    s: [2200, 352],
+                    t: [2200, 440]
+                }
             }
         ];
     }
@@ -142,7 +277,7 @@ export class TextureMap {
 
     private setLetters(): LetterMap {
         const overworld: LetterCoords = {
-            " ": [0, 0],
+            " ": [373.05, 53],
             "0": [264, 8],
             "1": [273, 8],
             "2": [282.1, 8],
@@ -187,7 +322,7 @@ export class TextureMap {
             ",": [354.1, 26],
         }
         const underground: LetterCoords = {
-            " ": [0, 0],
+            " ": [373.05, 53],
             "0": [408.05, 8],
             "1": [417.05, 8],
             "2": [426.1, 8],
@@ -232,7 +367,7 @@ export class TextureMap {
             ",": [489.075, 26],
         }
         const castle: LetterCoords = {
-            " ": [0, 0],
+            " ": [373.05, 53],
             "0": [408.05, 35],
             "1": [417.05, 35],
             "2": [426.1, 35],
@@ -277,7 +412,7 @@ export class TextureMap {
             ",": [489.075, 53],
         }
         const info: LetterCoords = {
-            ' ': [0, 0],
+            " ": [373.05, 53],
             "0": [264, 35],
             "1": [273, 35],
             "2": [282.1, 35],

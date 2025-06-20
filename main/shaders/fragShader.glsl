@@ -8,6 +8,8 @@ uniform sampler2D uSampler;
 
 uniform bool uTex;
 uniform bool isText;
+uniform bool isHud;
+uniform bool isShadowText;
 uniform bool isCursor;
 uniform bool isSelected;
 
@@ -17,6 +19,17 @@ uniform vec2 uTextStartPos;
 
 void main() {
     vec4 tex = texture2D(uSampler, vTextureCoord);
+
+    if(isHud) discard;
+    
+    if(isShadowText) {
+        vec4 color = vec4(0.580, 0.580, 1.0, 1.0);
+        float threshold = 0.1;
+        if(length(tex.rgb - color.rgb) < threshold) discard;
+
+        gl_FragColor = tex;
+        return;
+    }
     
     if(uTex) {
         if(isText) {

@@ -68,7 +68,7 @@ export class SheetProps {
                 spriteSize: [260, 17]
             },
             coin: {
-                position: [-0.28, 0.567],
+                position: [-0.28, 0.715],
                 size: [0.04, 0.038],
                 spriteSize: [7, 7],
                 coords: this.map.coins.overworld

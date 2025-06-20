@@ -11,6 +11,9 @@ import { FrameData } from "./animation.js";
 import { HudProps } from "./hud.interface.js";
 import { TextureMap } from "./texture-map.js";
 
+import { LevelState } from "./level-state.js";
+import { States } from "./texture-map.interface.js";
+
 export class Hud {
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
@@ -19,6 +22,7 @@ export class Hud {
     private programInfo: ProgramInfo;
 
     private screen: ScreenSmb;
+    private levelState: LevelState;
     private sheetProps: SheetProps;
 
     private animationManager!: AnimationManager;
@@ -27,13 +31,16 @@ export class Hud {
     private textureMap: TextureMap;
 
     private color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0];
-    private containerPosition: [number, number] = [0, -0.15];
+    private containerPosition: [number, number] = [-0.075, -0.15];
+
+    private currentState: States;
 
     constructor(
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
         screen: ScreenSmb,
+        levelState: LevelState,
         sheetProps: SheetProps,
     ) {
         this.gl = gl;
@@ -41,7 +48,10 @@ export class Hud {
         this.programInfo = programInfo;
 
         this.screen = screen;
+        this.levelState = levelState;
         this.sheetProps = sheetProps;
+
+        this.currentState = this.levelState.getCurrentState();
 
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
@@ -58,7 +68,7 @@ export class Hud {
             const spriteSize = this.sheetProps.miscProps().spriteProps.hud.spriteSize;
             const sheetSize = this.sheetProps.miscProps().spriteSheetSize;
 
-            const hudX = position[0];
+            const hudX = position[0] + this.containerPosition[0];
             const hudY = position[1] + this.screen['setSize'].h * 0.1;
 
             mat4.translate(
@@ -105,6 +115,8 @@ export class Hud {
             this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 1);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -126,7 +138,8 @@ export class Hud {
             projectionMatrix: mat4,
             text: string,
             x: number,
-            y: number
+            y: number,
+            type: States
         ): void {
             const letters = text.split('');
             const spacing = 0.08;
@@ -143,7 +156,8 @@ export class Hud {
                     letterX,
                     y,
                     textStartX,
-                    textEndX
+                    textEndX,
+                    type
                 );
             });
         }
@@ -155,32 +169,37 @@ export class Hud {
             
             this.hudProps = [
                 //Player
-                this.createHudProps('MARIO', -0.72, 1.09),
-                this.createHudProps('000000', -0.68, 1.014),
+                this.createHudProps('MARIO', -0.72, 1.09, this.currentState),
+                this.createHudProps('000000', -0.68, 1.014, this.currentState),
 
                 //Coin
-                this.createHudProps('x', -0.16, 1.014),
-                this.createHudProps('00', -0.04, 1.014),
+                this.createHudProps('x', -0.16, 1.014, this.currentState),
+                this.createHudProps('00', -0.04, 1.014, this.currentState),
 
                 //World
-                this.createHudProps('WORLD', 0.48, 1.09),
-                this.createHudProps('1-1', 0.48, 1.01),
+                this.createHudProps('WORLD', 0.48, 1.09, this.currentState),
+                this.createHudProps('1-1', 0.48, 1.01, this.currentState),
 
                 //Time
-                this.createHudProps('TIME', 1.0, 1.09),
-                this.createHudProps('000', 1.04, 1.01)
+                this.createHudProps('TIME', 1.0, 1.09, this.currentState),
+                this.createHudProps('000', 1.04, 1.01, this.currentState),
+
+                //Copyright
+                this.createHudProps('©1986 NINTENDO', 0.55, 0.13, States.Info)
             ];
         }
 
         private createHudProps(
             text: string,
             x: number,
-            y: number
+            y: number,
+            type?: States
         ): HudProps {
             return {
                 text,
                 position: [x, y],
                 color: this.color,
+                type
             }
         }
 
@@ -196,6 +215,7 @@ export class Hud {
                     props.text,
                     x,
                     y,
+                    props.type!
                 );
             });
         }
@@ -206,8 +226,11 @@ export class Hud {
             x: number,
             y: number,
             textStartX: number,
-            textEndX: number
+            textEndX: number,
+            type: States
         ): void {
+            if(!type) return;
+
             const modelViewMatrix = mat4.create();
             const size = [0.04, 0.04];
             const map = this.textureMap.letters;
@@ -225,7 +248,7 @@ export class Hud {
                 size[0], size[1],
             ];
 
-            const spriteCoords = map.overworld[letter] || map.overworld[' '];
+            const spriteCoords = map[type][letter] || map[type][' '];
             const [spriteX, spriteY] = spriteCoords;
             const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
             const [spriteWidth, spriteHeight] = this.sheetProps.miscProps().spriteProps.letter.spriteSize;
@@ -257,6 +280,8 @@ export class Hud {
             this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -278,8 +303,8 @@ export class Hud {
             const spriteSize = this.sheetProps.miscProps().spriteProps.coin.spriteSize;
             const sheetSize = this.sheetProps.miscProps().spriteSheetSize;
 
-            const hudX = position[0];
-            const hudY = position[1] + this.screen['setSize'].h * 0.1;
+            const hudX = position[0] + this.containerPosition[0];
+            const hudY = position[1] + this.screen['setSize'].h * 0.1 + this.containerPosition[1];
 
             mat4.translate(
                 modelViewMatrix,
@@ -325,6 +350,8 @@ export class Hud {
             this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -346,13 +373,13 @@ export class Hud {
                 [],
                 coinEntries.map(i => ({
                     id: `coin-${i}`,
+                    stars: 0,
                     coords: {
                         f: coinCoords.f,
                         s: coinCoords.s,
                         t: coinCoords.t
                     },
                     availableAnimations: ['flash'],
-                    stars: 0
                 })),
             );
 
@@ -367,6 +394,11 @@ export class Hud {
         } catch(err) {
             console.log(err);
         }
+    }
+
+    public updateState(): void {
+        this.currentState = this.levelState.getCurrentState();
+        this.setHud();
     }
 
     public update(deltaTime: number) {
