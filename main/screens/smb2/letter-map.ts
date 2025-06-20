@@ -1,5 +1,6 @@
 export const LetterMap: Record<string, Record<string, [number, number]>> = {
     overworld: {
+        ' ': [0, 0],
         "0": [208, 32],
         "1": [224, 32],
         "2": [240, 32],
@@ -46,6 +47,7 @@ export const LetterMap: Record<string, Record<string, [number, number]>> = {
         "@": [368, 80],
     },
     underground: {
+        " ": [586, 0],
         "0": [432, 32],
         "1": [448, 32],
         "2": [464, 32],
@@ -92,6 +94,7 @@ export const LetterMap: Record<string, Record<string, [number, number]>> = {
         "@": [592, 80],
     },
     info: {
+        " ": [0, 442],
         "0": [208, 144],
         "1": [224, 144],
         "2": [240, 144],
@@ -138,6 +141,7 @@ export const LetterMap: Record<string, Record<string, [number, number]>> = {
         "@": [368, 192],
     },
     castle: {
+        " ": [586, 442],
         "0": [432, 144],
         "1": [448, 144],
         "2": [464, 144],

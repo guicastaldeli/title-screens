@@ -284,7 +284,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(colors), this.gl.STATIC_DRAW);
     }
 
-    private parseColor(
+    public parseColor(
         color: string |
         [number, number, number, number]
     ): [number, number, number, number] {

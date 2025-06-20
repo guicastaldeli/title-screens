@@ -242,7 +242,7 @@ export class Options {
         this.options.forEach(opt => {
             if(opt !== option) {
                 opt.selected = false;
-                opt.color = defaultColor
+                opt.color = defaultColor;
             }
         });
 

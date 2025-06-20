@@ -1,7 +1,7 @@
 interface MiscProps {
     spriteSheetSize: [number, number];
     spriteProps: {
-        font: { 
+        letter: { 
             position: [number, number];
             coords: [number, number]; 
             size: [number, number]; 
@@ -49,7 +49,7 @@ export class SheetProps {
     public miscProps(): MiscProps {
         const spriteSheetSize: [number, number] = [1172, 884];
         const spriteProps: {
-            font: { 
+            letter: { 
                 position: [number, number];
                 coords: [number, number]; 
                 size: [number, number]; 
@@ -68,11 +68,11 @@ export class SheetProps {
                 coords: CoinCoords[]
             }
         } = {
-            font: {
+            letter: {
                 position: [0, 0],
                 coords: [0, 0],
                 size: [0.04, 0.038],
-                spriteSize: [200, 200]
+                spriteSize: [7, 7]
             },
             hud: {
                 position: [0, 0.61],
