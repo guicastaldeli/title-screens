@@ -13,7 +13,7 @@ export const LetterMap: Record<string, Record<string, [number, number]>> = {
         "9": [345.1, 8],
         "A": [354.1, 8],
         "B": [363, 8],
-        "C": [372, 8],
+        "C": [372.05, 8],
         "D": [381.05, 8],
         "E": [390.1, 8],
         "F": [399.1, 8],
