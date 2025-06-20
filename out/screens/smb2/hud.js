@@ -35,6 +35,7 @@ export class Hud {
         this.currentFrame = this.animationManager.getCoinFrame();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
     }
+    //Hud
     drawHud(projectionMatrix) {
         const modelViewMatrix = mat4.create();
         const position = this.sheetProps.miscProps().spriteProps.hud.position;
@@ -91,7 +92,7 @@ export class Hud {
     }
     drawHudProps(projectionMatrix, text, x, y) {
         const letters = text.split('');
-        const spacing = 0.07;
+        const spacing = 0.2;
         const startX = x - ((letters.length * spacing) / 2);
         const textStartX = x;
         const textEndX = startX + (letters.length * spacing);
@@ -102,11 +103,11 @@ export class Hud {
     }
     setHud() {
         this.hudProps = [
-            this.createHudProps('MARIO', 0, 0),
-            this.createHudProps('00000', 0, 0),
-            this.createHudProps('00', 0, 0),
-            this.createHudProps('1-1', 0, 0),
-            this.createHudProps('000', 0, 0)
+            this.createHudProps('0123456789ABCDEF', 0, 0),
+            //this.createHudProps('00000', 0, 0),
+            //this.createHudProps('00', 0, 0),
+            //this.createHudProps('1-1', 0, 0),
+            //this.createHudProps('000', 0, 0)
         ];
     }
     createHudProps(text, x, y) {
@@ -126,7 +127,7 @@ export class Hud {
     }
     drawLetter(projectionMatrix, letter, x, y, textStartX, textEndX) {
         const modelViewMatrix = mat4.create();
-        const size = [0.03, 0.03];
+        const size = [0.09, 0.1];
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
             -size[0], -size[1],
@@ -167,6 +168,7 @@ export class Hud {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
+    //
     //Coin
     drawCoin(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -218,6 +220,7 @@ export class Hud {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
+    //
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
             try {

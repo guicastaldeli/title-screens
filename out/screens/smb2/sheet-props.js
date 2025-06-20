@@ -8,10 +8,7 @@ export class SheetProps {
         const spriteSheetSize = [1172, 884];
         const spriteProps = {
             letter: {
-                position: [0, 0],
-                coords: [0, 0],
-                size: [0.04, 0.038],
-                spriteSize: [7, 7]
+                spriteSize: [7.85, 7.9]
             },
             hud: {
                 position: [0, 0.61],
