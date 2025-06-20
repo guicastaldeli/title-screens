@@ -22,8 +22,8 @@ export class Title {
     private position: [number, number] = [0, 0.12];
     private size: [number, number] = [1.0, 0.4];
 
-    private animationManager: AnimationManager;
-    private currentFrame: FrameData;
+    private animationManager!: AnimationManager;
+    private currentFrame!: FrameData;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -38,23 +38,7 @@ export class Title {
 
         this.screen = screen;
         this.sheetProps = sheetProps;
-
-        this.animationManager = new AnimationManager(
-            sheetProps,
-            sheetProps.titleProps().spriteCoords.map(group => ({
-                id: group.groupId,
-                coords: {
-                    f: group.coords.f,
-                    s: group.coords.s,
-                    t: group.coords.t
-                },
-                availableAnimations: ['flash'],
-                stars: group.stars
-            })),
-            []
-        );
-
-        this.currentFrame = this.animationManager.getTitleFrame();
+        this.updateTitle();
     }
 
     public drawTitle(projectionMatrix: mat4): void {
@@ -77,8 +61,8 @@ export class Title {
         ];
 
         const [spriteX, spriteY] = this.currentFrame.coords;
-        const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().spriteSheetSize;
-        const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().spriteSize;
+        const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().sheetSize;
+        const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().size;
 
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
@@ -119,6 +103,27 @@ export class Title {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
     }
 
+    private updateTitle(): void {
+        const titleCoords = this.sheetProps.titleProps().coords;
+
+        this.animationManager = new AnimationManager(
+            this.sheetProps,
+            titleCoords.map(group => ({
+                id: group.groupId,
+                coords: {
+                    f: group.coords.f,
+                    s: group.coords.s,
+                    t: group.coords.t
+                },
+                availableAnimations: ['flash'],
+                stars: group.stars
+            })),
+            []
+        );
+
+        this.currentFrame = this.animationManager.getTitleFrame();
+    }
+
     public async getTex(): Promise<void> {
         try {
             const path = './screens/smb2/assets/sprites/smb2-title-sprites.png';
@@ -129,7 +134,7 @@ export class Title {
     }
 
     public update(deltaTime: number) {
-        this.animationManager.update(deltaTime);
-        this.currentFrame = this.animationManager.getTitleFrame();
+        this.animationManager?.update(deltaTime);
+        this.currentFrame = this.animationManager?.getTitleFrame();
     }
 }

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { AnimationManager } from "./animation-manager.js";
-import { LetterMap } from "./letter-map.js";
+import { TextureMap } from "./texture-map.js";
 export class Hud {
     constructor(gl, buffers, programInfo, screen, sheetProps) {
         this.texture = null;
@@ -21,19 +21,9 @@ export class Hud {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.animationManager = new AnimationManager(sheetProps, [], sheetProps.miscProps().spriteProps.coin.coords.map((c, i) => ({
-            id: `coin-${i}`,
-            coords: {
-                f: c.f,
-                s: c.s,
-                t: c.t
-            },
-            availableAnimations: ['flash'],
-            stars: 0
-        })));
-        this.letterMap = LetterMap;
-        this.currentFrame = this.animationManager.getCoinFrame();
+        this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
+        this.updateCoin();
     }
     //Hud
     drawHud(projectionMatrix) {
@@ -92,7 +82,7 @@ export class Hud {
     }
     drawHudProps(projectionMatrix, text, x, y) {
         const letters = text.split('');
-        const spacing = 0.2;
+        const spacing = 0.08;
         const startX = x - ((letters.length * spacing) / 2);
         const textStartX = x;
         const textEndX = startX + (letters.length * spacing);
@@ -102,12 +92,22 @@ export class Hud {
         });
     }
     setHud() {
+        const randomScore = Math.random();
+        const score = Math.floor(randomScore * 1000000);
+        const paddedScore = score.toString().padStart(6, '0').substring(0, 6);
         this.hudProps = [
-            this.createHudProps('0123456789ABCDEF', 0, 0),
-            //this.createHudProps('00000', 0, 0),
-            //this.createHudProps('00', 0, 0),
-            //this.createHudProps('1-1', 0, 0),
-            //this.createHudProps('000', 0, 0)
+            //Player
+            this.createHudProps('MARIO', -0.72, 1.09),
+            this.createHudProps('000000', -0.68, 1.014),
+            //Coin
+            this.createHudProps('x', -0.16, 1.014),
+            this.createHudProps('00', -0.04, 1.014),
+            //World
+            this.createHudProps('WORLD', 0.48, 1.09),
+            this.createHudProps('1-1', 0.48, 1.01),
+            //Time
+            this.createHudProps('TIME', 1.0, 1.09),
+            this.createHudProps('000', 1.04, 1.01)
         ];
     }
     createHudProps(text, x, y) {
@@ -127,7 +127,8 @@ export class Hud {
     }
     drawLetter(projectionMatrix, letter, x, y, textStartX, textEndX) {
         const modelViewMatrix = mat4.create();
-        const size = [0.09, 0.1];
+        const size = [0.04, 0.04];
+        const map = this.textureMap.letters;
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
             -size[0], -size[1],
@@ -135,7 +136,7 @@ export class Hud {
             -size[0], size[1],
             size[0], size[1],
         ];
-        const spriteCoords = this.letterMap.overworld[letter] || this.letterMap.overworld[' '];
+        const spriteCoords = map.overworld[letter] || map.overworld[' '];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
         const [spriteWidth, spriteHeight] = this.sheetProps.miscProps().spriteProps.letter.spriteSize;
@@ -220,6 +221,21 @@ export class Hud {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
+    updateCoin() {
+        const coinCoords = this.sheetProps.miscProps().spriteProps.coin.coords;
+        const coinEntries = Object.entries(coinCoords);
+        this.animationManager = new AnimationManager(this.sheetProps, [], coinEntries.map(i => ({
+            id: `coin-${i}`,
+            coords: {
+                f: coinCoords.f,
+                s: coinCoords.s,
+                t: coinCoords.t
+            },
+            availableAnimations: ['flash'],
+            stars: 0
+        })));
+        this.currentFrame = this.animationManager.getCoinFrame();
+    }
     //
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -233,7 +249,8 @@ export class Hud {
         });
     }
     update(deltaTime) {
-        this.animationManager.update(deltaTime);
-        this.currentFrame = this.animationManager.getCoinFrame();
+        var _a, _b;
+        (_a = this.animationManager) === null || _a === void 0 ? void 0 : _a.update(deltaTime);
+        this.currentFrame = (_b = this.animationManager) === null || _b === void 0 ? void 0 : _b.getCoinFrame();
     }
 }

@@ -19,17 +19,7 @@ export class Title {
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.animationManager = new AnimationManager(sheetProps, sheetProps.titleProps().spriteCoords.map(group => ({
-            id: group.groupId,
-            coords: {
-                f: group.coords.f,
-                s: group.coords.s,
-                t: group.coords.t
-            },
-            availableAnimations: ['flash'],
-            stars: group.stars
-        })), []);
-        this.currentFrame = this.animationManager.getTitleFrame();
+        this.updateTitle();
     }
     drawTitle(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -43,8 +33,8 @@ export class Title {
             this.size[0], this.size[1],
         ];
         const [spriteX, spriteY] = this.currentFrame.coords;
-        const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().spriteSheetSize;
-        const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().spriteSize;
+        const [sheetWidth, sheetHeight] = this.sheetProps.titleProps().sheetSize;
+        const [spriteWidth, spriteHeight] = this.sheetProps.titleProps().size;
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
         const top = spriteY / sheetHeight;
@@ -76,6 +66,20 @@ export class Title {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
+    updateTitle() {
+        const titleCoords = this.sheetProps.titleProps().coords;
+        this.animationManager = new AnimationManager(this.sheetProps, titleCoords.map(group => ({
+            id: group.groupId,
+            coords: {
+                f: group.coords.f,
+                s: group.coords.s,
+                t: group.coords.t
+            },
+            availableAnimations: ['flash'],
+            stars: group.stars
+        })), []);
+        this.currentFrame = this.animationManager.getTitleFrame();
+    }
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -88,7 +92,8 @@ export class Title {
         });
     }
     update(deltaTime) {
-        this.animationManager.update(deltaTime);
-        this.currentFrame = this.animationManager.getTitleFrame();
+        var _a, _b;
+        (_a = this.animationManager) === null || _a === void 0 ? void 0 : _a.update(deltaTime);
+        this.currentFrame = (_b = this.animationManager) === null || _b === void 0 ? void 0 : _b.getTitleFrame();
     }
 }
