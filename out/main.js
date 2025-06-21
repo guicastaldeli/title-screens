@@ -105,9 +105,9 @@ function main() {
                 isSelected: gl.getUniformLocation(shaderProgram, 'isSelected'),
                 isHud: gl.getUniformLocation(shaderProgram, 'isHud'),
                 isHudText: gl.getUniformLocation(shaderProgram, 'isHudText'),
+                isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText'),
                 uState: gl.getUniformLocation(shaderProgram, 'uState'),
                 haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
-                isSmb: gl.getUniformLocation(shaderProgram, 'isSmb')
             }
         };
         gl.useProgram(programInfo.program);

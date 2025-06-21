@@ -18,7 +18,7 @@ export class Cursor {
     private options?: Options;
 
     private position: [number, number] = [-0.45, 0];
-    private coords: [number, number] = [518.99, 265.5];
+    private coords: [number, number] = [12.08, 360.1];
 
     public isMouseControlled: boolean = true;
     public selectedIndex: number = 0;
@@ -94,7 +94,7 @@ export class Cursor {
         const spriteCoords = this.coords;
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
-        const [spriteWidth, spriteHeight] = [8, 8];
+        const [spriteWidth, spriteHeight] = [7.8, 7.8];
 
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;

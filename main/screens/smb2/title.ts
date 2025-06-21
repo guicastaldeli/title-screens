@@ -92,6 +92,7 @@ export class Title {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);

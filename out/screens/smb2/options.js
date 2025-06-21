@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
+import { States } from "./texture-map.interface.js";
 export class Options {
     constructor(gl, buffers, programInfo, screen, levelState, sheetProps, cursor) {
         this.containerPosition = [0.12, -0.20];
@@ -90,6 +91,11 @@ export class Options {
             left, top,
             right, top
         ];
+        const currentState = this.levelState.getCurrentState();
+        const stateValue = currentState === States.Overworld ? 0 :
+            currentState === States.Underground ? 1 :
+                currentState === States.Underwater ? 2 :
+                    3;
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -103,8 +109,9 @@ export class Options {
         this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
-        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected && !this.cursor.selected ? 1 : 0);
@@ -113,7 +120,8 @@ export class Options {
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
-        this.gl.uniform1f(this.programInfo.uniformLocations.isSmb, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.enable(this.gl.BLEND);

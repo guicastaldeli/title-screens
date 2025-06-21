@@ -33,9 +33,9 @@ export interface ProgramInfo {
         isSelected: WebGLUniformLocation | null;
         isHud: WebGLUniformLocation | null;
         isHudText: WebGLUniformLocation | null;
+        isShadowText: WebGLUniformLocation | null;
         uState: WebGLUniformLocation | null;
         haveState: WebGLUniformLocation | null;
-        isSmb: WebGLUniformLocation | null;
     }
 }
 
@@ -133,9 +133,9 @@ async function main(): Promise<void> {
             isSelected: gl.getUniformLocation(shaderProgram, 'isSelected'),
             isHud: gl.getUniformLocation(shaderProgram, 'isHud'),
             isHudText: gl.getUniformLocation(shaderProgram, 'isHudText'),
+            isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText'),
             uState: gl.getUniformLocation(shaderProgram, 'uState'),
             haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
-            isSmb: gl.getUniformLocation(shaderProgram, 'isSmb')
         }
     }
 

@@ -11,7 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.45, 0];
-        this.coords = [518.99, 265.5];
+        this.coords = [12.08, 360.1];
         this.isMouseControlled = true;
         this.selectedIndex = 0;
         this.optionPosition = [];
@@ -59,7 +59,7 @@ export class Cursor {
         const spriteCoords = this.coords;
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
-        const [spriteWidth, spriteHeight] = [8, 8];
+        const [spriteWidth, spriteHeight] = [7.8, 7.8];
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
         const top = spriteY / sheetHeight;
