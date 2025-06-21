@@ -60,8 +60,8 @@ void main() {
                 vec3 darkGray = vec3(0.6431, 0.6431, 0.6431);
                 vec3 selectedColor = vec3(0.82745, 0.82745, 0.82745);
 
-                float waveSpeed = 0.8;
-                float waveFrequency = 5.0;
+                float waveSpeed = 1.0;
+                float waveFrequency = 10.0;
                 float waveWidth = 2.0;
                 
                 float wavePos = (gl_FragCoord.x / 100.0 - uTime * waveSpeed) * waveFrequency;
@@ -101,7 +101,7 @@ void main() {
 
         if(isSelected) {
             vec3 darkGray = vec3(0.6431, 0.6431, 0.6431);
-            vec3 selectedColor = vec3(0.82745, 0.82745, 0.82745);
+            vec3 selectedColor = vec3(0.9176, 0.9176, 0.9176);
 
             float waveSpeed = 0.8;
             float waveFrequency = 5.0;
@@ -111,11 +111,10 @@ void main() {
             float waveFactor = sin(wavePos) * 0.5 + 0.5;
             vec3 waveColor = mix(darkGray, selectedColor, smoothstep(0.5 - waveWidth, 0.5 + waveWidth, waveFactor));
 
-            vec3 baseColor = mix(backgroundColor.rgb, waveColor, waveFactor);
-            vec3 finalColor = mix(baseColor, tex.rgb, alpha);
-            gl_FragColor = vec4(finalColor, 1.0);
+            vec3 finalColor = mix(tex.rgb, waveColor, waveFactor);
+            gl_FragColor = vec4(finalColor, tex.a);
         } else {
-            gl_FragColor = mix(backgroundColor, uColor, alpha);
+            gl_FragColor = vec4(mix(tex.rgb, tex.rgb * uColor.rgb, alpha), tex.a);
         }
 
         return;
