@@ -15,6 +15,7 @@ import { Hud } from "./hud.js";
 import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
+import { Terrain } from "./terrain.js";
 export class ScreenSmb extends BaseScreen {
     constructor(state, screenManager, tick, gl, programInfo, buffers, levelState) {
         super(state, gl, programInfo, buffers, tick);
@@ -38,6 +39,7 @@ export class ScreenSmb extends BaseScreen {
         this.options = new Options(gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
+        this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.setupInput();
     }
     //Bakcground
@@ -57,7 +59,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
-    createBackground() {
+    setInit() {
         this.gl.useProgram(this.programInfo.program);
         this.gl.disable(this.gl.DEPTH_TEST);
         const projectionMatrix = mat4.create();
@@ -74,6 +76,8 @@ export class ScreenSmb extends BaseScreen {
         this.title.drawTitle(projectionMatrix);
         this.options.initOptions(projectionMatrix);
         this.cursor.drawCursor(projectionMatrix);
+        //Terrain
+        this.terrain.initTerrain(projectionMatrix);
         //
         this.gl.enable(this.gl.DEPTH_TEST);
     }
@@ -242,9 +246,11 @@ export class ScreenSmb extends BaseScreen {
             yield this.options.getTex();
             yield this.hud.getTex();
             yield this.title.getTex();
+            yield this.terrain.getTex();
         });
     }
     updateLevelState() {
+        this.terrain.updateState();
         this.options.updateState();
         this.hud.updateState();
     }
@@ -255,14 +261,14 @@ export class ScreenSmb extends BaseScreen {
         this.title.update(deltaTime);
         this.options.update(deltaTime);
         this.cursor.update();
-        this.createBackground();
+        this.setInit();
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             this.initGrid();
             yield this.loadAssets();
             yield this.state.markInit('smb');
-            return this.createBackground();
+            return this.setInit();
         });
     }
 }

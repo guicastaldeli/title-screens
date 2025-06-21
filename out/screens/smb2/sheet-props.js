@@ -2,8 +2,22 @@ import { TextureMap } from "./texture-map.js";
 export class SheetProps {
     constructor() {
         this.map = new TextureMap();
+        this.tilesetProps();
         this.miscProps();
         this.titleProps();
+    }
+    //Tileset
+    tilesetProps() {
+        const spriteSheetSize = [680, 764];
+        const spriteProps = {
+            ground: {
+                spriteSize: [16, 16]
+            }
+        };
+        return {
+            spriteSheetSize,
+            spriteProps
+        };
     }
     //Misc
     miscProps() {

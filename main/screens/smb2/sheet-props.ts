@@ -22,6 +22,15 @@ interface MiscProps {
     };
 }
 
+interface TilesetProps {
+    spriteSheetSize: [number, number];
+    spriteProps: {
+        ground: {
+            spriteSize: [number, number] 
+        }
+    };
+}
+
 interface TitleProps {
     sheetSize: [number, number];
     size: [number, number];
@@ -34,8 +43,28 @@ export class SheetProps {
     constructor() {
         this.map = new TextureMap();
         
+        this.tilesetProps();
         this.miscProps();
         this.titleProps();
+    }
+
+    //Tileset
+    public tilesetProps(): TilesetProps {
+        const spriteSheetSize: [number, number] = [680, 764];
+        const spriteProps: {
+            ground: {
+                spriteSize: [number, number]
+            }
+        } = {
+            ground: {
+                spriteSize: [16, 16]
+            }
+        }
+
+        return {
+            spriteSheetSize,
+            spriteProps
+        }
     }
 
     //Misc

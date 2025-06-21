@@ -7,6 +7,17 @@ export enum States {
     Info = 'info'
 }
 
+//Letters
+export type LetterCoords = Record<string, [number, number]>;
+
+export interface LetterMap {
+    overworld: LetterCoords;
+    underground: LetterCoords;
+    underwater: LetterCoords;
+    castle: LetterCoords;
+    info: LetterCoords;
+}
+
 //Title
 interface TitleCoords {
     f: [number, number];
@@ -33,13 +44,16 @@ export interface CoinMap {
     info: CoinCoords; 
 }
 
-//Letters
-export type LetterCoords = Record<string, [number, number]>;
+//Tileset
+    //Terrain
+        //Ground
+        export type GroundCoords = [number, number];
 
-export interface LetterMap {
-    overworld: LetterCoords;
-    underground: LetterCoords;
-    underwater: LetterCoords;
-    castle: LetterCoords;
-    info: LetterCoords;
-}
+        export interface GroundMap {
+            overworld: GroundCoords;
+            underground: GroundCoords;
+            underwater: GroundCoords;
+            castle: GroundCoords;
+        }
+    //
+//

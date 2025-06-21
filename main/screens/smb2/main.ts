@@ -16,6 +16,8 @@ import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
 
+import { Terrain } from "./terrain.js";
+
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
     private levelState: LevelState;
@@ -43,6 +45,8 @@ export class ScreenSmb extends BaseScreen {
     private options: Options;
     private cursor: Cursor;
 
+    private terrain: Terrain;
+
     constructor(
         state: State,
         screenManager: ScreenManager,
@@ -64,6 +68,8 @@ export class ScreenSmb extends BaseScreen {
         this.options = new Options(gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
+
+        this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
 
         this.setupInput();
     }
@@ -91,7 +97,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
 
-    private createBackground(): void {
+    private setInit(): void {
         this.gl.useProgram(this.programInfo.program);
         this.gl.disable(this.gl.DEPTH_TEST);
 
@@ -118,6 +124,9 @@ export class ScreenSmb extends BaseScreen {
             this.title.drawTitle(projectionMatrix);
             this.options.initOptions(projectionMatrix);
             this.cursor.drawCursor(projectionMatrix);
+
+            //Terrain
+            this.terrain.initTerrain(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -361,9 +370,11 @@ export class ScreenSmb extends BaseScreen {
         await this.options.getTex();
         await this.hud.getTex();
         await this.title.getTex();
+        await this.terrain.getTex();
     }
 
     public updateLevelState(): void {
+        this.terrain.updateState();
         this.options.updateState();
         this.hud.updateState();
     }
@@ -377,7 +388,7 @@ export class ScreenSmb extends BaseScreen {
         this.options.update(deltaTime);
         this.cursor.update();
         
-        this.createBackground();
+        this.setInit();
     }
 
     public async init(): Promise<void> {
@@ -385,6 +396,6 @@ export class ScreenSmb extends BaseScreen {
         await this.loadAssets();
 
         await this.state.markInit('smb');
-        return this.createBackground();
+        return this.setInit();
     }
 }
