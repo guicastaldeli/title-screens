@@ -9,9 +9,11 @@ uniform sampler2D uSampler;
 uniform bool uTex;
 uniform bool isText;
 uniform bool isHud;
-uniform bool isShadowText;
+uniform bool isHudText;
 uniform bool isCursor;
 uniform bool isSelected;
+uniform bool haveState;
+uniform bool isSmb;
 
 uniform float uState;
 
@@ -22,38 +24,48 @@ uniform vec2 uTextStartPos;
 void main() {
     vec4 tex = texture2D(uSampler, vTextureCoord);
 
-    if(!uTex && !isText && !isHud && !isCursor) {
-        vec4 tileColor = vColor;
+    if(haveState) {
+        if(!uTex && !isText && !isHud && !isCursor) {
+            vec4 tileColor = vColor;
 
-        if(uState < 0.1) {
-            tileColor = vec4(0.580, 0.580, 1.0, 1.0);
-        } else if(uState < 1.1) {
-            tileColor = vec4(0.0, 0.0, 0.0, 1.0);
-        } else if(uState < 2.1) {
-            tileColor = vec4(0.2588, 0.2588, 1.0, 1.0);
-        } else {
-            tileColor = vec4(0.0, 0.0, 0.0, 1.0);
+            if(uState < 0.1) {
+                tileColor = vec4(0.580, 0.580, 1.0, 1.0);
+            } else if(uState < 1.1) {
+                tileColor = vec4(0.0, 0.0, 0.0, 1.0);
+            } else if(uState < 2.1) {
+                tileColor = vec4(0.2588, 0.2588, 1.0, 1.0);
+            } else {
+                tileColor = vec4(0.0, 0.0, 0.0, 1.0);
+            }
+
+            gl_FragColor = tileColor;
+            return;
         }
-
-        gl_FragColor = tileColor;
-        return;
     }
 
     if(isHud) discard;
-    
-    if(isShadowText) {
+
+    if(isHudText) {
         vec4 color = vec4(0.580, 0.580, 1.0, 1.0);
         float threshold = 0.1;
         if(length(tex.rgb - color.rgb) < threshold) discard;
-
-        gl_FragColor = tex;
-        return;
     }
     
     if(uTex) {
         if(isText) {
+            vec4 color = vec4(0.580, 0.580, 1.0, 1.0);
+            float threshold = 0.1;
+            if(length(tex.rgb - color.rgb) < threshold) discard;
+            
             float brightness = (tex.r + tex.g + tex.b) / 3.0;
-            vec4 backgroundColor = vec4(0.0, 0.0, 0.0, 1.0);
+            vec4 backgroundColor;
+
+            if(isSmb) {
+                backgroundColor = vec4(0.3255, 0.3255, 0.3255, 1.0);
+            } else {
+                backgroundColor = vec4(0.0, 0.0, 0.0, 1.0);
+            }
+
             float alpha = step(0.1, brightness);
 
             if(isSelected) {
@@ -62,8 +74,8 @@ void main() {
 
                 float textPos = (gl_FragCoord.x - uTextStartPos.x) / (uTextStartPos.y - uTextStartPos.x);
 
-                float waveSpeed = 1.0;
-                float waveFrequency = 10.0;
+                float waveSpeed = 0.8;
+                float waveFrequency = 5.0;
                 float waveWidth = 2.0;
                 
                 float wavePos = (textPos - uTime * waveSpeed) * waveFrequency;

@@ -1,3 +1,5 @@
+import { States } from "./smb2/texture-map.interface";
+
 export interface Option {
     text: string;
     position: [number, number];
@@ -7,4 +9,5 @@ export interface Option {
         x: [number, number],
         y: [number, number]
     }
+    type?: States
 }

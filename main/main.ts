@@ -32,8 +32,10 @@ export interface ProgramInfo {
         uTextStartPos: WebGLUniformLocation | null;
         isSelected: WebGLUniformLocation | null;
         isHud: WebGLUniformLocation | null;
-        isShadowText: WebGLUniformLocation | null;
+        isHudText: WebGLUniformLocation | null;
         uState: WebGLUniformLocation | null;
+        haveState: WebGLUniformLocation | null;
+        isSmb: WebGLUniformLocation | null;
     }
 }
 
@@ -130,8 +132,10 @@ async function main(): Promise<void> {
             uTextStartPos: gl.getUniformLocation(shaderProgram, 'uTextStartPos'),
             isSelected: gl.getUniformLocation(shaderProgram, 'isSelected'),
             isHud: gl.getUniformLocation(shaderProgram, 'isHud'),
-            isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText'),
-            uState: gl.getUniformLocation(shaderProgram, 'uState')
+            isHudText: gl.getUniformLocation(shaderProgram, 'isHudText'),
+            uState: gl.getUniformLocation(shaderProgram, 'uState'),
+            haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
+            isSmb: gl.getUniformLocation(shaderProgram, 'isSmb')
         }
     }
 

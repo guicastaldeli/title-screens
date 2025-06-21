@@ -13,6 +13,8 @@ import { ProgramInfo } from "../../main.js";
 import { SheetProps } from "./sheet-props.js";
 import { Hud } from "./hud.js";
 import { Title } from "./title.js";
+import { Options } from "./options.js";
+import { Cursor } from "./cursor.js";
 
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
@@ -38,8 +40,8 @@ export class ScreenSmb extends BaseScreen {
 
     private hud: Hud;
     private title: Title;
-    //private options: Options;
-    //private cursor: Cursor;
+    private options: Options;
+    private cursor: Cursor;
 
     constructor(
         state: State,
@@ -58,6 +60,12 @@ export class ScreenSmb extends BaseScreen {
 
         this.hud = new Hud(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
+        this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
+        this.options = new Options(gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
+        this.cursor.setOptions(this.options);
+        this.cursor.setOptionPosition();
+
+        this.setupInput();
     }
 
     //Bakcground
@@ -108,6 +116,8 @@ export class ScreenSmb extends BaseScreen {
         //Elements
             this.hud.drawHud(projectionMatrix);
             this.title.drawTitle(projectionMatrix);
+            this.options.initOptions(projectionMatrix);
+            this.cursor.drawCursor(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -220,6 +230,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
@@ -327,12 +338,33 @@ export class ScreenSmb extends BaseScreen {
         return [0, 0, 0, 1];
     }
 
+    private setupInput(): void {
+        //Mouse
+        const canvas = <HTMLCanvasElement>(this.gl.canvas);
+
+        canvas.addEventListener('mousemove', (e) => {
+            this.cursor.handleMouseMove(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('click', () => {
+            if(!this.state.isLoading()) this.cursor.handleMouseClick();
+        });
+
+        //Keyboard
+        document.addEventListener('keydown', (e) => {
+            if(!this.state.isLoading()) this.cursor.handleInput(e.key);
+        });
+    }
+
     private async loadAssets(): Promise<void> {
+        await this.cursor.getTex();
+        await this.options.getTex();
         await this.hud.getTex();
         await this.title.getTex();
     }
 
     public updateLevelState(): void {
+        this.options.updateState();
         this.hud.updateState();
     }
 
@@ -341,6 +373,10 @@ export class ScreenSmb extends BaseScreen {
 
         this.hud.update(deltaTime);
         this.title.update(deltaTime);
+
+        this.options.update(deltaTime);
+        this.cursor.update();
+        
         this.createBackground();
     }
 

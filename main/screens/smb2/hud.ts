@@ -23,6 +23,7 @@ export class Hud {
 
     private screen: ScreenSmb;
     private levelState: LevelState;
+    private currentState: States;
     private sheetProps: SheetProps;
 
     private animationManager!: AnimationManager;
@@ -32,8 +33,6 @@ export class Hud {
 
     private color: [number, number, number, number] = [1.0, 1.0, 1.0, 1.0];
     private containerPosition: [number, number] = [-0.075, -0.15];
-
-    private currentState: States;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -49,9 +48,8 @@ export class Hud {
 
         this.screen = screen;
         this.levelState = levelState;
-        this.sheetProps = sheetProps;
-
         this.currentState = this.levelState.getCurrentState();
+        this.sheetProps = sheetProps;
 
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
@@ -116,7 +114,7 @@ export class Hud {
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 1);
-            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -281,7 +279,8 @@ export class Hud {
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
-            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 1);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isSelected, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -351,7 +350,7 @@ export class Hud {
             this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
-            this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);

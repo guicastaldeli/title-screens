@@ -33,6 +33,7 @@ export class ScreenDk extends BaseScreen {
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
         this.options = new Options(gl, buffers, programInfo, this, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
+        this.cursor.setOptionPosition();
         this.setupInput();
     }
     //Background
@@ -135,6 +136,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 0);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     //Texture

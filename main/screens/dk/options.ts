@@ -93,10 +93,11 @@ export class Options {
         const textStartX = x;
         const textEndX = startX + (letters.length * spacing);
 
-        const option = this.options.find(opt =>
-            opt.position[0] === x - this.containerPosition[0] &&
-            opt.position[1] === y - this.containerPosition[1]
-        );
+        const option = this.options.find(opt => {
+            const dx = Math.abs(opt.position[0] - (x - this.containerPosition[0]));
+            const dy = Math.abs(opt.position[1] - (y - this.containerPosition[1]));
+            return dx < 0.001 && dy < 0.001;
+        });
 
         const isSelected = option !== undefined 
         && this.options.indexOf(option) === this.cursor.selectedIndex;
@@ -193,6 +194,7 @@ export class Options {
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isSmb, 0);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 

@@ -12,8 +12,8 @@ export class AnimationManager {
         
         this.animations.title = new Animation(sheetProps, titleGroups, {
             frameKeys: ['f', 's', 't'],
-            spriteSize: sheetProps.titleProps().spriteSize,
-            spriteSheetSize: sheetProps.titleProps().spriteSheetSize,
+            spriteSize: sheetProps.titleProps().sheetSize,
+            spriteSheetSize: sheetProps.titleProps().sheetSize,
             defaultCoords: [0, 0]
         });
 

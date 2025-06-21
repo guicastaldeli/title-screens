@@ -3,7 +3,6 @@ export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.52, 0];
         this.coords = [518.99, 265.5];
-        this.size = [8, 8];
         this.isMouseControlled = true;
         this.selectedIndex = 0;
         this.optionPosition = [];
@@ -31,6 +30,7 @@ export class Cursor {
                 this.cursorCurrentPosition = [...this.optionPosition[0]];
                 this.cursorTargetPosition = [...this.optionPosition[0]];
                 this.selectedIndex = 0;
+                this.position = [this.cursorOffsetX, this.optionPosition[0][0]];
                 this.updateCursor();
             }
         }
@@ -50,7 +50,7 @@ export class Cursor {
         const spriteCoords = this.coords;
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = this.sheetProps.spriteSheetSize;
-        const [spriteWidth, spriteHeight] = [this.size[0], this.size[1]];
+        const [spriteWidth, spriteHeight] = [8, 8];
         const left = spriteX / sheetWidth;
         const right = (spriteX + spriteWidth) / sheetWidth;
         const top = spriteY / sheetHeight;
@@ -75,6 +75,7 @@ export class Cursor {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
