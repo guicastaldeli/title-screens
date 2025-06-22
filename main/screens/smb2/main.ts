@@ -120,13 +120,13 @@ export class ScreenSmb extends BaseScreen {
         this.drawTile(projectionMatrix);
 
         //Elements
+            //Terrain
+            this.terrain.initTerrain(projectionMatrix);
+
             this.hud.drawHud(projectionMatrix);
             this.title.drawTitle(projectionMatrix);
             this.options.initOptions(projectionMatrix);
             this.cursor.drawCursor(projectionMatrix);
-
-            //Terrain
-            this.terrain.initTerrain(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -212,15 +212,18 @@ export class ScreenSmb extends BaseScreen {
         ];
 
         const currentState = this.levelState.getCurrentState();
-        const stateValue = currentState === States.Overworld ? 0 :
-                            currentState === States.Underground ? 1 :
-                            currentState === States.Underwater ? 2 :
-                            3
+        const stateValue = 
+        currentState === States.Overworld ? 0 :
+        currentState === States.Underground ? 1 :
+        currentState === States.Underwater ? 2 : 3;
 
         const color = this.parseColor('rgb(56, 56, 56)');
 
         const colors = [
-            ...color, ...color, ...color, ...color
+            ...color, 
+            ...color, 
+            ...color, 
+            ...color
         ];
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);

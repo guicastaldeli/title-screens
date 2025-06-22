@@ -55,5 +55,13 @@ export interface CoinMap {
             underwater: GroundCoords;
             castle: GroundCoords;
         }
+
+        //Elements
+        export type ElementsCoords = [number, number];
+
+        export interface ElementsMap {
+            water: ElementsCoords,
+            lava: ElementsCoords
+        }
     //
 //

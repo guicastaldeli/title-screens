@@ -5,12 +5,15 @@ import { LetterCoords } from "./texture-map.interface.js";
 import { LetterMap } from "./texture-map.interface.js";
 import { GroundCoords } from "./texture-map.interface.js";
 import { GroundMap } from "./texture-map.interface.js";
+import { ElementsCoords } from "./texture-map.interface.js";
+import { ElementsMap } from "./texture-map.interface.js";
 
 export class TextureMap {
     public title: TitleMap;
     public coins: CoinMap;
     public letters: LetterMap;
     public ground: GroundMap;
+    public elements: ElementsMap;
 
     constructor() {
         this.letters = this.setLetters();
@@ -21,6 +24,7 @@ export class TextureMap {
 
         //Terrain
         this.ground = this.setGround();
+        this.elements = this.setElements();
     }
 
     private setLetters(): LetterMap {
@@ -525,17 +529,28 @@ export class TextureMap {
         }
     }
 
+    //Terrain
     private setGround(): GroundMap {
         const overworld: GroundCoords = [0, 16];
         const underground: GroundCoords = [147, 15.9];
         const underwater: GroundCoords = [147, 99.9];
-        const castle: GroundCoords = [0, 99.9];
+        const castle: GroundCoords = [17, 99.9];
 
         return {
             overworld,
             underground,
             underwater,
             castle
+        }
+    }
+
+    private setElements(): ElementsMap {
+        const water: ElementsCoords = [637, 15.9];
+        const lava: ElementsCoords = [147, 15.9];
+
+        return {
+            water,
+            lava
         }
     }
 }

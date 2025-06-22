@@ -108,6 +108,7 @@ function main() {
                 isShadowText: gl.getUniformLocation(shaderProgram, 'isShadowText'),
                 uState: gl.getUniformLocation(shaderProgram, 'uState'),
                 haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
+                isGround: gl.getUniformLocation(shaderProgram, 'isGround'),
             }
         };
         gl.useProgram(programInfo.program);

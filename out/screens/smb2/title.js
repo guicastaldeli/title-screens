@@ -25,7 +25,7 @@ export class Title {
         const modelViewMatrix = mat4.create();
         const titleX = this.position[0];
         const titleY = this.position[1] + this.screen['setSize'].h * 0.1;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [titleX, titleY, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [titleX, titleY, 0.1]);
         const positions = [
             -this.size[0], -this.size[1],
             this.size[0], -this.size[1],
@@ -65,6 +65,8 @@ export class Title {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);

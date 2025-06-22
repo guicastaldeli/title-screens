@@ -6,6 +6,7 @@ export class TextureMap {
         this.coins = this.setCoins();
         //Terrain
         this.ground = this.setGround();
+        this.elements = this.setElements();
     }
     setLetters() {
         const overworld = {
@@ -504,16 +505,25 @@ export class TextureMap {
             info
         };
     }
+    //Terrain
     setGround() {
         const overworld = [0, 16];
         const underground = [147, 15.9];
         const underwater = [147, 99.9];
-        const castle = [0, 99.9];
+        const castle = [17, 99.9];
         return {
             overworld,
             underground,
             underwater,
             castle
+        };
+    }
+    setElements() {
+        const water = [637, 15.9];
+        const lava = [147, 15.9];
+        return {
+            water,
+            lava
         };
     }
 }

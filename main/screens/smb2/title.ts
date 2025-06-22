@@ -50,7 +50,7 @@ export class Title {
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [titleX, titleY, 0]
+            [titleX, titleY, 0.1]
         );
 
         const positions = [
@@ -101,6 +101,9 @@ export class Title {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
