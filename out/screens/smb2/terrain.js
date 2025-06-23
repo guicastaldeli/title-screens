@@ -105,7 +105,7 @@ export class Terrain {
         ];
         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
     }
-    setGround(projectionMatrix) {
+    setTerrain(projectionMatrix) {
         const width = this.size[0] * 1.95;
         const height = this.size[1] * 1.95;
         const lastWidth = width * 0.83;
@@ -159,10 +159,121 @@ export class Terrain {
             }
         }
     }
+    //Elements
+    //Overworld
+    drawClouds(projectionMatrix, x, y) {
+        const modelViewMatrix = mat4.create();
+        const map = this.textureMap.elements.underwater.water;
+        const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+        const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0], this.size[1],
+            this.size[0], this.size[1],
+        ];
+        const [spriteX, spriteY] = map;
+        const [sheetWidth, sheetHeight] = sheetSize;
+        const [spriteWidth, spriteHeight] = spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+    }
+    drawCastle(projectionMatrix, x, y) {
+        const modelViewMatrix = mat4.create();
+        const map = this.textureMap.elements.overworld.castle;
+        const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+        const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0], this.size[1],
+            this.size[0], this.size[1],
+        ];
+        const [spriteX, spriteY] = map;
+        const [sheetWidth, sheetHeight] = sheetSize;
+        const [spriteWidth, spriteHeight] = spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+    }
+    drawTrees(projectionMatrix, x, y) {
+        const modelViewMatrix = mat4.create();
+        const map = this.textureMap.elements.overworld.trees;
+        const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+        const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0], this.size[1],
+            this.size[0], this.size[1],
+        ];
+        const [spriteX, spriteY] = map.f;
+        const [sheetWidth, sheetHeight] = sheetSize;
+        const [spriteWidth, spriteHeight] = spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+    }
+    drawMushrooms(projectionMatrix, x, y) {
+        const modelViewMatrix = mat4.create();
+        const map = this.textureMap.elements.overworld.mushrooms;
+        const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+        const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            -this.size[0], -this.size[1],
+            this.size[0], -this.size[1],
+            -this.size[0], this.size[1],
+            this.size[0], this.size[1],
+        ];
+        const [spriteX, spriteY] = map;
+        const [sheetWidth, sheetHeight] = sheetSize;
+        const [spriteWidth, spriteHeight] = spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+    }
+    //
     //Underwater
     drawWater(projectionMatrix, x, y) {
         const modelViewMatrix = mat4.create();
-        const map = this.textureMap.elements.water;
+        const map = this.textureMap.elements.underwater.water;
         const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
         const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
@@ -190,7 +301,7 @@ export class Terrain {
     //
     //Castle
     drawLava(projectionMatrix, x, y) {
-        const map = this.textureMap.elements.lava;
+        const map = this.textureMap.elements.castle.lava;
         const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
         const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
         const positions = [
@@ -233,6 +344,7 @@ export class Terrain {
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
     }
     //
+    //
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -245,7 +357,7 @@ export class Terrain {
         });
     }
     initTerrain(projectionMatrix) {
-        this.setGround(projectionMatrix);
+        this.setTerrain(projectionMatrix);
     }
     updateState() {
         this.currentState = this.levelState.getCurrentState();

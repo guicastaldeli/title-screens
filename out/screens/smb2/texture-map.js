@@ -522,14 +522,35 @@ export class TextureMap {
         };
     }
     setElements() {
-        const water = [637, 15.9];
-        const lava = {
-            f: [200, 476],
-            s: [540, 33],
+        const overworld = {
+            clouds: {
+                f: [0, 0],
+                s: [0, 0]
+            },
+            castle: [0, 0],
+            trees: {
+                f: [0, 0],
+                s: [0, 0]
+            },
+            mushrooms: [0, 0]
+        };
+        const underground = {
+            pipe: [0, 0]
+        };
+        const underwater = {
+            water: [637, 15.9]
+        };
+        const castle = {
+            lava: {
+                f: [200, 476],
+                s: [540, 33],
+            }
         };
         return {
-            water,
-            lava
+            overworld,
+            underground,
+            underwater,
+            castle
         };
     }
 }

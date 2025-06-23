@@ -65,18 +65,32 @@ export interface CoinMap {
         }
 
         //Elements
-        export type ElementsCoords = 
-            [number, number] |
-            {
-                f: [number, number];
-                s: [number, number]
-            }
+        type SingleCoord = [number, number];
+        type PairedCoords = {
+            f: SingleCoord,
+            s: SingleCoord
+        }
+
+        export type ElementsCoords =
+        SingleCoord |
+        PairedCoords |
+        Record<string, SingleCoord | PairedCoords>;
 
         export interface ElementsMap {
-            water: ElementsCoords,
-            lava: {
-                f: ElementsCoords,
-                s: ElementsCoords
+            overworld: {
+                clouds: PairedCoords,
+                castle: SingleCoord,
+                trees: PairedCoords,
+                mushrooms: SingleCoord
+            }
+            underground: {
+                pipe: SingleCoord
+            }
+            underwater: {
+                water: SingleCoord
+            }
+            castle: {
+                lava: PairedCoords
             }
         }
     //

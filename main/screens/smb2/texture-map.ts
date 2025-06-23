@@ -548,15 +548,36 @@ export class TextureMap {
     }
 
     private setElements(): ElementsMap {
-        const water: ElementsCoords = [637, 15.9];
-        const lava: ElementsCoords = {
-            f: [200, 476],
-            s: [540, 33],
+        const overworld: ElementsCoords = {
+            clouds: {
+                f: [0, 0],
+                s: [0, 0]
+            },
+            castle: [0, 0],
+            trees: {
+                f: [0, 0],
+                s: [0, 0]
+            },
+            mushrooms: [0, 0]
+        }
+        const underground: ElementsCoords = {
+            pipe: [0, 0]
+        }
+        const underwater: ElementsCoords = {
+            water: [637, 15.9]
+        }
+        const castle: ElementsCoords = {
+            lava: {
+                f: [200, 476],
+                s: [540, 33],
+            }
         }
 
         return {
-            water,
-            lava
-        }
+            overworld,
+            underground,
+            underwater,
+            castle
+        } as ElementsMap
     }
 }

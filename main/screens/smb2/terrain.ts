@@ -160,7 +160,7 @@ export class Terrain {
         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
     }
 
-    private setGround(projectionMatrix: mat4): void {
+    private setTerrain(projectionMatrix: mat4): void {
         const width = this.size[0] * 1.95;
         const height = this.size[1] * 1.95;
         const lastWidth = width * 0.83;
@@ -234,123 +234,301 @@ export class Terrain {
         }
     }
 
-    //Underwater
-        private drawWater(
-            projectionMatrix: mat4, 
-            x: number,
-            y: number
-        ): void {
-            const modelViewMatrix = mat4.create();
+    //Elements
+        //Overworld
+            private drawClouds(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const modelViewMatrix = mat4.create();
 
-            const map = this.textureMap.elements.water as [number, number];
-            const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-            const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+                const map = this.textureMap.elements.underwater.water as [number, number];
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
 
-            mat4.translate(
-                modelViewMatrix,
-                modelViewMatrix,
-                [x, y, 0]
-            );
+                mat4.translate(
+                    modelViewMatrix,
+                    modelViewMatrix,
+                    [x, y, 0]
+                );
 
-            const positions = [
-                -this.size[0], -this.size[1],
-                this.size[0], -this.size[1],
-                -this.size[0], this.size[1],
-                this.size[0], this.size[1],
-            ];
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
 
-            const [spriteX, spriteY] = map;
-            const [sheetWidth, sheetHeight] = sheetSize;
-            const [spriteWidth, spriteHeight] = spriteSize;
+                const [spriteX, spriteY] = map;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
 
-            const left = spriteX / sheetWidth;
-            const right = (spriteX + spriteWidth) / sheetWidth;
-            const top = spriteY / sheetHeight;
-            const bottom = ((spriteY + spriteHeight) / sheetHeight);
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
 
-            const coords = [
-                left, bottom,
-                right, bottom,
-                left, top,
-                right, top
-            ];
- 
-            this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
-        }
-    //
-
-    //Castle
-        private drawLava(
-            projectionMatrix: mat4, 
-            x: number,
-            y: number
-        ): void {
-            const map = 
-            this.textureMap.elements.lava as { 
-                f: [number, number],
-                s: [number, number]
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+    
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
             }
-            
-            const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-            const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
 
+            private drawCastle(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const modelViewMatrix = mat4.create();
 
-            const positions = [
-                -this.size[0], -this.size[1],
-                this.size[0], -this.size[1],
-                -this.size[0], this.size[1],
-                this.size[0], this.size[1],
-            ];
+                const map = this.textureMap.elements.overworld.castle as [number, number];
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
 
-            const topRowY = y + this.size[1];
-            const bottomRowY = y;
-            const depperRowY = y - this.size[1];
-            const z = -0.1;
+                mat4.translate(
+                    modelViewMatrix,
+                    modelViewMatrix,
+                    [x, y, 0]
+                );
 
-           const fModelViewMatrix = mat4.create();
-           mat4.translate(fModelViewMatrix, fModelViewMatrix, [x, topRowY, z]);
-           this.drawLavaFrame(projectionMatrix, fModelViewMatrix, positions, map.f, sheetSize, spriteSize);
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
 
-           const sModelViewMatrix = mat4.create();
-           mat4.translate(sModelViewMatrix, sModelViewMatrix, [x, bottomRowY, z]);
-           this.drawLavaFrame(projectionMatrix, sModelViewMatrix, positions, map.s, sheetSize, spriteSize);
+                const [spriteX, spriteY] = map;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
 
-           const tModelViewMatrix = mat4.create();
-           mat4.translate(tModelViewMatrix, tModelViewMatrix, [x, depperRowY, z]);
-           this.drawLavaFrame(projectionMatrix, tModelViewMatrix, positions, map.s, sheetSize, spriteSize);
-        }
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
 
-        private drawLavaFrame(
-            projectionMatrix: mat4,
-            modelViewMatrix: mat4,
-            positions: number[],
-            frameCoords: [number, number],
-            sheetSize: [number, number],
-            spriteSize: [number, number]
-        ): void {
-            const [spriteX, spriteY] = frameCoords;
-            const [sheetWidth, sheetHeight] = sheetSize;
-            const [spriteWidth, spriteHeight] = spriteSize;
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+    
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+            }
 
-            const left = spriteX / sheetWidth;
-            const right = (spriteX + spriteWidth) / sheetWidth;
-            const top = spriteY / sheetHeight;
-            const bottom = ((spriteY + spriteHeight) / sheetHeight);
+            private drawTrees(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const modelViewMatrix = mat4.create();
 
-            const coords = [
-                left, bottom,
-                right, bottom,
-                left, top,
-                right, top
-            ];
+                const map =
+                this.textureMap.elements.overworld.trees as { 
+                    f: [number, number],
+                    s: [number, number]
+                }
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
 
-            this.gl.enable(this.gl.DEPTH_TEST);
-            this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
-            this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
-            this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
-        }
+                mat4.translate(
+                    modelViewMatrix,
+                    modelViewMatrix,
+                    [x, y, 0]
+                );
+
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
+
+                const [spriteX, spriteY] = map.f;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
+
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
+
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+    
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+            }
+
+            private drawMushrooms(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const modelViewMatrix = mat4.create();
+
+                const map = this.textureMap.elements.overworld.mushrooms as [number, number];
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+
+                mat4.translate(
+                    modelViewMatrix,
+                    modelViewMatrix,
+                    [x, y, 0]
+                );
+
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
+
+                const [spriteX, spriteY] = map;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
+
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
+
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+    
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+            }
+        //
+
+        //Underwater
+            private drawWater(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const modelViewMatrix = mat4.create();
+
+                const map = this.textureMap.elements.underwater.water as [number, number];
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+
+                mat4.translate(
+                    modelViewMatrix,
+                    modelViewMatrix,
+                    [x, y, 0]
+                );
+
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
+
+                const [spriteX, spriteY] = map;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
+
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
+
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+    
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+            }
+        //
+
+        //Castle
+            private drawLava(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
+                const map = 
+                this.textureMap.elements.castle.lava as { 
+                    f: [number, number],
+                    s: [number, number]
+                }
+                
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+
+                const positions = [
+                    -this.size[0], -this.size[1],
+                    this.size[0], -this.size[1],
+                    -this.size[0], this.size[1],
+                    this.size[0], this.size[1],
+                ];
+
+                const topRowY = y + this.size[1];
+                const bottomRowY = y;
+                const depperRowY = y - this.size[1];
+                const z = -0.1;
+
+                const fModelViewMatrix = mat4.create();
+                mat4.translate(fModelViewMatrix, fModelViewMatrix, [x, topRowY, z]);
+                this.drawLavaFrame(projectionMatrix, fModelViewMatrix, positions, map.f, sheetSize, spriteSize);
+
+                const sModelViewMatrix = mat4.create();
+                mat4.translate(sModelViewMatrix, sModelViewMatrix, [x, bottomRowY, z]);
+                this.drawLavaFrame(projectionMatrix, sModelViewMatrix, positions, map.s, sheetSize, spriteSize);
+
+                const tModelViewMatrix = mat4.create();
+                mat4.translate(tModelViewMatrix, tModelViewMatrix, [x, depperRowY, z]);
+                this.drawLavaFrame(projectionMatrix, tModelViewMatrix, positions, map.s, sheetSize, spriteSize);
+            }
+
+            private drawLavaFrame(
+                projectionMatrix: mat4,
+                modelViewMatrix: mat4,
+                positions: number[],
+                frameCoords: [number, number],
+                sheetSize: [number, number],
+                spriteSize: [number, number]
+            ): void {
+                const [spriteX, spriteY] = frameCoords;
+                const [sheetWidth, sheetHeight] = sheetSize;
+                const [spriteWidth, spriteHeight] = spriteSize;
+
+                const left = spriteX / sheetWidth;
+                const right = (spriteX + spriteWidth) / sheetWidth;
+                const top = spriteY / sheetHeight;
+                const bottom = ((spriteY + spriteHeight) / sheetHeight);
+
+                const coords = [
+                    left, bottom,
+                    right, bottom,
+                    left, top,
+                    right, top
+                ];
+
+                this.gl.enable(this.gl.DEPTH_TEST);
+                this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
+                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
+            }
+        //
     //
-
 
     public async getTex(): Promise<void> {
         try {
@@ -362,7 +540,7 @@ export class Terrain {
     }
 
     public initTerrain(projectionMatrix: mat4): void {        
-        this.setGround(projectionMatrix);
+        this.setTerrain(projectionMatrix);
     }
 
     public updateState(): void {
