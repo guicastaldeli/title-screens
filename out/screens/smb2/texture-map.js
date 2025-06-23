@@ -508,7 +508,10 @@ export class TextureMap {
     //Terrain
     setGround() {
         const overworld = [0, 16];
-        const underground = [147, 15.9];
+        const underground = {
+            ground: [147, 16],
+            ceil: [167, 15.9],
+        };
         const underwater = [147, 99.9];
         const castle = [17, 99.9];
         return {
@@ -520,7 +523,10 @@ export class TextureMap {
     }
     setElements() {
         const water = [637, 15.9];
-        const lava = [147, 15.9];
+        const lava = {
+            f: [200, 476],
+            s: [540, 33],
+        };
         return {
             water,
             lava

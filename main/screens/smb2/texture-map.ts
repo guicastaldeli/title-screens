@@ -532,7 +532,10 @@ export class TextureMap {
     //Terrain
     private setGround(): GroundMap {
         const overworld: GroundCoords = [0, 16];
-        const underground: GroundCoords = [147, 15.9];
+        const underground: GroundCoords = {
+            ground: [147, 16],
+            ceil: [167, 15.9],
+        }
         const underwater: GroundCoords = [147, 99.9];
         const castle: GroundCoords = [17, 99.9];
 
@@ -546,7 +549,10 @@ export class TextureMap {
 
     private setElements(): ElementsMap {
         const water: ElementsCoords = [637, 15.9];
-        const lava: ElementsCoords = [147, 15.9];
+        const lava: ElementsCoords = {
+            f: [200, 476],
+            s: [540, 33],
+        }
 
         return {
             water,

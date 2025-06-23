@@ -93,6 +93,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -387,6 +388,7 @@ export class ScreenSmb extends BaseScreen {
 
         this.hud.update(deltaTime);
         this.title.update(deltaTime);
+        this.terrain.update(deltaTime);
 
         this.options.update(deltaTime);
         this.cursor.update();

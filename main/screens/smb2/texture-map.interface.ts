@@ -47,21 +47,37 @@ export interface CoinMap {
 //Tileset
     //Terrain
         //Ground
-        export type GroundCoords = [number, number];
+        export type GroundCoords = 
+            [number, number] |
+            {
+                ground: [number, number];
+                ceil: [number, number]
+            }
 
         export interface GroundMap {
             overworld: GroundCoords;
-            underground: GroundCoords;
+            underground: {
+                ground: GroundCoords;
+                ceil: GroundCoords;
+            }
             underwater: GroundCoords;
             castle: GroundCoords;
         }
 
         //Elements
-        export type ElementsCoords = [number, number];
+        export type ElementsCoords = 
+            [number, number] |
+            {
+                f: [number, number];
+                s: [number, number]
+            }
 
         export interface ElementsMap {
             water: ElementsCoords,
-            lava: ElementsCoords
+            lava: {
+                f: ElementsCoords,
+                s: ElementsCoords
+            }
         }
     //
 //

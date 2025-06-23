@@ -14,6 +14,7 @@ uniform bool isShadowText;
 uniform bool isCursor;
 uniform bool isSelected;
 uniform bool haveState;
+uniform bool isLava;
 
 uniform float uState;
 
@@ -122,6 +123,12 @@ void main() {
 
     if(isHudText) {
         vec4 color = vec4(0.580, 0.580, 1.0, 1.0);
+        float threshold = 0.1;
+        if(length(tex.rgb - color.rgb) < threshold) discard;
+    }
+
+    if(isLava) {
+        vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
         float threshold = 0.1;
         if(length(tex.rgb - color.rgb) < threshold) discard;
     }
