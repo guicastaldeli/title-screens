@@ -38,6 +38,7 @@ export interface ProgramInfo {
         haveState: WebGLUniformLocation | null;
         isGround: WebGLUniformLocation | null;
         isLava: WebGLUniformLocation | null;
+        needTransp: WebGLUniformLocation | null;
     }
 }
 
@@ -139,7 +140,8 @@ async function main(): Promise<void> {
             uState: gl.getUniformLocation(shaderProgram, 'uState'),
             haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
             isGround: gl.getUniformLocation(shaderProgram, 'isGround'),
-            isLava: gl.getUniformLocation(shaderProgram, 'isLava')
+            isLava: gl.getUniformLocation(shaderProgram, 'isLava'),
+            needTransp: gl.getUniformLocation(shaderProgram, 'needTransp')
         }
     }
 

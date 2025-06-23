@@ -550,10 +550,10 @@ export class TextureMap {
     private setElements(): ElementsMap {
         const overworld: ElementsCoords = {
             clouds: {
-                f: [0, 0],
-                s: [0, 0]
+                f: [350, 628.18],
+                s: [624, 596.18]
             },
-            castle: [0, 0],
+            castle: [24.05, 683.1],
             trees: {
                 f: [0, 0],
                 s: [0, 0]

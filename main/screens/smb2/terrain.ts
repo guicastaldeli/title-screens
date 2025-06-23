@@ -8,6 +8,7 @@ import { LevelState } from "./level-state.js";
 import { GroundCoords, States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
+import { PairedCoords } from "./texture-map.interface.js";
 
 export class Terrain {
     private gl: WebGLRenderingContext;
@@ -26,8 +27,17 @@ export class Terrain {
     private size: [number, number] = [0.1, 0.1];
 
     private cols: number = 35;
+    private numClouds: number = 8;
     private scroll: number = 0.0;
-    private speed: number = 0.1;
+    private speed: number = 0.2;
+    private spacing: number = 50;
+    private clouds: Array<{
+        x: number,
+        y: number,
+        speed: number,
+        scale: number,
+        variant: keyof PairedCoords
+    }> = [];
 
     constructor(
         gl: WebGLRenderingContext,
@@ -46,6 +56,7 @@ export class Terrain {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
+        this.initCloudVariants();
     }
 
     private glConfig(
@@ -166,12 +177,15 @@ export class Terrain {
         const lastWidth = width * 0.83;
         const lastHeight = height * 9.25;
 
+        //Overworld
+        const cloudCoordsY = height * 2;
+
         //Underwater
-        const waterCoords = height * 4.62;
+        const waterCoordsY = height * 4.62;
 
         //Castle
         const castleGroundCoords = this.position[0] * 2.8;
-        const lavaCoords = height - 1.003;
+        const lavaCoordsY = height - 1.003;
 
         const rows =
         this.currentState === States.Underwater ? 1 :
@@ -198,6 +212,9 @@ export class Terrain {
                 //Last X
                 const lx = startX + j * lastWidth;
 
+                //Overworld
+                if(this.currentState === States.Overworld) this.setOverworldTerrain(projectionMatrix, x, y, j, i);
+
                 //Underground
                 if(this.currentState === States.Underground && i === 2) {
                     const ceilCoords = this.textureMap.ground.underground.ceil as [number, number];
@@ -218,8 +235,8 @@ export class Terrain {
                     const scroll = x + this.scroll;
                     const wrapped = scroll % (this.cols * width);
                     const finalCoord = 1.1;
-                    const final = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
-                    this.drawWater(projectionMatrix, final, waterCoords);
+                    const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
+                    this.drawWater(projectionMatrix, finalX, waterCoordsY);
                 }
 
                 //Lava
@@ -227,8 +244,8 @@ export class Terrain {
                     const scroll = x + this.scroll;
                     const wrapped = scroll % (this.cols * width);
                     const finalCoord = 1.1;
-                    const final = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
-                    this.drawLava(projectionMatrix, final, lavaCoords);
+                    const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
+                    this.drawLava(projectionMatrix, finalX, lavaCoordsY);
                 }
             }
         }
@@ -236,48 +253,94 @@ export class Terrain {
 
     //Elements
         //Overworld
-            private drawClouds(
-                projectionMatrix: mat4, 
-                x: number,
-                y: number
-            ): void {
-                const modelViewMatrix = mat4.create();
+            //Cloud
+                private cloudLength = 35;
+                private cloudGapX = () => Math.random() * (3 - 1.5) + 1.5;
+                private cloudGapY = () => Math.random() * (0.5 - (-0.5)) + (-0.5);
 
-                const map = this.textureMap.elements.underwater.water as [number, number];
-                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+                private initCloudVariants(): void {
+                    for(let i = 0; i < this.cloudLength; i++) {
+                        this.clouds.push({
+                            x: this.position[0] + (i * this.cloudGapX()),
+                            y: (this.size[1] * 2) + this.cloudGapY(),
+                            speed: Math.random() * 0.05 + 0.05,
+                            scale: 0.15,
+                            variant: Math.random() < 0.6 ? 'f' : 's'
+                        });
+                    }
+                }
 
-                mat4.translate(
-                    modelViewMatrix,
-                    modelViewMatrix,
-                    [x, y, 0]
-                );
+                private updateClouds(deltaTime: number): void {
+                    const lScreen = this.position[0];
 
-                const positions = [
-                    -this.size[0], -this.size[1],
-                    this.size[0], -this.size[1],
-                    -this.size[0], this.size[1],
-                    this.size[0], this.size[1],
-                ];
+                    for(const cloud of this.clouds) {
+                        cloud.x -= cloud.speed * deltaTime;
 
-                const [spriteX, spriteY] = map;
-                const [sheetWidth, sheetHeight] = sheetSize;
-                const [spriteWidth, spriteHeight] = spriteSize;
+                        if(cloud.x + cloud.scale < lScreen) {
+                            let fCloud = this.clouds[0];
 
-                const left = spriteX / sheetWidth;
-                const right = (spriteX + spriteWidth) / sheetWidth;
-                const top = spriteY / sheetHeight;
-                const bottom = ((spriteY + spriteHeight) / sheetHeight);
+                            for(const c of this.clouds) {
+                                if(c.x > fCloud.x) {
+                                    fCloud = c;
+                                }
+                            }
 
-                const coords = [
-                    left, bottom,
-                    right, bottom,
-                    left, top,
-                    right, top
-                ];
-    
-                this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
-            }
+                            cloud.x = fCloud.x + this.cloudGapX();
+                            cloud.y = (this.size[1] * 2) + this.cloudGapY();
+                            cloud.variant = Math.random() < 0.6 ? 'f' : 's'; 
+                        }
+                    }
+                }
+
+                private drawClouds(projectionMatrix: mat4): void {
+                    const map = this.textureMap.elements.overworld.clouds as PairedCoords;
+                    const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                    const baseSize = [0.9, 0.6];
+                    const spriteSizes = {
+                        f: [35, 25] as [number, number],
+                        s: [50, 30] as [number, number]
+                    }
+
+                    for(const c of this.clouds) {
+                        const modelViewMatrix = mat4.create();
+                        const scaledWidth = baseSize[0] * c.scale;
+                        const scaleHeight = baseSize[1] * c.scale;
+
+                        mat4.translate(
+                            modelViewMatrix,
+                            modelViewMatrix,
+                            [c.x, c.y, 0]
+                        );
+
+                        const positions = [
+                            -scaledWidth, -scaleHeight,
+                            scaledWidth, -scaleHeight,
+                            -scaledWidth, scaleHeight,
+                            scaledWidth, scaleHeight
+                        ];
+                        
+                        const [spriteX, spriteY] = map[c.variant];
+                        const [spriteWidth, spriteHeight] = spriteSizes[c.variant];
+                        const [sheetWidth, sheetHeight] = sheetSize;
+
+                        const left = spriteX / sheetWidth;
+                        const right = (spriteX + spriteWidth) / sheetWidth;
+                        const top = spriteY / sheetHeight;
+                        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+
+                        const coords = [
+                            left, bottom,
+                            right, bottom,
+                            left, top,
+                            right, top
+                        ];
+
+                        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
+                        this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
+                    }
+                }
+            //
 
             private drawCastle(
                 projectionMatrix: mat4, 
@@ -286,21 +349,26 @@ export class Terrain {
             ): void {
                 const modelViewMatrix = mat4.create();
 
+                const size = [0.5, 0.5];
+
                 const map = this.textureMap.elements.overworld.castle as [number, number];
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+                const spriteSize = [80, 80]
+
+                const updX = 0.5;
+                const updY = 0.79;
 
                 mat4.translate(
                     modelViewMatrix,
                     modelViewMatrix,
-                    [x, y, 0]
+                    [x + updX, y + updY, 0]
                 );
 
                 const positions = [
-                    -this.size[0], -this.size[1],
-                    this.size[0], -this.size[1],
-                    -this.size[0], this.size[1],
-                    this.size[0], this.size[1],
+                    -size[0], -size[1],
+                    size[0], -size[1],
+                    -size[0], size[1],
+                    size[0], size[1],
                 ];
 
                 const [spriteX, spriteY] = map;
@@ -319,7 +387,9 @@ export class Terrain {
                     right, top
                 ];
     
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
             }
 
             private drawTrees(
@@ -329,28 +399,33 @@ export class Terrain {
             ): void {
                 const modelViewMatrix = mat4.create();
 
-                const map =
-                this.textureMap.elements.overworld.trees as { 
+                const size = [0.5, 0.5];
+
+                const map = this.textureMap.elements.overworld.trees as {
                     f: [number, number],
                     s: [number, number]
                 }
+
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+                const spriteSize = [80, 80]
+
+                const updX = 0.5;
+                const updY = 0.79;
 
                 mat4.translate(
                     modelViewMatrix,
                     modelViewMatrix,
-                    [x, y, 0]
+                    [x + updX, y + updY, 0]
                 );
 
                 const positions = [
-                    -this.size[0], -this.size[1],
-                    this.size[0], -this.size[1],
-                    -this.size[0], this.size[1],
-                    this.size[0], this.size[1],
+                    -size[0], -size[1],
+                    size[0], -size[1],
+                    -size[0], size[1],
+                    size[0], size[1],
                 ];
 
-                const [spriteX, spriteY] = map.f;
+                const [spriteX, spriteY] = map;
                 const [sheetWidth, sheetHeight] = sheetSize;
                 const [spriteWidth, spriteHeight] = spriteSize;
 
@@ -366,7 +441,9 @@ export class Terrain {
                     right, top
                 ];
     
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
             }
 
             private drawMushrooms(
@@ -379,11 +456,13 @@ export class Terrain {
                 const map = this.textureMap.elements.overworld.mushrooms as [number, number];
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
                 const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
+                const updX = 1.0;
+                const updY = 1.0;
 
                 mat4.translate(
                     modelViewMatrix,
                     modelViewMatrix,
-                    [x, y, 0]
+                    [x + updX, y + updY, 0]
                 );
 
                 const positions = [
@@ -410,6 +489,23 @@ export class Terrain {
                 ];
     
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+            }
+
+            //Set
+            private setOverworldTerrain(
+                projectionMatrix: mat4, 
+                x: number, 
+                y: number,
+                j: number,
+                i: number
+            ): void {
+                this.drawClouds(projectionMatrix);
+
+                if(i === 0 && j === 0) {
+                    this.drawCastle(projectionMatrix, x, y);
+                    //this.drawTrees(projectionMatrix, x, y);
+                    //this.drawMushrooms(projectionMatrix, x, y);
+                }
             }
         //
 
@@ -464,8 +560,7 @@ export class Terrain {
                 x: number,
                 y: number
             ): void {
-                const map = 
-                this.textureMap.elements.castle.lava as { 
+                const map = this.textureMap.elements.castle.lava as { 
                     f: [number, number],
                     s: [number, number]
                 }
@@ -549,6 +644,8 @@ export class Terrain {
 
     public update(deltaTime: number) {
         const width = this.cols * this.size[0];
+        this.scroll -= this.speed * deltaTime;
+        this.updateClouds(deltaTime);
 
         if(this.currentState === States.Underwater) {
             this.scroll -= this.speed * deltaTime;

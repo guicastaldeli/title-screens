@@ -66,7 +66,7 @@ export interface CoinMap {
 
         //Elements
         type SingleCoord = [number, number];
-        type PairedCoords = {
+        export type PairedCoords = {
             f: SingleCoord,
             s: SingleCoord
         }
@@ -75,6 +75,12 @@ export interface CoinMap {
         SingleCoord |
         PairedCoords |
         Record<string, SingleCoord | PairedCoords>;
+
+        export interface CloudParameters {
+            finalX: number;
+            coordsY: number;
+            i: number;
+        }
 
         export interface ElementsMap {
             overworld: {
