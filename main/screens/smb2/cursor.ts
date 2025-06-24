@@ -165,15 +165,17 @@ export class Cursor {
 
         const defaultColor = [...this.options.color] as [number, number, number, number];
         this.options.options.forEach(option => {
-            option.color = defaultColor;
-            option.selected = false;
+            if(!option.selected) {
+                option.color = defaultColor;
+            }
         });
 
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
 
-        if(this.options && this.options.options[this.selectedIndex]) this.options.options[this.selectedIndex].color = this.selectedColor;
+        const currentOption = this.options.options[this.selectedIndex];
+        if(currentOption && !currentOption.selected) currentOption.color = this.selectedColor;
 
         this.getSelectedIndex();
     }
@@ -199,7 +201,7 @@ export class Cursor {
                 this.moveSelection(1);
                 break;
             case 'Enter':
-                this.selected = true
+                this.selected = true;
                 this.options.selectedOption();
                 setTimeout(() => this.selected = false, this.options.intervalSelected);
                 break;
@@ -240,11 +242,15 @@ export class Cursor {
                     
                     if(this.isMouseControlled) {
                         this.selected = false;
-
                         const defaultColor = [...this.options.color] as [number, number, number, number];
     
                         this.options.options.forEach((option, idx) => {
-                            option.color = idx === i ? this.selectedColor : defaultColor;
+                            if(option.selected && 
+                                option.text !== 'MARIO GAME' && 
+                                option.text !== 'LUIGI GAME'
+                            ) {
+                                option.color = idx === i ? this.selectedColor : defaultColor;
+                            }
                         });
                     }
                 }
@@ -255,13 +261,18 @@ export class Cursor {
     }
 
     public handleMouseClick(): void {
-        if(!this.selected) {
+        if(!this.selected && this.options) {
             this.selected = true;
-            if(this.options) this.options.selectedOption();
+            const selectedOption = this.options.options[this.selectedIndex];
 
-            setTimeout(() => {
-               this.selected = false;
-            }, this.options?.intervalSelected || 1000);
+            if(selectedOption.text !== 'MARIO GAME' && 
+                selectedOption.text !== 'LUIGI GAME') {
+                setTimeout(() => {
+                   this.selected = false;
+                }, this.options?.intervalSelected || 1000);
+            }
+
+            this.options.selectedOption();
         }
     }
 

@@ -116,14 +116,16 @@ export class Cursor {
         }
         const defaultColor = [...this.options.color];
         this.options.options.forEach(option => {
-            option.color = defaultColor;
-            option.selected = false;
+            if (!option.selected) {
+                option.color = defaultColor;
+            }
         });
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
-        if (this.options && this.options.options[this.selectedIndex])
-            this.options.options[this.selectedIndex].color = this.selectedColor;
+        const currentOption = this.options.options[this.selectedIndex];
+        if (currentOption && !currentOption.selected)
+            currentOption.color = this.selectedColor;
         this.getSelectedIndex();
     }
     getSelectedIndex() {
@@ -180,7 +182,11 @@ export class Cursor {
                         this.selected = false;
                         const defaultColor = [...this.options.color];
                         this.options.options.forEach((option, idx) => {
-                            option.color = idx === i ? this.selectedColor : defaultColor;
+                            if (option.selected &&
+                                option.text !== 'MARIO GAME' &&
+                                option.text !== 'LUIGI GAME') {
+                                option.color = idx === i ? this.selectedColor : defaultColor;
+                            }
                         });
                     }
                 }
@@ -190,13 +196,16 @@ export class Cursor {
     }
     handleMouseClick() {
         var _a;
-        if (!this.selected) {
+        if (!this.selected && this.options) {
             this.selected = true;
-            if (this.options)
-                this.options.selectedOption();
-            setTimeout(() => {
-                this.selected = false;
-            }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.intervalSelected) || 1000);
+            const selectedOption = this.options.options[this.selectedIndex];
+            if (selectedOption.text !== 'MARIO GAME' &&
+                selectedOption.text !== 'LUIGI GAME') {
+                setTimeout(() => {
+                    this.selected = false;
+                }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.intervalSelected) || 1000);
+            }
+            this.options.selectedOption();
         }
     }
     getTex() {

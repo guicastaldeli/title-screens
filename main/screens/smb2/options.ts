@@ -85,6 +85,13 @@ export class Options {
     private updateSelectionColors(): void {
         const selectedIndex = this.cursor.getSelectedIndex();
         this.options.forEach((opt, i) => {
+            if(!(opt.text === 'MARIO GAME' || 
+                opt.text === 'LUIGI GAME') && 
+                opt.selected
+            ) {
+                return;
+            }
+
             opt.color = i === selectedIndex
                 ? this.cursor.selectedColor
                 : this.color
@@ -129,6 +136,7 @@ export class Options {
                 textEndX,
                 isSelected,
                 type,
+                option?.selected || false
             );
         });
 
@@ -144,6 +152,7 @@ export class Options {
         textEndX: number,
         isSelected: boolean,
         type: States,
+        optionSelected: boolean,
     ): void {
         if(!type) return;
 
@@ -209,8 +218,10 @@ export class Options {
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, isSelected && !this.cursor.selected ? 1 : 0);
-        if(isSelected === true && !this.cursor.selected) this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
+
+        const shouldShowSelectedShader = isSelected && !this.cursor.selected && !optionSelected;
+        this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, shouldShowSelectedShader ? 1 : 0);
+        if(shouldShowSelectedShader) this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
 
         this.gl.uniform4f(this.programInfo.uniformLocations.uColor, ...this.color);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
@@ -267,33 +278,46 @@ export class Options {
             this.selectionTimeout.delete(option);
         }
 
-        this.options.forEach(opt => {
-            if(opt !== option) {
-                opt.selected = false;
-                opt.color = defaultColor;
-            }
-        });
+        if(option.text === 'MARIO GAME' || option.text === 'LUIGI GAME') {
+            this.options.forEach(opt => {
+                if(opt.text === 'MARIO GAME' ||
+                    opt.text === 'LUIGI GAME'
+                ) {
+                    opt.selected = false;
+                    opt.color = defaultColor;
+                }
+            });
 
-        //Player
-        if(option.text === 'MARIO GAME') this.screen.setCurrentPlayer('mario');
-        if(option.text === 'LUIGI GAME') this.screen.setCurrentPlayer('luigi');
+            option.selected = true;
+            option.color = this.cursor.selectedColor;
+            if(option.text === 'MARIO GAME') this.screen.setCurrentPlayer('mario');
+            if(option.text === 'LUIGI GAME') this.screen.setCurrentPlayer('luigi');            
+        } else {
+             this.options.forEach(opt => {
+                if (!(opt.text === 'MARIO GAME' || 
+                    opt.text === 'LUIGI GAME')
+                ) {
+                    opt.selected = false;
+                    opt.color = defaultColor;
+                }
+            });
 
-        if(!this.cursor.isMouseControlled) {
+            option.selected = true;
+            option.color = this.cursor.selectedColor;
+
             setTimeout(() => {
                 if(this.options[this.cursor.selectedIndex] === option) {
                     option.color = this.cursor.selectedColor;
                 } else {
                     option.color = defaultColor;
                 }
-
+    
+                option.selected = false;
                 this.selectionTimeout.delete(option);
             }, this.intervalSelected);
-
+    
             this.selectionTimeout.set(option, this.intervalSelected);
         }
-
-        option.selected = true;
-        option.color = this.screen.parseColor('rgb(102, 102, 102)');
     }
 
     public getOptionPositions(): [number, number][] {
