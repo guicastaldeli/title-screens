@@ -31,15 +31,29 @@ export class Options {
         this.cursor = cursor;
         this.setOptions();
         this.textureMap = new TextureMap();
+        this.prevSelectedIndex = this.cursor.selectedIndex;
     }
     setOptions() {
+        var _a;
+        const prevIndex = this.cursor.getSelectedIndex();
+        const prevSelectedOpt = (_a = this.options[prevIndex]) === null || _a === void 0 ? void 0 : _a.text;
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
-        if (this.options.length > 0)
-            this.options[0].color = this.cursor.selectedColor;
+        const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
+        this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
+        this.updateSelectionColors();
+    }
+    updateSelectionColors() {
+        const selectedIndex = this.cursor.getSelectedIndex();
+        this.options.forEach((opt, i) => {
+            opt.color = i === selectedIndex
+                ? this.cursor.selectedColor
+                : this.color;
+            opt.selected = i === selectedIndex;
+        });
     }
     drawOptions(projectionMatrix, text, x, y, type) {
         var _a;

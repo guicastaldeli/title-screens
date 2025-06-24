@@ -40,6 +40,7 @@ export class Options {
     private waveSpeed: number = 2.0;
     public intervalSelected: number = 1000;
     private selectionTimeout: Map<Option, number> = new Map();
+    private prevSelectedIndex: any;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -62,16 +63,33 @@ export class Options {
 
         this.setOptions();
         this.textureMap = new TextureMap();
+
+        this.prevSelectedIndex = this.cursor.selectedIndex;
     }
 
     private setOptions(): void {
+        const prevIndex = this.cursor.getSelectedIndex();
+        const prevSelectedOpt = this.options[prevIndex]?.text;
+
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
 
-        if(this.options.length > 0) this.options[0].color = this.cursor.selectedColor;
+        const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
+        this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
+        this.updateSelectionColors();
+    }
+
+    private updateSelectionColors(): void {
+        const selectedIndex = this.cursor.getSelectedIndex();
+        this.options.forEach((opt, i) => {
+            opt.color = i === selectedIndex
+                ? this.cursor.selectedColor
+                : this.color
+            opt.selected = i === selectedIndex;
+        });
     }
 
     public drawOptions(
