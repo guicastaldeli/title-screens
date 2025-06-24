@@ -108,8 +108,7 @@ export class Options {
         const currentState = this.levelState.getCurrentState();
         const stateValue = currentState === States.Overworld ? 0 :
             currentState === States.Underground ? 1 :
-                currentState === States.Underwater ? 2 :
-                    3;
+                currentState === States.Underwater ? 2 : 3;
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -180,6 +179,11 @@ export class Options {
                 opt.color = defaultColor;
             }
         });
+        //Player
+        if (option.text === 'MARIO GAME')
+            this.screen.setCurrentPlayer('mario');
+        if (option.text === 'LUIGI GAME')
+            this.screen.setCurrentPlayer('luigi');
         if (!this.cursor.isMouseControlled) {
             setTimeout(() => {
                 if (this.options[this.cursor.selectedIndex] === option) {

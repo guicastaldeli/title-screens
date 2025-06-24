@@ -1,9 +1,20 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 export class Player {
     constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
-        this.position = [-2.1, -1.2];
-        this.size = [0.1, 0.1];
+        this.character = 'mario';
+        this.sizeState = 'small';
+        this.actionState = 'normal';
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -13,6 +24,78 @@ export class Player {
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
     }
-    drawPlayer() {
+    setCharacter(char) {
+        this.character = char;
+    }
+    drawPlayer(projectionMatrix) {
+        const modelViewMatrix = mat4.create();
+        const sizes = {
+            small: [0.1, 0.1],
+            big: [0.1, 0.2]
+        };
+        const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
+        const sheetSize = this.sheetProps.playersetProps().sheetSize;
+        const spriteSize = this.sheetProps.playersetProps().spriteSize.player.mario.small;
+        const x = -1.5;
+        const y = 0.7;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        const positions = [
+            -sizes.small[0], -sizes.small[1],
+            sizes.small[0], -sizes.small[1],
+            -sizes.small[0], sizes.small[1],
+            sizes.small[0], sizes.small[1],
+        ];
+        const [spriteX, spriteY] = map;
+        const [sheetWidth, sheetHeight] = sheetSize;
+        const [spriteWidth, spriteHeight] = spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTileTextureCoord);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(coords), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isGround, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+    getTex() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const path = './screens/smb2/assets/sprites/smb2-mario-luigi-sprites.png';
+                this.texture = yield this.screen.loadTexture(this.gl, path);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
+    }
+    initPlayer(projectionMatrix) {
+        this.drawPlayer(projectionMatrix);
     }
 }

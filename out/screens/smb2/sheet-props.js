@@ -61,38 +61,18 @@ export class SheetProps {
         const spriteSize = {
             player: {
                 mario: {
-                    small: {
-                        normal: [8, 8],
-                        swim: {
-                            f: [8, 8],
-                            s: [8, 8]
-                        }
-                    },
-                    big: {
-                        normal: [10, 10],
-                        swim: {
-                            f: [10, 10],
-                            s: [10, 10]
-                        }
-                    }
+                    small: [16, 16],
+                    big: [16, 32],
                 },
                 luigi: {
-                    small: {
-                        normal: [8, 8],
-                        swim: {
-                            f: [8, 8],
-                            s: [8, 8]
-                        }
-                    },
-                    big: {
-                        normal: [10, 10],
-                        swim: {
-                            f: [10, 10],
-                            s: [10, 10]
-                        }
-                    }
+                    small: [16, 16],
+                    big: [16, 32],
                 }
             }
+        };
+        return {
+            sheetSize,
+            spriteSize
         };
     }
 }

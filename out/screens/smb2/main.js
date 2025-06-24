@@ -16,6 +16,7 @@ import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
 import { Terrain } from "./terrain.js";
+import { Player } from "./player.js";
 export class ScreenSmb extends BaseScreen {
     constructor(state, screenManager, tick, gl, programInfo, buffers, levelState) {
         super(state, gl, programInfo, buffers, tick);
@@ -40,6 +41,7 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
         this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.setupInput();
     }
     //Bakcground
@@ -79,6 +81,8 @@ export class ScreenSmb extends BaseScreen {
         this.title.drawTitle(projectionMatrix);
         this.options.initOptions(projectionMatrix);
         this.cursor.drawCursor(projectionMatrix);
+        //Player
+        this.player.initPlayer(projectionMatrix);
         //
         this.gl.enable(this.gl.DEPTH_TEST);
     }
@@ -243,6 +247,10 @@ export class ScreenSmb extends BaseScreen {
                 this.cursor.handleInput(e.key);
         });
     }
+    setCurrentPlayer(char) {
+        this.player.character = char;
+        this.player.setCharacter(char);
+    }
     loadAssets() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.cursor.getTex();
@@ -250,6 +258,7 @@ export class ScreenSmb extends BaseScreen {
             yield this.hud.getTex();
             yield this.title.getTex();
             yield this.terrain.getTex();
+            yield this.player.getTex();
         });
     }
     updateLevelState() {

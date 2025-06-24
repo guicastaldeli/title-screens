@@ -17,6 +17,7 @@ import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
 
 import { Terrain } from "./terrain.js";
+import { Player } from "./player.js";
 
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
@@ -46,6 +47,7 @@ export class ScreenSmb extends BaseScreen {
     private cursor: Cursor;
 
     private terrain: Terrain;
+    private player: Player;
 
     constructor(
         state: State,
@@ -70,6 +72,7 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.setOptionPosition();
 
         this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
 
         this.setupInput();
     }
@@ -128,6 +131,9 @@ export class ScreenSmb extends BaseScreen {
             this.title.drawTitle(projectionMatrix);
             this.options.initOptions(projectionMatrix);
             this.cursor.drawCursor(projectionMatrix);
+
+            //Player
+            this.player.initPlayer(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -369,12 +375,18 @@ export class ScreenSmb extends BaseScreen {
         });
     }
 
+    public setCurrentPlayer(char: 'mario' | 'luigi'): void {
+        this.player.character = char;
+        this.player.setCharacter(char);
+    }
+
     private async loadAssets(): Promise<void> {
         await this.cursor.getTex();
         await this.options.getTex();
         await this.hud.getTex();
         await this.title.getTex();
         await this.terrain.getTex();
+        await this.player.getTex();
     }
 
     public updateLevelState(): void {

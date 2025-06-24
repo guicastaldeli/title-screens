@@ -561,34 +561,34 @@ export class TextureMap {
             //Mario
             mario: {
                 small: {
-                    normal: [0, 0],
+                    normal: [0, 8],
                     swim: {
-                        f: [0, 0],
-                        s: [0, 0]
+                        f: [192, 8],
+                        s: [228, 8]
                     }
                 },
                 big: {
-                    normal: [0, 0],
+                    normal: [0, 32],
                     swim: {
-                        f: [0, 0],
-                        s: [0, 0]
+                        f: [192.1, 31],
+                        s: [228.1, 31]
                     }
                 }
             },
             //Luigi
             luigi: {
                 small: {
-                    normal: [0, 0],
+                    normal: [288, 8],
                     swim: {
-                        f: [0, 0],
-                        s: [0, 0]
+                        f: [462, 8],
+                        s: [516, 8]
                     }
                 },
                 big: {
-                    normal: [0, 0],
+                    normal: [288, 32],
                     swim: {
-                        f: [0, 0],
-                        s: [0, 0]
+                        f: [462.1, 31],
+                        s: [516, 31]
                     }
                 }
             }

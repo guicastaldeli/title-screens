@@ -37,6 +37,22 @@ interface TitleProps {
     coords: TitleMap;
 }
 
+interface PlayerProps {
+    sheetSize: [number, number];
+    spriteSize: {
+        player: {
+            mario: {
+                small: [number, number];
+                big: [number, number];
+            },
+            luigi: {
+                small: [number, number];
+                big: [number, number];
+            }
+        }
+    }
+}
+
 export class SheetProps {
     private map: TextureMap;
 
@@ -124,78 +140,35 @@ export class SheetProps {
     }
 
     //Playerset
-    public playersetProps(): void {
+    public playersetProps(): PlayerProps {
         const sheetSize: [number, number] = [584, 468];
         const spriteSize: {
             player: {
                 mario: {
-                    small: {
-                        normal: [number, number],
-                        swim: {
-                            f: [number, number],
-                            s: [number, number]
-                        }
-                    }
-                    big: {
-                        normal: [number, number],
-                        swim: {
-                            f: [number, number],
-                            s: [number, number]
-                        }
-                    }
+                    small: [number, number],
+                    big: [number, number]
                 },
                 luigi: {
-                    small: {
-                        normal: [number, number],
-                        swim: {
-                            f: [number, number],
-                            s: [number, number]
-                        }
-                    }
-                    big: {
-                        normal: [number, number],
-                        swim: {
-                            f: [number, number],
-                            s: [number, number]
-                        }
-                    }
+                    small: [number, number],
+                    big: [number, number]
                 }
             }
         } = {
             player: {
                 mario: {
-                    small: {
-                        normal: [8, 8],
-                        swim: {
-                            f: [8, 8],
-                            s: [8, 8]
-                        }
-                    },
-                    big: {
-                        normal: [10, 10],
-                        swim: {
-                            f: [10, 10],
-                            s: [10, 10]
-                        }
-                    }
+                    small: [16, 16],
+                    big: [16, 32],
                 },
                 luigi: {
-                    small: {
-                        normal: [8, 8],
-                        swim: {
-                            f: [8, 8],
-                            s: [8, 8]
-                        }
-                    },
-                    big: {
-                        normal: [10, 10],
-                        swim: {
-                            f: [10, 10],
-                            s: [10, 10]
-                        }
-                    }
+                    small: [16, 16],
+                    big: [16, 32],
                 }
             }
+        }
+
+        return {
+            sheetSize,
+            spriteSize
         }
     }
 }
