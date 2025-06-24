@@ -555,13 +555,13 @@ export class TextureMap {
             },
             castle: [24.05, 683.1],
             trees: {
-                f: [0, 0],
-                s: [0, 0]
+                f: [264.2, 644.2],
+                s: [288.2, 628.1]
             },
-            mushrooms: [0, 0]
+            mushrooms: [112, 588]
         }
         const underground: ElementsCoords = {
-            pipe: [0, 0]
+            pipe: [152, 612]
         }
         const underwater: ElementsCoords = {
             water: [637, 15.9]

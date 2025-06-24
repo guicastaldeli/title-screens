@@ -27,6 +27,7 @@ export class Terrain {
     private size: [number, number] = [0.1, 0.1];
 
     private cols: number = 35;
+    private rows: number = 2;
     private numClouds: number = 8;
     private scroll: number = 0.0;
     private speed: number = 0.2;
@@ -177,76 +178,19 @@ export class Terrain {
         const lastWidth = width * 0.83;
         const lastHeight = height * 9.25;
 
-        //Overworld
-        const cloudCoordsY = height * 2;
-
-        //Underwater
-        const waterCoordsY = height * 4.62;
-
-        //Castle
-        const castleGroundCoords = this.position[0] * 2.8;
-        const lavaCoordsY = height - 1.003;
-
-        const rows =
-        this.currentState === States.Underwater ? 1 :
-        this.currentState === States.Castle ? 3 :
-        this.currentState === States.Underground ? 3 : 2
-
         const startX = this.position[0];
         const startY = this.position[1] + this.screen['setSize'].h * 0.1;
 
-        for(let i = 0; i < rows; i++) {
+        for(let i = 0; i < this.rows; i++) {
             for(let j = 0; j < this.cols; j++) {
-                //Normal X
-                const x =
-                this.currentState === States.Castle && i <= 1
-                ? castleGroundCoords + j * width
-                : startX + j * width
+                const x = startX + j * width
+                const y = startY + i * height
 
-                //Normal Y
-                const y = 
-                (this.currentState !== States.Castle && this.currentState !== States.Underground)
-                ? startY + i * height
-                : startY + (i <= 1 ? height * i : lastHeight);
-
-                //Last X
-                const lx = startX + j * lastWidth;
-
-                //Overworld
                 if(this.currentState === States.Overworld) this.setOverworldTerrain(projectionMatrix, x, y, j, i);
-
-                //Underground
-                if(this.currentState === States.Underground && i === 2) {
-                    const ceilCoords = this.textureMap.ground.underground.ceil as [number, number];
-
-                    this.drawGround(
-                        projectionMatrix, 
-                        this.currentState, 
-                        lx, 
-                        y,
-                        ceilCoords
-                    );
-                } else {
-                    this.drawGround(projectionMatrix, this.currentState, x, y);
-                }
-
-                //Underwater
-                if(this.currentState === States.Underwater) {
-                    const scroll = x + this.scroll;
-                    const wrapped = scroll % (this.cols * width);
-                    const finalCoord = 1.1;
-                    const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
-                    this.drawWater(projectionMatrix, finalX, waterCoordsY);
-                }
-
-                //Lava
-                if(this.currentState === States.Castle && i === 0) {
-                    const scroll = x + this.scroll;
-                    const wrapped = scroll % (this.cols * width);
-                    const finalCoord = 1.1;
-                    const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
-                    this.drawLava(projectionMatrix, finalX, lavaCoordsY);
-                }
+                if(this.currentState === States.Underground) this.setUndergroundTerrain(projectionMatrix, x, y, i, j, startX, lastWidth);
+                if(this.currentState === States.Underwater) this.setUnderwaterTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i);
+                if(this.currentState === States.Castle) this.setCastleTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i, j);
+                this.drawGround(projectionMatrix, this.currentState, x, y);
             }
         }
     }
@@ -254,8 +198,8 @@ export class Terrain {
     //Elements
         //Overworld
             //Cloud
-                private cloudLength = 35;
-                private cloudGapX = () => Math.random() * (3 - 1.5) + 1.5;
+                private cloudLength = 15;
+                private cloudGapX = () => Math.random() * (2 - 1.5) + 1.5;
                 private cloudGapY = () => Math.random() * (0.5 - (-0.5)) + (-0.5);
 
                 private initCloudVariants(): void {
@@ -264,7 +208,7 @@ export class Terrain {
                             x: this.position[0] + (i * this.cloudGapX()),
                             y: (this.size[1] * 2) + this.cloudGapY(),
                             speed: Math.random() * 0.05 + 0.05,
-                            scale: 0.15,
+                            scale: 0.18,
                             variant: Math.random() < 0.6 ? 'f' : 's'
                         });
                     }
@@ -295,11 +239,8 @@ export class Terrain {
                 private drawClouds(projectionMatrix: mat4): void {
                     const map = this.textureMap.elements.overworld.clouds as PairedCoords;
                     const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                    const baseSize = [0.9, 0.6];
-                    const spriteSizes = {
-                        f: [35, 25] as [number, number],
-                        s: [50, 30] as [number, number]
-                    }
+                    const baseSize = [0.95, 0.6];
+                    const spriteSizes = { f: [35, 25], s: [50, 30] }
 
                     for(const c of this.clouds) {
                         const modelViewMatrix = mat4.create();
@@ -355,7 +296,7 @@ export class Terrain {
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
                 const spriteSize = [80, 80]
 
-                const updX = 0.5;
+                const updX = 0.53;
                 const updY = 0.79;
 
                 mat4.translate(
@@ -397,20 +338,72 @@ export class Terrain {
                 x: number,
                 y: number
             ): void {
+                const map = this.textureMap.elements.overworld.trees as { f: [number, number], s: [number, number] }
+                const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
+                const spriteSizes = { f: [15.5, 31.7], s: [15.5, 65] }
+                const variants = ['f', 's'];
+
+                const updX = 3.2;
+                const updY = 0.49;
+
+                for(const variant of variants) {
+                    const modelViewMatrix = mat4.create();
+                    const size = variant === 'f' ? [0.11, 0.2] : [0.11, 0.41];
+                    const xOffset = variant === 's' ? 0.5 : 0;
+
+                    mat4.translate(
+                        modelViewMatrix,
+                        modelViewMatrix,
+                        [
+                            x + updX + xOffset, 
+                            y + updY,
+                            0
+                        ]
+                    );
+
+                    const positions = [
+                        -size[0], -size[1],
+                        size[0], -size[1],
+                        -size[0], size[1],
+                        size[0], size[1],
+                    ];
+
+                    const [spriteX, spriteY] = map[variant];
+                    const [spriteWidth, spriteHeight] = spriteSizes[variant];
+                    const [sheetWidth, sheetHeight] = sheetSize;
+
+                    const left = spriteX / sheetWidth;
+                    const right = (spriteX + spriteWidth) / sheetWidth;
+                    const top = spriteY / sheetHeight;
+                    const bottom = ((spriteY + spriteHeight) / sheetHeight);
+    
+                    const coords = [
+                        left, bottom,
+                        right, bottom,
+                        left, top,
+                        right, top
+                    ];
+        
+                    this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
+                    this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                    this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
+                }
+            }
+
+            private drawMushrooms(
+                projectionMatrix: mat4, 
+                x: number,
+                y: number
+            ): void {
                 const modelViewMatrix = mat4.create();
 
-                const size = [0.5, 0.5];
-
-                const map = this.textureMap.elements.overworld.trees as {
-                    f: [number, number],
-                    s: [number, number]
-                }
-
+                const map = this.textureMap.elements.overworld.mushrooms as [number, number];
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSize = [80, 80]
+                const spriteSize = [32, 16.2];
+                const size = [0.18, 0.08];
 
-                const updX = 0.5;
-                const updY = 0.79;
+                const updX = 4.0;
+                const updY = 0.37;
 
                 mat4.translate(
                     modelViewMatrix,
@@ -446,18 +439,39 @@ export class Terrain {
                 this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
             }
 
-            private drawMushrooms(
+            //Set
+            private setOverworldTerrain(
+                projectionMatrix: mat4, 
+                x: number, 
+                y: number,
+                j: number,
+                i: number
+            ): void {
+                this.drawClouds(projectionMatrix);
+
+                if(i === 0 && j === 0) {
+                    this.drawCastle(projectionMatrix, x, y);
+                    this.drawTrees(projectionMatrix, x, y);
+                    this.drawMushrooms(projectionMatrix, x, y);
+                }
+            }
+        //
+
+        //Underground
+            private drawPipe(
                 projectionMatrix: mat4, 
                 x: number,
                 y: number
             ): void {
                 const modelViewMatrix = mat4.create();
 
-                const map = this.textureMap.elements.overworld.mushrooms as [number, number];
+                const map = this.textureMap.elements.underground.pipe;
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
-                const updX = 1.0;
-                const updY = 1.0;
+                const spriteSize = [31, 63];
+                const size = [0.12, 0.29];
+
+                const updX = 0.12;
+                const updY = 1.61;
 
                 mat4.translate(
                     modelViewMatrix,
@@ -466,10 +480,10 @@ export class Terrain {
                 );
 
                 const positions = [
-                    -this.size[0], -this.size[1],
-                    this.size[0], -this.size[1],
-                    -this.size[0], this.size[1],
-                    this.size[0], this.size[1],
+                    -size[0], -size[1],
+                    size[0], -size[1],
+                    -size[0], size[1],
+                    size[0], size[1],
                 ];
 
                 const [spriteX, spriteY] = map;
@@ -488,23 +502,39 @@ export class Terrain {
                     right, top
                 ];
     
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+                this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
             }
 
             //Set
-            private setOverworldTerrain(
-                projectionMatrix: mat4, 
-                x: number, 
+            private setUndergroundTerrain(
+                projectionMatrix: mat4,
+                x: number,
                 y: number,
+                i: number,
                 j: number,
-                i: number
+                startX: number,
+                lastWidth: number
             ): void {
-                this.drawClouds(projectionMatrix);
+                this.rows = 3;
+                const ceilX = startX / 1.25;
+                const finalCeilX = ceilX + j * lastWidth;
 
-                if(i === 0 && j === 0) {
-                    this.drawCastle(projectionMatrix, x, y);
-                    //this.drawTrees(projectionMatrix, x, y);
-                    //this.drawMushrooms(projectionMatrix, x, y);
+                if(i === 0 && j === 0) this.drawPipe(projectionMatrix, x, y);
+
+                if(i === 2) {
+                    const ceilCoords = this.textureMap.ground.underground.ceil as [number, number];
+
+                    this.drawGround(
+                        projectionMatrix, 
+                        this.currentState, 
+                        finalCeilX, 
+                        y,
+                        ceilCoords
+                    );
+                } else {
+                    this.drawGround(projectionMatrix, this.currentState, x, y);
                 }
             }
         //
@@ -552,6 +582,28 @@ export class Terrain {
     
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
             }
+
+            //Set
+            private setUnderwaterTerrain(
+                projectionMatrix: mat4, 
+                x: number,
+                width: number,
+                height: number,
+                startX: number,
+                startY: number,
+                lastHeight: number,
+                i: number
+            ): void {
+                this.rows = 1;
+                if(i <= 1) startY + (i <= 1 ? height * i : lastHeight);
+                const waterCoordsY = height * 4.62;
+
+                const scroll = x + this.scroll;
+                const wrapped = scroll % (this.cols * width);
+                const finalCoord = 1.1;
+                const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
+                this.drawWater(projectionMatrix, finalX, waterCoordsY);
+            }
         //
 
         //Castle
@@ -560,11 +612,7 @@ export class Terrain {
                 x: number,
                 y: number
             ): void {
-                const map = this.textureMap.elements.castle.lava as { 
-                    f: [number, number],
-                    s: [number, number]
-                }
-                
+                const map = this.textureMap.elements.castle.lava as { f: [number, number], s: [number, number] }
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
                 const spriteSize = this.sheetProps.tilesetProps().spriteProps.ground.spriteSize;
 
@@ -621,6 +669,36 @@ export class Terrain {
                 this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
                 this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
+            }
+
+            //Set
+            private setCastleTerrain(
+                projectionMatrix: mat4,
+                x: number,
+                width: number,
+                height: number,
+                startX: number,
+                startY: number,
+                lastHeight: number,
+                i: number,
+                j: number
+            ): void {
+                this.rows = 3;
+                const castleGroundCoords = this.position[0] * 2.8;
+                const lavaCoordsY = height - 1.003;
+
+                if(i <= 1) {
+                    castleGroundCoords + j * width;
+                    startY + (i <= 1 ? height * i : lastHeight);
+                }
+
+                if(i === 0) {
+                    const scroll = x + this.scroll;
+                    const wrapped = scroll % (this.cols * width);
+                    const finalCoord = 1.1;
+                    const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
+                    this.drawLava(projectionMatrix, finalX, lavaCoordsY);
+                }
             }
         //
     //
