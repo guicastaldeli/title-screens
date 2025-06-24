@@ -25,6 +25,10 @@ export class Player {
     public character: 'mario' | 'luigi' = 'mario';
     private sizeState: 'small' | 'big' = 'small';
     private actionState: 'normal' | 'swim' = 'normal';
+    private charSizes: Record<'mario' | 'luigi', 'small' | 'big'> = {
+        mario: 'small',
+        luigi: 'small'
+    }
 
     constructor(
         gl: WebGLRenderingContext,
@@ -43,23 +47,24 @@ export class Player {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
+
+        window.addEventListener('keydown', (e) => this.handleKey(e));
     }
 
     public setCharacter(char: 'mario' | 'luigi'): void {
         this.character = char;
+        this.sizeState = this.charSizes[char];
     }
 
     private drawPlayer(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
 
-        const sizes = {
-            small: [0.1, 0.1],
-            big: [0.1, 0.2]
-        }
+        const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
+        const currentSize = sizes[this.sizeState];
 
         const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState] as [number, number];
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
-        const spriteSize = this.sheetProps.playersetProps().spriteSize.player.mario.small;
+        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
 
         const x = -1.5;
         const y = 0.7;
@@ -71,10 +76,10 @@ export class Player {
         );
 
         const positions = [
-            -sizes.small[0], -sizes.small[1],
-            sizes.small[0], -sizes.small[1],
-            -sizes.small[0], sizes.small[1],
-            sizes.small[0], sizes.small[1],
+            -currentSize[0], -currentSize[1],
+            currentSize[0], -currentSize[1],
+            -currentSize[0], currentSize[1],
+            currentSize[0], currentSize[1],
         ];
 
         const [spriteX, spriteY] = map;
@@ -123,6 +128,15 @@ export class Player {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    private handleKey(e: KeyboardEvent): void {
+        if(e.key.toLowerCase() === 'g') this.toggleSize();
+    }
+
+    private toggleSize(): void {
+        this.charSizes[this.character] = this.charSizes[this.character] === 'small' ? 'big' : 'small';
+        this.sizeState = this.charSizes[this.character];
     }
 
     public async getTex(): Promise<void> {

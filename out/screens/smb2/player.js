@@ -15,6 +15,10 @@ export class Player {
         this.character = 'mario';
         this.sizeState = 'small';
         this.actionState = 'normal';
+        this.charSizes = {
+            mario: 'small',
+            luigi: 'small'
+        };
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -23,27 +27,27 @@ export class Player {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
+        window.addEventListener('keydown', (e) => this.handleKey(e));
     }
     setCharacter(char) {
         this.character = char;
+        this.sizeState = this.charSizes[char];
     }
     drawPlayer(projectionMatrix) {
         const modelViewMatrix = mat4.create();
-        const sizes = {
-            small: [0.1, 0.1],
-            big: [0.1, 0.2]
-        };
+        const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
+        const currentSize = sizes[this.sizeState];
         const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
-        const spriteSize = this.sheetProps.playersetProps().spriteSize.player.mario.small;
+        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
         const x = -1.5;
         const y = 0.7;
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
-            -sizes.small[0], -sizes.small[1],
-            sizes.small[0], -sizes.small[1],
-            -sizes.small[0], sizes.small[1],
-            sizes.small[0], sizes.small[1],
+            -currentSize[0], -currentSize[1],
+            currentSize[0], -currentSize[1],
+            -currentSize[0], currentSize[1],
+            currentSize[0], currentSize[1],
         ];
         const [spriteX, spriteY] = map;
         const [sheetWidth, sheetHeight] = sheetSize;
@@ -83,6 +87,14 @@ export class Player {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+    handleKey(e) {
+        if (e.key.toLowerCase() === 'g')
+            this.toggleSize();
+    }
+    toggleSize() {
+        this.charSizes[this.character] = this.charSizes[this.character] === 'small' ? 'big' : 'small';
+        this.sizeState = this.charSizes[this.character];
     }
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
