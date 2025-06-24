@@ -129,9 +129,13 @@ void main() {
     }
 
     if(needTransp) {
-        vec4 color = vec4(0.580, 0.580, 1.0, 1.0);
-        float threshold = 0.1;
-        if(length(tex.rgb - color.rgb) < threshold) discard;
+        vec4 fColor = vec4(0.580, 0.580, 1.0, 1.0);
+        vec4 sColor = vec4(0.0, 0.160784, 0.54902, 1.0);
+        vec3 threshold = vec3(0.1);
+
+        bool fIsTransp = all(lessThan(abs(tex.rgb - fColor.rgb), threshold));
+        bool sIsTransp = all(lessThan(abs(tex.rgb - sColor.rgb), threshold));
+        if(fIsTransp || sIsTransp) discard;
     }
 
     if(isLava) {

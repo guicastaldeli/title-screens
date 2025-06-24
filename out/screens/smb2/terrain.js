@@ -114,7 +114,9 @@ export class Terrain {
             left, top,
             right, top
         ];
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
     }
     setTerrain(projectionMatrix) {
         const width = this.size[0] * 1.95;
@@ -127,15 +129,22 @@ export class Terrain {
             for (let j = 0; j < this.cols; j++) {
                 const x = startX + j * width;
                 const y = startY + i * height;
-                if (this.currentState === States.Overworld)
-                    this.setOverworldTerrain(projectionMatrix, x, y, j, i);
-                if (this.currentState === States.Underground)
-                    this.setUndergroundTerrain(projectionMatrix, x, y, i, j, startX, lastWidth);
-                if (this.currentState === States.Underwater)
-                    this.setUnderwaterTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i);
-                if (this.currentState === States.Castle)
-                    this.setCastleTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i, j);
-                this.drawGround(projectionMatrix, this.currentState, x, y);
+                switch (this.currentState) {
+                    case States.Overworld:
+                        this.setOverworldTerrain(projectionMatrix, x, y, j, i);
+                        this.drawGround(projectionMatrix, this.currentState, x, y);
+                        break;
+                    case States.Underground:
+                        this.setUndergroundTerrain(projectionMatrix, x, y, i, j, startX, startY, lastWidth, lastHeight);
+                        break;
+                    case States.Underwater:
+                        this.setUnderwaterTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i);
+                        this.drawGround(projectionMatrix, this.currentState, x, y);
+                        break;
+                    case States.Castle:
+                        this.setCastleTerrain(projectionMatrix, x, y, width, height, startX, startY, i, j);
+                        break;
+                }
             }
         }
     }
@@ -350,15 +359,15 @@ export class Terrain {
         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
     }
     //Set
-    setUndergroundTerrain(projectionMatrix, x, y, i, j, startX, lastWidth) {
+    setUndergroundTerrain(projectionMatrix, x, y, i, j, startX, startY, lastWidth, lastHeight) {
         this.rows = 3;
-        const ceilX = startX / 1.25;
-        const finalCeilX = ceilX + j * lastWidth;
+        const ceilX = startX / 1.25 + j * lastWidth;
+        const ceilY = startY + lastHeight;
         if (i === 0 && j === 0)
             this.drawPipe(projectionMatrix, x, y);
         if (i === 2) {
             const ceilCoords = this.textureMap.ground.underground.ceil;
-            this.drawGround(projectionMatrix, this.currentState, finalCeilX, y, ceilCoords);
+            this.drawGround(projectionMatrix, this.currentState, ceilX, ceilY, ceilCoords);
         }
         else {
             this.drawGround(projectionMatrix, this.currentState, x, y);
@@ -447,24 +456,32 @@ export class Terrain {
         ];
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
     }
     //Set
-    setCastleTerrain(projectionMatrix, x, width, height, startX, startY, lastHeight, i, j) {
-        this.rows = 3;
+    setCastleTerrain(projectionMatrix, x, y, width, height, startX, startY, i, j) {
+        this.rows = 4;
+        const normalCoord = this.position[0] + j * width;
         const castleGroundCoords = this.position[0] * 2.8;
+        const groundY = (startY * 1.11) + (i * height / 2);
+        const castleX = castleGroundCoords + j * width;
         const lavaCoordsY = height - 1.003;
-        if (i <= 1) {
-            castleGroundCoords + j * width;
-            startY + (i <= 1 ? height * i : lastHeight);
-        }
+        const ceilY = startY + height * 9.25;
         if (i === 0) {
             const scroll = x + this.scroll;
             const wrapped = scroll % (this.cols * width);
             const finalCoord = 1.1;
             const finalX = wrapped < startX * finalCoord ? wrapped + (this.cols * width) : wrapped;
             this.drawLava(projectionMatrix, finalX, lavaCoordsY);
+        }
+        else if (i === 2) {
+            this.drawGround(projectionMatrix, this.currentState, normalCoord, ceilY);
+        }
+        else {
+            this.drawGround(projectionMatrix, this.currentState, castleX, groundY);
         }
     }
     //
@@ -484,6 +501,7 @@ export class Terrain {
         this.setTerrain(projectionMatrix);
     }
     updateState() {
+        this.rows = 2;
         this.currentState = this.levelState.getCurrentState();
     }
     update(deltaTime) {
