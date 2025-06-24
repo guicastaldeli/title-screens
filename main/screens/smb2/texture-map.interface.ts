@@ -65,16 +65,16 @@ export interface CoinMap {
         }
 
         //Elements
-        type SingleCoord = [number, number];
-        export type PairedCoords = {
-            f: SingleCoord,
-            s: SingleCoord
+        type GroundSingleCoord = [number, number];
+        export type GroundPairedCoords = {
+            f: GroundSingleCoord,
+            s: GroundSingleCoord
         }
 
         export type ElementsCoords =
-        SingleCoord |
-        PairedCoords |
-        Record<string, SingleCoord | PairedCoords>;
+        GroundSingleCoord |
+        GroundPairedCoords |
+        Record<string, GroundSingleCoord | GroundPairedCoords>;
 
         export interface CloudParameters {
             finalX: number;
@@ -84,20 +84,45 @@ export interface CoinMap {
 
         export interface ElementsMap {
             overworld: {
-                clouds: PairedCoords,
-                castle: SingleCoord,
-                trees: PairedCoords,
-                mushrooms: SingleCoord
+                clouds: GroundPairedCoords,
+                castle: GroundSingleCoord,
+                trees: GroundPairedCoords,
+                mushrooms: GroundSingleCoord
             }
             underground: {
-                pipe: SingleCoord
+                pipe: GroundSingleCoord
             }
             underwater: {
-                water: SingleCoord
+                water: GroundSingleCoord
             }
             castle: {
-                lava: PairedCoords
+                lava: GroundPairedCoords
             }
         }
     //
+
+    //Player
+    type PlayerSingleCoord = [number, number];
+
+    type PlayerPairedCoords = {
+        normal: PlayerSingleCoord;
+        swim: {
+            f: PlayerSingleCoord;
+            s: PlayerSingleCoord;
+        }
+    }
+
+    type CharCoords = {
+        small: PlayerPairedCoords;
+        big: PlayerPairedCoords;
+    }
+
+    export type PlayerCoords = {
+        mario: CharCoords;
+        luigi: CharCoords;
+    }
+
+    export interface PlayerMap {
+        player: PlayerCoords;
+    }
 //

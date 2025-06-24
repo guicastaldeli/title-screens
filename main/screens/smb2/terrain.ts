@@ -8,7 +8,7 @@ import { LevelState } from "./level-state.js";
 import { GroundCoords, States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
-import { PairedCoords } from "./texture-map.interface.js";
+import { GroundPairedCoords } from "./texture-map.interface.js";
 
 export class Terrain {
     private gl: WebGLRenderingContext;
@@ -37,7 +37,7 @@ export class Terrain {
         y: number,
         speed: number,
         scale: number,
-        variant: keyof PairedCoords
+        variant: keyof GroundPairedCoords
     }> = [];
 
     constructor(
@@ -250,7 +250,7 @@ export class Terrain {
                 }
 
                 private drawClouds(projectionMatrix: mat4): void {
-                    const map = this.textureMap.elements.overworld.clouds as PairedCoords;
+                    const map = this.textureMap.elements.overworld.clouds as GroundPairedCoords;
                     const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
                     const baseSize = [0.95, 0.6];
                     const spriteSizes = { f: [35, 25], s: [50, 30] }

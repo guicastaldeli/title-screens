@@ -7,6 +7,8 @@ export class TextureMap {
         //Terrain
         this.ground = this.setGround();
         this.elements = this.setElements();
+        //Player
+        this.player = this.setPlayer();
     }
     setLetters() {
         const overworld = {
@@ -552,5 +554,45 @@ export class TextureMap {
             underwater,
             castle
         };
+    }
+    //Player
+    setPlayer() {
+        const player = {
+            //Mario
+            mario: {
+                small: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                },
+                big: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                }
+            },
+            //Luigi
+            luigi: {
+                small: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                },
+                big: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                }
+            }
+        };
+        return { player };
     }
 }

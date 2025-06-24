@@ -7,6 +7,8 @@ import { GroundCoords } from "./texture-map.interface.js";
 import { GroundMap } from "./texture-map.interface.js";
 import { ElementsCoords } from "./texture-map.interface.js";
 import { ElementsMap } from "./texture-map.interface.js";
+import { PlayerCoords } from "./texture-map.interface.js";
+import { PlayerMap } from "./texture-map.interface.js";
 
 export class TextureMap {
     public title: TitleMap;
@@ -14,6 +16,7 @@ export class TextureMap {
     public letters: LetterMap;
     public ground: GroundMap;
     public elements: ElementsMap;
+    public player: PlayerMap;
 
     constructor() {
         this.letters = this.setLetters();
@@ -25,6 +28,9 @@ export class TextureMap {
         //Terrain
         this.ground = this.setGround();
         this.elements = this.setElements();
+
+        //Player
+        this.player = this.setPlayer();
     }
 
     private setLetters(): LetterMap {
@@ -579,5 +585,47 @@ export class TextureMap {
             underwater,
             castle
         } as ElementsMap
+    }
+
+    //Player
+    private setPlayer(): PlayerMap {
+        const player: PlayerCoords = {
+            //Mario
+            mario: {
+                small: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                },
+                big: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                }
+            },
+            //Luigi
+            luigi: {
+                small: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                },
+                big: {
+                    normal: [0, 0],
+                    swim: {
+                        f: [0, 0],
+                        s: [0, 0]
+                    }
+                }
+            }
+        }
+
+        return { player };
     }
 }

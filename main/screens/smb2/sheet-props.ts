@@ -122,4 +122,80 @@ export class SheetProps {
             coords: coords
         }
     }
+
+    //Playerset
+    public playersetProps(): void {
+        const sheetSize: [number, number] = [584, 468];
+        const spriteSize: {
+            player: {
+                mario: {
+                    small: {
+                        normal: [number, number],
+                        swim: {
+                            f: [number, number],
+                            s: [number, number]
+                        }
+                    }
+                    big: {
+                        normal: [number, number],
+                        swim: {
+                            f: [number, number],
+                            s: [number, number]
+                        }
+                    }
+                },
+                luigi: {
+                    small: {
+                        normal: [number, number],
+                        swim: {
+                            f: [number, number],
+                            s: [number, number]
+                        }
+                    }
+                    big: {
+                        normal: [number, number],
+                        swim: {
+                            f: [number, number],
+                            s: [number, number]
+                        }
+                    }
+                }
+            }
+        } = {
+            player: {
+                mario: {
+                    small: {
+                        normal: [8, 8],
+                        swim: {
+                            f: [8, 8],
+                            s: [8, 8]
+                        }
+                    },
+                    big: {
+                        normal: [10, 10],
+                        swim: {
+                            f: [10, 10],
+                            s: [10, 10]
+                        }
+                    }
+                },
+                luigi: {
+                    small: {
+                        normal: [8, 8],
+                        swim: {
+                            f: [8, 8],
+                            s: [8, 8]
+                        }
+                    },
+                    big: {
+                        normal: [10, 10],
+                        swim: {
+                            f: [10, 10],
+                            s: [10, 10]
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
