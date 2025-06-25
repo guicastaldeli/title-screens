@@ -37,11 +37,22 @@ export class Options {
         var _a;
         const prevIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = (_a = this.options[prevIndex]) === null || _a === void 0 ? void 0 : _a.text;
+        const prevSelected = new Set();
+        this.options.forEach(opt => {
+            if (opt.selected)
+                prevSelected.add(opt.text);
+        });
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
+        this.options.forEach(opt => {
+            if (prevSelected.has(opt.text)) {
+                opt.selected = true;
+                opt.color = this.cursor.selectedColor;
+            }
+        });
         const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
         this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
         this.updateSelectionColors();
@@ -61,7 +72,7 @@ export class Options {
         });
     }
     drawOptions(projectionMatrix, text, x, y, type) {
-        var _a;
+        var _a, _b;
         const letters = text.split('');
         const spacing = 0.08;
         const startX = x - ((letters.length * spacing) / 2);
@@ -72,11 +83,12 @@ export class Options {
             const dy = Math.abs(opt.position[1] - (y - this.containerPosition[1]));
             return dx < 0.001 && dy < 0.001;
         });
-        const isSelected = option !== undefined
-            && this.options.indexOf(option) === this.cursor.selectedIndex;
+        const isSelected = option !== undefined &&
+            (option.selected ||
+                (this.options.indexOf(option) === this.cursor.selectedIndex && ((_a = option.hovered) !== null && _a !== void 0 ? _a : false)));
         const originalColor = [...this.color];
         if (option)
-            this.color = (_a = option.color) !== null && _a !== void 0 ? _a : originalColor;
+            this.color = (_b = option.color) !== null && _b !== void 0 ? _b : originalColor;
         letters.forEach((l, i) => {
             const letterX = startX + (i * spacing);
             this.drawLetter(projectionMatrix, l, letterX, y, textStartX, textEndX, isSelected, type, (option === null || option === void 0 ? void 0 : option.selected) || false);
@@ -195,6 +207,7 @@ export class Options {
                 this.screen.setCurrentPlayer('luigi');
         }
         else {
+            const wasSelected = option.selected;
             this.options.forEach(opt => {
                 if (!(opt.text === 'MARIO GAME' ||
                     opt.text === 'LUIGI GAME')) {
@@ -202,19 +215,21 @@ export class Options {
                     opt.color = defaultColor;
                 }
             });
-            option.selected = true;
-            option.color = this.cursor.selectedColor;
-            setTimeout(() => {
-                if (this.options[this.cursor.selectedIndex] === option) {
-                    option.color = this.cursor.selectedColor;
-                }
-                else {
-                    option.color = defaultColor;
-                }
-                option.selected = false;
-                this.selectionTimeout.delete(option);
-            }, this.intervalSelected);
-            this.selectionTimeout.set(option, this.intervalSelected);
+            option.selected = !wasSelected;
+            option.color = option.selected ? this.cursor.selectedColor : defaultColor;
+            if (option.selected) {
+                const timoutId = setTimeout(() => {
+                    if (this.options[this.cursor.selectedIndex] === option) {
+                        option.color = this.cursor.selectedColor;
+                    }
+                    else {
+                        option.color = defaultColor;
+                    }
+                    option.selected = false;
+                    this.selectionTimeout.delete(option);
+                }, this.intervalSelected);
+                this.selectionTimeout.set(option, timoutId);
+            }
         }
     }
     getOptionPositions() {
@@ -246,8 +261,33 @@ export class Options {
         });
     }
     updateState() {
+        var _a;
+        const prevSelectedIndex = this.cursor.getSelectedIndex();
+        const prevSelectedOpt = (_a = this.options[prevSelectedIndex]) === null || _a === void 0 ? void 0 : _a.text;
+        const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
+        this.selectionTimeout.forEach((timeoutId, option) => {
+            clearTimeout(timeoutId);
+            option.selected = false;
+            option.color = this.color;
+            this.selectionTimeout.delete(option);
+        });
         this.currentState = this.levelState.getCurrentState();
         this.setOptions();
+        this.options.forEach(opt => {
+            if (opt.text === 'MARIO GAME' || opt.text === 'LUIGI GAME') {
+                const wasSelected = prevSelected.includes(opt.text);
+                opt.selected = wasSelected;
+                opt.color = wasSelected ? this.cursor.selectedColor : this.color;
+            }
+            else {
+                opt.selected = false;
+                opt.color = this.color;
+                opt.hovered = false;
+            }
+        });
+        const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
+        this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
+        this.cursor.setOptionPosition();
     }
     update(deltaTime) {
         this.waveTime += this.waveSpeed * deltaTime;

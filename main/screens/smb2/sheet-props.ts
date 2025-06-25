@@ -128,8 +128,8 @@ export class SheetProps {
 
     //Title
     public titleProps(): TitleProps {
-        const sheetSize: [number, number] = [2600, 528];
-        const size: [number, number] = [199.8, 88];
+        const sheetSize: [number, number] = [2599.9, 528];
+        const size: [number, number] = [199.8, 87.83];
         const coords = this.map.title;
 
         return {

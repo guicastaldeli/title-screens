@@ -5,6 +5,7 @@ export interface Option {
     position: [number, number];
     color?: [number, number, number, number];
     selected?: boolean,
+    hovered?: boolean,
     bounds: {
         x: [number, number],
         y: [number, number]

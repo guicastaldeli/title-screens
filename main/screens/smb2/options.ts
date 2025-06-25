@@ -70,12 +70,24 @@ export class Options {
     private setOptions(): void {
         const prevIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = this.options[prevIndex]?.text;
+        const prevSelected = new Set<string>();
+
+        this.options.forEach(opt => {
+            if(opt.selected) prevSelected.add(opt.text);
+        });
 
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
+
+        this.options.forEach(opt => {
+            if(prevSelected.has(opt.text)) {
+                opt.selected = true;
+                opt.color = this.cursor.selectedColor;
+            }
+        });
 
         const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
         this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
@@ -118,8 +130,9 @@ export class Options {
             return dx < 0.001 && dy < 0.001;
         });
 
-        const isSelected = option !== undefined 
-        && this.options.indexOf(option) === this.cursor.selectedIndex;
+        const isSelected = option !== undefined &&
+        (option.selected ||
+        (this.options.indexOf(option) === this.cursor.selectedIndex && (option.hovered ?? false)));
 
         const originalColor = [...this.color] as [number, number, number, number];
         if(option) this.color = option.color ?? originalColor;
@@ -293,6 +306,8 @@ export class Options {
             if(option.text === 'MARIO GAME') this.screen.setCurrentPlayer('mario');
             if(option.text === 'LUIGI GAME') this.screen.setCurrentPlayer('luigi');            
         } else {
+            const wasSelected = option.selected;
+
              this.options.forEach(opt => {
                 if (!(opt.text === 'MARIO GAME' || 
                     opt.text === 'LUIGI GAME')
@@ -302,21 +317,23 @@ export class Options {
                 }
             });
 
-            option.selected = true;
-            option.color = this.cursor.selectedColor;
+            option.selected = !wasSelected;
+            option.color = option.selected ? this.cursor.selectedColor : defaultColor;
 
-            setTimeout(() => {
-                if(this.options[this.cursor.selectedIndex] === option) {
-                    option.color = this.cursor.selectedColor;
-                } else {
-                    option.color = defaultColor;
-                }
-    
-                option.selected = false;
-                this.selectionTimeout.delete(option);
-            }, this.intervalSelected);
-    
-            this.selectionTimeout.set(option, this.intervalSelected);
+            if(option.selected) {
+                const timoutId = setTimeout(() => {
+                   if(this.options[this.cursor.selectedIndex] === option) {
+                        option.color = this.cursor.selectedColor
+                   } else {
+                        option.color = defaultColor
+                   }
+
+                   option.selected = false;
+                   this.selectionTimeout.delete(option)
+                }, this.intervalSelected) as unknown as number;
+
+                this.selectionTimeout.set(option, timoutId);
+            }
         }
     }
 
@@ -357,8 +374,35 @@ export class Options {
     }
 
     public updateState(): void {
+        const prevSelectedIndex = this.cursor.getSelectedIndex();
+        const prevSelectedOpt = this.options[prevSelectedIndex]?.text;
+        const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
+
+        this.selectionTimeout.forEach((timeoutId, option) => {
+            clearTimeout(timeoutId);
+            option.selected = false;
+            option.color = this.color;
+            this.selectionTimeout.delete(option);
+        });
+
         this.currentState = this.levelState.getCurrentState();
         this.setOptions();
+
+        this.options.forEach(opt => {
+            if(opt.text === 'MARIO GAME' || opt.text === 'LUIGI GAME') {
+                const wasSelected = prevSelected.includes(opt.text);
+                opt.selected = wasSelected;
+                opt.color = wasSelected ? this.cursor.selectedColor : this.color;
+            } else {
+                opt.selected = false;
+                opt.color = this.color;
+                opt.hovered = false;
+            }
+        });
+
+        const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
+        this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
+        this.cursor.setOptionPosition();
     }
 
     public update(deltaTime: number): void {

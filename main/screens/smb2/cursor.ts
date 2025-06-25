@@ -61,11 +61,13 @@ export class Cursor {
             this.optionPosition = this.options.getOptionPositions();
 
             if(this.optionPosition.length > 0) {
-                this.cursorCurrentPosition = [...this.optionPosition[0]];
-                this.cursorTargetPosition = [...this.optionPosition[0]];
-                this.selectedIndex = 0;
-
-                this.position = [this.cursorOffsetX, this.optionPosition[0][1]];
+                this.selectedIndex = Math.min(this.selectedIndex, this.optionPosition.length - 1);
+                this.selectedIndex = Math.max(0, this.selectedIndex);
+                
+                this.cursorCurrentPosition = [...this.optionPosition[this.selectedIndex]];
+                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+                
+                this.position = [this.cursorOffsetX, this.optionPosition[this.selectedIndex][1]];
                 this.updateCursor();
             }
         }
@@ -263,6 +265,8 @@ export class Cursor {
                         this.selected = false;
     
                         this.options.options.forEach((option, idx) => {
+                            option.hovered = (idx === i);
+                            
                             if(!option.selected && 
                                 option.text !== 'MARIO GAME' && 
                                 option.text !== 'LUIGI GAME'

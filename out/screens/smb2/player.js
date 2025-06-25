@@ -25,6 +25,9 @@ export class Player {
         this.transitionSpeed = 2.0;
         this.isTransitioning = false;
         this.hasTransitioned = false;
+        this.animationTimer = 0;
+        this.animationSpeed = 0.5;
+        this.currentFrame = 'f';
         this.groundLevel = -0.61;
         this.seaLevel = -0.81;
         this.gl = gl;
@@ -55,7 +58,12 @@ export class Player {
             spriteCoords = map;
         }
         else {
-            spriteCoords = map.f;
+            if (this.currentY !== this.seaLevel) {
+                spriteCoords = map.f;
+            }
+            else {
+                spriteCoords = map.s;
+            }
         }
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
         const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];

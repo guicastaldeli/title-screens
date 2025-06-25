@@ -36,6 +36,10 @@ export class Player {
     private isTransitioning: boolean = false;
     private hasTransitioned: boolean = false;
 
+    private animationTimer: number = 0;
+    private animationSpeed: number = 0.5;
+    private currentFrame: 'f' | 's' = 'f';
+
     private readonly groundLevel = -0.61;
     private readonly seaLevel = -0.81;
 
@@ -79,9 +83,13 @@ export class Player {
         let spriteCoords: [number, number];
 
         if(this.actionState === 'normal') {
-            spriteCoords = map as [number, number]
+            spriteCoords = map as [number, number];
         } else {
-            spriteCoords = (map as { f: [number, number], s: [number, number] }).f
+            if(this.currentY !== this.seaLevel) {
+                spriteCoords = (map as { f: [number, number], s: [number, number] }).f;
+            } else {
+                spriteCoords = (map as { f: [number, number], s: [number, number] }).s;
+            }
         }
 
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
