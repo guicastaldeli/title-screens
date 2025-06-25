@@ -274,6 +274,7 @@ export class ScreenSmb extends BaseScreen {
         this.terrain.update(deltaTime);
         this.options.update(deltaTime);
         this.cursor.update();
+        this.player.update(deltaTime);
         this.setInit();
     }
     init() {

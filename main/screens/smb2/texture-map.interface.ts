@@ -34,14 +34,14 @@ export interface TitleProps {
 export type TitleMap = TitleProps[];
 
 //Coins
-export type CoinCoords = Record<string, [number, number]>;
+export type CoinCoords = {
+    f: [number, number];
+    s: [number, number];
+    t: [number, number];
+}
 
-export interface CoinMap {
-    overworld: CoinCoords;
-    underground: CoinCoords;
-    underwater: CoinCoords;
-    castle: CoinCoords;
-    info: CoinCoords; 
+export type CoinMap = {
+    [key in States]: CoinCoords;
 }
 
 //Tileset

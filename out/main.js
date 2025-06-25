@@ -110,7 +110,7 @@ function main() {
                 haveState: gl.getUniformLocation(shaderProgram, 'haveState'),
                 isGround: gl.getUniformLocation(shaderProgram, 'isGround'),
                 isLava: gl.getUniformLocation(shaderProgram, 'isLava'),
-                needTransp: gl.getUniformLocation(shaderProgram, 'needTransp')
+                needTransp: gl.getUniformLocation(shaderProgram, 'needTransp'),
             }
         };
         gl.useProgram(programInfo.program);

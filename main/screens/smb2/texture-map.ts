@@ -500,38 +500,32 @@ export class TextureMap {
     }
 
     private setCoins(): CoinMap {
-        const overworld: CoinCoords = {
-            f: [264.1, 76.05],
-            s: [274.1, 76.05],
-            t: [284.1, 76.05],
-        }
-        const underground: CoinCoords = {
-            f: [264.1, 76.05],
-            s: [274.1, 76.05],
-            t: [284.1, 76.05],
-        }
-        const underwater: CoinCoords = {
-            f: [264.1, 76.05],
-            s: [274.1, 76.05],
-            t: [284.1, 76.05],
-        }
-        const castle: CoinCoords = {
-            f: [264.1, 76.05],
-            s: [274.1, 76.05],
-            t: [284.1, 76.05],
-        }
-        const info: CoinCoords = {
-            f: [264.1, 76.05],
-            s: [274.1, 76.05],
-            t: [284.1, 76.05],
-        }
-
         return {
-            overworld,
-            underground,
-            underwater,
-            castle,
-            info
+            overworld: {
+                f: [264.1, 76.05],
+                s: [274.1, 76.05],
+                t: [284.1, 76.05],
+            },
+            underground: {
+                f: [264.1, 92.05],
+                s: [274.1, 92.05],
+                t: [284.1, 92.05],
+            },
+            underwater: {
+                f: [344.1, 92.05],
+                s: [344.1, 92.05],
+                t: [344.1, 92.05],
+            },
+            castle: {
+                f: [344.1, 76.05],
+                s: [344.1, 76.05],
+                t: [344.1, 76.05],
+            },
+            info: {
+                f: [0, 0],
+                s: [0, 0],
+                t: [0, 0],
+            }
         }
     }
 

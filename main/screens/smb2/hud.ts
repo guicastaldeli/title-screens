@@ -319,8 +319,8 @@ export class Hud {
     //Coin
         private drawCoin(projectionMatrix: mat4): void {
             const modelViewMatrix = mat4.create();
-            const coinFrame = this.currentFrame;
 
+            const coinFrame = this.currentFrame;
             const position = this.sheetProps.miscProps().spriteProps.coin.position;
             const size = this.sheetProps.miscProps().spriteProps.coin.size;
             const spriteSize = this.sheetProps.miscProps().spriteProps.coin.spriteSize;
@@ -375,6 +375,7 @@ export class Hud {
             this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -388,22 +389,18 @@ export class Hud {
         }
 
         private updateCoin(): void {
-            const coinCoords = this.sheetProps.miscProps().spriteProps.coin.coords;
-            const coinEntries = Object.entries(coinCoords);
+            const map = this.textureMap.coins;
+            const coords = map[this.currentState] || map[States.Overworld];
 
             this.animationManager = new AnimationManager(
                 this.sheetProps, 
                 [],
-                coinEntries.map(i => ({
-                    id: `coin-${i}`,
+                [{
+                    id: `coin-${this.currentState}`,
                     stars: 0,
-                    coords: {
-                        f: coinCoords.f,
-                        s: coinCoords.s,
-                        t: coinCoords.t
-                    },
-                    availableAnimations: ['flash'],
-                })),
+                    coords: coords,
+                    availableAnimations: ['flash']
+                }]
             );
 
             this.currentFrame = this.animationManager.getCoinFrame();
@@ -422,6 +419,7 @@ export class Hud {
     public updateState(): void {
         this.currentState = this.levelState.getCurrentState();
         this.setHud();
+        this.updateCoin();
     }
 
     public update(deltaTime: number) {

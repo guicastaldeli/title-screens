@@ -404,6 +404,7 @@ export class ScreenSmb extends BaseScreen {
 
         this.options.update(deltaTime);
         this.cursor.update();
+        this.player.update(deltaTime);
         
         this.setInit();
     }

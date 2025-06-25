@@ -30,6 +30,15 @@ export class Player {
         luigi: 'small'
     }
 
+    private currentY: number = -0.61;
+    private targetY: number = -0.81;
+    private transitionSpeed: number = 2.0;
+    private isTransitioning: boolean = false;
+    private hasTransitioned: boolean = false;
+
+    private readonly groundLevel = -0.61;
+    private readonly seaLevel = -0.81;
+
     constructor(
         gl: WebGLRenderingContext,
         buffers: Buffers,
@@ -60,7 +69,10 @@ export class Player {
         const modelViewMatrix = mat4.create();
         this.updateActionState();
 
-        const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
+        const sizes = { 
+            small: { w: 0.1, h: 0.1 }, 
+            big: { w: 0.1, h: 0.2 } 
+        };
         const currentSize = sizes[this.sizeState];
 
         const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
@@ -75,8 +87,8 @@ export class Player {
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
         const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
 
-        const x = -1.5;
-        const y = 0.7;
+        const x = -1.45;
+        const y = this.currentY + currentSize.h;
 
         mat4.translate(
             modelViewMatrix,
@@ -85,10 +97,10 @@ export class Player {
         );
 
         const positions = [
-            -currentSize[0], -currentSize[1],
-            currentSize[0], -currentSize[1],
-            -currentSize[0], currentSize[1],
-            currentSize[0], currentSize[1],
+            -currentSize.w, -currentSize.h,
+            currentSize.w, -currentSize.h,
+            -currentSize.w, currentSize.h,
+            currentSize.w, currentSize.h,
         ];
 
         const [spriteX, spriteY] = spriteCoords;
@@ -140,8 +152,27 @@ export class Player {
     }
 
     private updateActionState(): void {
+        const prevState = this.currentState;
         this.currentState = this.levelState.getCurrentState();
         this.actionState = this.currentState === States.Underwater ? 'swim' : 'normal';
+
+        if(prevState === this.currentState) return;
+
+        if(this.currentState === States.Underwater) {
+            if(!this.hasTransitioned) {
+                this.targetY = this.seaLevel;
+                this.isTransitioning = true;
+                this.hasTransitioned = true;
+            } else {
+                this.currentY = this.seaLevel;
+                this.targetY = this.seaLevel;
+                this.isTransitioning = false;
+            }
+        } else {
+            this.currentY = this.groundLevel;
+            this.targetY = this.groundLevel;
+            this.isTransitioning = false;
+        }
     }
 
     private handleKey(e: KeyboardEvent): void {
@@ -164,5 +195,18 @@ export class Player {
 
     public initPlayer(projectionMatrix: mat4) {
         this.drawPlayer(projectionMatrix);
+    }
+
+    public update(deltaTime: number): void {
+        if(this.isTransitioning) {
+            const diff = this.targetY - this.currentY;
+
+            if(Math.abs(diff) < 0.001) {
+                this.currentY = this.targetY;
+                this.isTransitioning = false;
+            } else {
+                this.currentY += diff * this.transitionSpeed * deltaTime;
+            }
+        }
     }
 }

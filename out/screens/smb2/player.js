@@ -20,6 +20,13 @@ export class Player {
             mario: 'small',
             luigi: 'small'
         };
+        this.currentY = -0.61;
+        this.targetY = -0.81;
+        this.transitionSpeed = 2.0;
+        this.isTransitioning = false;
+        this.hasTransitioned = false;
+        this.groundLevel = -0.61;
+        this.seaLevel = -0.81;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -37,7 +44,10 @@ export class Player {
     drawPlayer(projectionMatrix) {
         const modelViewMatrix = mat4.create();
         this.updateActionState();
-        const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
+        const sizes = {
+            small: { w: 0.1, h: 0.1 },
+            big: { w: 0.1, h: 0.2 }
+        };
         const currentSize = sizes[this.sizeState];
         const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
         let spriteCoords;
@@ -49,14 +59,14 @@ export class Player {
         }
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
         const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
-        const x = -1.5;
-        const y = 0.7;
+        const x = -1.45;
+        const y = this.currentY + currentSize.h;
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
         const positions = [
-            -currentSize[0], -currentSize[1],
-            currentSize[0], -currentSize[1],
-            -currentSize[0], currentSize[1],
-            currentSize[0], currentSize[1],
+            -currentSize.w, -currentSize.h,
+            currentSize.w, -currentSize.h,
+            -currentSize.w, currentSize.h,
+            currentSize.w, currentSize.h,
         ];
         const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = sheetSize;
@@ -98,8 +108,28 @@ export class Player {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     updateActionState() {
+        const prevState = this.currentState;
         this.currentState = this.levelState.getCurrentState();
         this.actionState = this.currentState === States.Underwater ? 'swim' : 'normal';
+        if (prevState === this.currentState)
+            return;
+        if (this.currentState === States.Underwater) {
+            if (!this.hasTransitioned) {
+                this.targetY = this.seaLevel;
+                this.isTransitioning = true;
+                this.hasTransitioned = true;
+            }
+            else {
+                this.currentY = this.seaLevel;
+                this.targetY = this.seaLevel;
+                this.isTransitioning = false;
+            }
+        }
+        else {
+            this.currentY = this.groundLevel;
+            this.targetY = this.groundLevel;
+            this.isTransitioning = false;
+        }
     }
     handleKey(e) {
         if (e.key.toLowerCase() === 'g')
@@ -122,5 +152,17 @@ export class Player {
     }
     initPlayer(projectionMatrix) {
         this.drawPlayer(projectionMatrix);
+    }
+    update(deltaTime) {
+        if (this.isTransitioning) {
+            const diff = this.targetY - this.currentY;
+            if (Math.abs(diff) < 0.001) {
+                this.currentY = this.targetY;
+                this.isTransitioning = false;
+            }
+            else {
+                this.currentY += diff * this.transitionSpeed * deltaTime;
+            }
+        }
     }
 }

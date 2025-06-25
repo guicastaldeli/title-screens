@@ -248,6 +248,7 @@ export class Hud {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -257,18 +258,14 @@ export class Hud {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     updateCoin() {
-        const coinCoords = this.sheetProps.miscProps().spriteProps.coin.coords;
-        const coinEntries = Object.entries(coinCoords);
-        this.animationManager = new AnimationManager(this.sheetProps, [], coinEntries.map(i => ({
-            id: `coin-${i}`,
-            stars: 0,
-            coords: {
-                f: coinCoords.f,
-                s: coinCoords.s,
-                t: coinCoords.t
-            },
-            availableAnimations: ['flash'],
-        })));
+        const map = this.textureMap.coins;
+        const coords = map[this.currentState] || map[States.Overworld];
+        this.animationManager = new AnimationManager(this.sheetProps, [], [{
+                id: `coin-${this.currentState}`,
+                stars: 0,
+                coords: coords,
+                availableAnimations: ['flash']
+            }]);
         this.currentFrame = this.animationManager.getCoinFrame();
     }
     //
@@ -286,6 +283,7 @@ export class Hud {
     updateState() {
         this.currentState = this.levelState.getCurrentState();
         this.setHud();
+        this.updateCoin();
     }
     update(deltaTime) {
         var _a, _b;

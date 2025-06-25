@@ -1,5 +1,5 @@
 import { SheetProps } from "./sheet-props";
-import { Animation } from "./animation.js"
+import { Animation, FrameData } from "./animation.js"
 import { SpriteGroup } from "./animation.js";
 
 export class AnimationManager {
@@ -7,7 +7,11 @@ export class AnimationManager {
     private animations: Record<string, Animation> = {};
     private currentStars: number = 0;
 
-    constructor(sheetProps: SheetProps, titleGroups: SpriteGroup[], coinGroups: SpriteGroup[]) {
+    constructor(
+        sheetProps: SheetProps, 
+        titleGroups: SpriteGroup[], 
+        coinGroups: SpriteGroup[]
+    ) {
         this.sheetProps = sheetProps;
         
         this.animations.title = new Animation(sheetProps, titleGroups, {
@@ -48,7 +52,7 @@ export class AnimationManager {
         return this.animations.coin.getCurrentFrame();
     }
 
-    public update(deltaTime: number) {
+    public update(deltaTime: number): void {
         this.animations.title.update(deltaTime);
         this.syncAnimation();
     }
