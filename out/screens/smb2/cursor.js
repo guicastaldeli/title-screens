@@ -116,7 +116,9 @@ export class Cursor {
         }
         const defaultColor = [...this.options.color];
         this.options.options.forEach(option => {
-            if (!option.selected) {
+            if (option.text !== 'MARIO GAME' &&
+                option.text !== 'LUIGI GAME') {
+                option.selected = false;
                 option.color = defaultColor;
             }
         });
@@ -124,8 +126,11 @@ export class Cursor {
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
         const currentOption = this.options.options[this.selectedIndex];
-        if (currentOption && !currentOption.selected)
+        if (currentOption &&
+            currentOption.text !== 'MARIO GAME' &&
+            currentOption.text !== 'LUIGI GAME') {
             currentOption.color = this.selectedColor;
+        }
         this.getSelectedIndex();
     }
     getSelectedIndex() {
@@ -178,11 +183,18 @@ export class Cursor {
                         this.cursorTargetPosition[0],
                         this.optionPosition[i][1]
                     ];
+                    const defaultColor = [...this.options.color];
+                    this.options.options.forEach(option => {
+                        if (option.text !== 'MARIO GAME' &&
+                            option.text !== 'LUIGI GAME') {
+                            option.selected = false;
+                            option.color = defaultColor;
+                        }
+                    });
                     if (this.isMouseControlled) {
                         this.selected = false;
-                        const defaultColor = [...this.options.color];
                         this.options.options.forEach((option, idx) => {
-                            if (option.selected &&
+                            if (!option.selected &&
                                 option.text !== 'MARIO GAME' &&
                                 option.text !== 'LUIGI GAME') {
                                 option.color = idx === i ? this.selectedColor : defaultColor;
