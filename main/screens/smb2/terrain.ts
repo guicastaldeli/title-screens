@@ -30,7 +30,7 @@ export class Terrain {
     private rows: number = 2;
     private numClouds: number = 8;
     private scroll: number = 0.0;
-    private speed: number = 0.2;
+    private speed: number = 0.05;
     private spacing: number = 50;
     private clouds: Array<{
         x: number,
@@ -252,7 +252,7 @@ export class Terrain {
                 private drawClouds(projectionMatrix: mat4): void {
                     const map = this.textureMap.elements.overworld.clouds as GroundPairedCoords;
                     const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                    const baseSize = [0.95, 0.6];
+                    const baseSize = [0.98, 0.6];
                     const spriteSizes = { f: [35, 25], s: [50, 30] }
 
                     for(const c of this.clouds) {

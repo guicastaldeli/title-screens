@@ -19,7 +19,7 @@ export class Terrain {
         this.rows = 2;
         this.numClouds = 8;
         this.scroll = 0.0;
-        this.speed = 0.2;
+        this.speed = 0.05;
         this.spacing = 50;
         this.clouds = [];
         //Elements
@@ -179,7 +179,7 @@ export class Terrain {
     drawClouds(projectionMatrix) {
         const map = this.textureMap.elements.overworld.clouds;
         const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-        const baseSize = [0.95, 0.6];
+        const baseSize = [0.98, 0.6];
         const spriteSizes = { f: [35, 25], s: [50, 30] };
         for (const c of this.clouds) {
             const modelViewMatrix = mat4.create();

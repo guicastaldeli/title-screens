@@ -164,6 +164,7 @@ export class Hud {
             const randomScore = Math.random();
             const score = Math.floor(randomScore * 1000000);
             const paddedScore = score.toString().padStart(6, '0').substring(0, 6);
+            const worldId = this.setWorld();
             
             this.hudProps = [
                 //Player
@@ -176,7 +177,7 @@ export class Hud {
 
                 //World
                 this.createHudProps('WORLD', 0.48, 1.09, this.currentState),
-                this.createHudProps('1-1', 0.48, 1.01, this.currentState),
+                this.createHudProps(worldId, 0.48, 1.01, this.currentState),
 
                 //Time
                 this.createHudProps('TIME', 1.0, 1.09, this.currentState),
@@ -216,6 +217,25 @@ export class Hud {
                     props.type!
                 );
             });
+        }
+
+        private setWorld(): string {
+            const id = {
+                overworld: '1-1',
+                underground: '1-2',
+                underwater: '3-2',
+                castle: '8-4'
+            }
+
+            const worlds = {
+                [States.Overworld]: id.overworld,
+                [States.Underground]: id.underground,
+                [States.Underwater]: id.underwater,
+                [States.Castle]: id.castle
+            }
+            
+            const worldId = worlds[this.currentState] || worlds[States.Overworld];
+            return worldId;
         }
 
         private drawLetter(

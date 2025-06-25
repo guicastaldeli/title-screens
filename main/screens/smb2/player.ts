@@ -58,11 +58,20 @@ export class Player {
 
     private drawPlayer(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
+        this.updateActionState();
 
         const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
         const currentSize = sizes[this.sizeState];
 
-        const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState] as [number, number];
+        const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
+        let spriteCoords: [number, number];
+
+        if(this.actionState === 'normal') {
+            spriteCoords = map as [number, number]
+        } else {
+            spriteCoords = (map as { f: [number, number], s: [number, number] }).f
+        }
+
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
         const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
 
@@ -82,7 +91,7 @@ export class Player {
             currentSize[0], currentSize[1],
         ];
 
-        const [spriteX, spriteY] = map;
+        const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = sheetSize;
         const [spriteWidth, spriteHeight] = spriteSize;
 
@@ -128,6 +137,11 @@ export class Player {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    private updateActionState(): void {
+        this.currentState = this.levelState.getCurrentState();
+        this.actionState = this.currentState === States.Underwater ? 'swim' : 'normal';
     }
 
     private handleKey(e: KeyboardEvent): void {

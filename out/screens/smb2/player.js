@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 export class Player {
     constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
@@ -35,9 +36,17 @@ export class Player {
     }
     drawPlayer(projectionMatrix) {
         const modelViewMatrix = mat4.create();
+        this.updateActionState();
         const sizes = { small: [0.1, 0.1], big: [0.1, 0.2] };
         const currentSize = sizes[this.sizeState];
         const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
+        let spriteCoords;
+        if (this.actionState === 'normal') {
+            spriteCoords = map;
+        }
+        else {
+            spriteCoords = map.f;
+        }
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
         const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
         const x = -1.5;
@@ -49,7 +58,7 @@ export class Player {
             -currentSize[0], currentSize[1],
             currentSize[0], currentSize[1],
         ];
-        const [spriteX, spriteY] = map;
+        const [spriteX, spriteY] = spriteCoords;
         const [sheetWidth, sheetHeight] = sheetSize;
         const [spriteWidth, spriteHeight] = spriteSize;
         const left = spriteX / sheetWidth;
@@ -87,6 +96,10 @@ export class Player {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+    updateActionState() {
+        this.currentState = this.levelState.getCurrentState();
+        this.actionState = this.currentState === States.Underwater ? 'swim' : 'normal';
     }
     handleKey(e) {
         if (e.key.toLowerCase() === 'g')
