@@ -133,7 +133,7 @@ function main() {
         renderScreenDk = new ScreenDk(state, screenManager, tick, gl, programInfo, buffers);
         screenManager.registerScreen('dk', renderScreenDk);
         //Smb
-        renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers, levelState);
+        renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers, levelState);
         screenManager.registerScreen('smb', renderScreenSmb);
         //
         yield screenManager.current('smb');
@@ -197,7 +197,7 @@ function render() {
             initialized = true;
         }
         windowTitle();
-        tick.update(deltaTime);
+        tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
         requestAnimationFrame(render);

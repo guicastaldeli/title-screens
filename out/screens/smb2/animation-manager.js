@@ -1,16 +1,17 @@
 import { Animation } from "./animation.js";
 export class AnimationManager {
-    constructor(sheetProps, titleGroups, coinGroups) {
+    constructor(tick, sheetProps, titleGroups, coinGroups) {
         this.animations = {};
         this.currentStars = 0;
+        this.tick = tick;
         this.sheetProps = sheetProps;
-        this.animations.title = new Animation(sheetProps, titleGroups, {
+        this.animations.title = new Animation(tick, sheetProps, titleGroups, {
             frameKeys: ['f', 's', 't'],
-            spriteSize: sheetProps.titleProps().sheetSize,
+            spriteSize: sheetProps.titleProps().size,
             spriteSheetSize: sheetProps.titleProps().sheetSize,
             defaultCoords: [0, 0]
         });
-        this.animations.coin = new Animation(sheetProps, coinGroups, {
+        this.animations.coin = new Animation(tick, sheetProps, coinGroups, {
             frameKeys: ['f', 's', 't'],
             spriteSize: sheetProps.miscProps().spriteProps.coin.spriteSize,
             spriteSheetSize: sheetProps.miscProps().spriteSheetSize,
@@ -36,6 +37,8 @@ export class AnimationManager {
         return this.animations.coin.getCurrentFrame();
     }
     update(deltaTime) {
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         this.animations.title.update(deltaTime);
         this.syncAnimation();
     }

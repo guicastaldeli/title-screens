@@ -11,7 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 export class Options {
-    constructor(gl, buffers, programInfo, screen, levelState, sheetProps, cursor) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps, cursor) {
         this.containerPosition = [0.12, -0.20];
         this.isCopyright = false;
         this.copyrightText = [];
@@ -21,6 +21,8 @@ export class Options {
         this.waveSpeed = 2.0;
         this.intervalSelected = 1000;
         this.selectionTimeout = new Map();
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -294,6 +296,8 @@ export class Options {
         this.cursor.setOptionPosition();
     }
     update(deltaTime) {
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         this.waveTime += this.waveSpeed * deltaTime;
     }
 }

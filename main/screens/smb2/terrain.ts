@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -11,6 +12,7 @@ import { TextureMap } from "./texture-map.js";
 import { GroundPairedCoords } from "./texture-map.interface.js";
 
 export class Terrain {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -43,6 +45,7 @@ export class Terrain {
     }> = [];
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
@@ -50,6 +53,9 @@ export class Terrain {
         levelState: LevelState,
         sheetProps: SheetProps,
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -775,6 +781,8 @@ export class Terrain {
     }
 
     public update(deltaTime: number) {
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
+        
         const width = this.cols * this.size[0];
         this.scroll -= this.speed * deltaTime;
         this.updateClouds(deltaTime);

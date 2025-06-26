@@ -1,3 +1,4 @@
+import { Tick } from "../../tick.js";
 import { SheetProps } from "./sheet-props.js";
 
 export interface SpriteGroup {
@@ -39,6 +40,7 @@ interface AnimationConfig {
 }
 
 export class Animation {
+    private tick: Tick;
     private sheetProps: SheetProps;
     private groups: SpriteGroup[];
     private currentGroup: SpriteGroup | null = null;
@@ -64,10 +66,14 @@ export class Animation {
     private static sharedFlashIndex: number = 0;
 
     constructor(
+        tick: Tick,
         sheetProps: SheetProps, 
         groups: SpriteGroup[],
         config: Partial<AnimationConfig> = {}
     ) {
+        this.tick = tick;
+        tick.add(this.update.bind(this));
+
         this.sheetProps = sheetProps;
         this.groups = groups;
         
@@ -86,14 +92,6 @@ export class Animation {
         }
 
         this.init();
-    }
-
-    private generateAnimationId(): string {
-        const effectiveIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
-        const frameKey = this.getCurrentFrameKey();
-        const syncStatus = this.externalFrameIndex !== null ? ' [SYNCED]' : '';
-        
-        return `${this.currentGroup?.id || 'animation'}: ${frameKey}-${effectiveIndex} [${this.currentPhase}]${syncStatus}`;
     }
 
     private init(): void {
@@ -270,8 +268,9 @@ export class Animation {
     }
 
     public update(deltaTime: number): void {
-        const time = deltaTime * 1000;
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
 
+        const time = deltaTime * 1000;
         if(this.isPaused) {
             this.pauseTimer += time;
             if(this.pauseTimer >= this.config.pauseDuration) this.endPause();
@@ -279,7 +278,6 @@ export class Animation {
         }
 
         this.pauseIntervalTimer += time;
-
         if(this.pauseIntervalTimer >= this.config.pauseInterval) {
             this.lastPhase = this.currentPhase;
             this.pauseIntervalTimer = 0;

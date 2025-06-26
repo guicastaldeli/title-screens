@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -10,6 +11,7 @@ import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 
 export class Entities {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -22,22 +24,20 @@ export class Entities {
     private sheetProps: SheetProps;
     private textureMap: TextureMap;
 
-    private readonly currentY: number = -0.48;
-
     //Direction
-    private readonly defaultStartX: number = 1.8;
-    private readonly castleStartX: number = 0.5;
+        private readonly currentY: number = -0.48;
+        private readonly defaultStartX: number = 1.8;
+        private readonly castleStartX: number = 0.5;
+        private readonly startY: number = -0.61;
+        private readonly endX: number = -1.0;
 
-    private get startX(): number {
-        return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
-    }
-
+        private get startX(): number {
+            return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
+        }
+    //
 
     //Entities Animation
-    private readonly startY: number = -0.61;
-    private readonly endX: number = -1.0;
-
-    private walkSpeed: number = 0.5;
+    private walkSpeed: number = 0.2;
     private walkDirection: number = -1;
     private walkPositionX: number = this.startX;
     private walkSpriteToggleTime: number = 0;
@@ -62,6 +62,7 @@ export class Entities {
     private useStandingprite: boolean = true;
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
@@ -69,6 +70,9 @@ export class Entities {
         levelState: LevelState,
         sheetProps: SheetProps,
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -81,6 +85,7 @@ export class Entities {
 
         this.startJump();
         this.lastJumpTime = performance.now();
+        this.walkSpriteToggleTime = performance.now();
     }
 
     private drawEntities(projectionMatrix: mat4): void {
@@ -208,8 +213,9 @@ export class Entities {
 
     //Entity Animation
         //Other Entities
-        private updateWalk(currentTime: number): void {
-            this.walkPositionX += this.walkDirection * this.walkSpeed * (currentTime - this.lastUpdateTime) / 2;
+        private updateWalk(deltaTime: number): void {
+            this.walkPositionX += this.walkDirection * this.walkSpeed * deltaTime;
+            const currentTime = performance.now();
 
             if(this.walkPositionX <= this.endX) {
                 this.walkPositionX = this.endX;
@@ -242,10 +248,10 @@ export class Entities {
             }
         }
 
-        private updateJump(currentTime: number): void {
+        private updateJump(deltaTime: number): void {
             if(!this.isJumping) return;
-            const deltaTime = (currentTime - this.jumpStartTime) / 50000;
 
+            const currentTime = performance.now();
             this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
             this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
             this.jumpVelocity.y += this.gravity * deltaTime;
@@ -289,13 +295,15 @@ export class Entities {
     }
 
     public update(deltaTime: number): void {
-        const currentTime = performance.now();
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
+        
+        const currentTime = deltaTime * 800;
 
         if(this.currentState === States.Overworld && this.textureMap.entity[this.currentState].koopa) {
             if(!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay) this.startJump();   
             if(this.isJumping) this.updateJump(currentTime);
         } else {
-            this.updateWalk(deltaTime);
+            this.updateWalk(currentTime);
         }
     }
 }

@@ -12,11 +12,13 @@ import { AnimationManager } from "./animation-manager.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 export class Hud {
-    constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
         this.hudProps = [];
         this.color = [1.0, 1.0, 1.0, 1.0];
         this.containerPosition = [-0.075, -0.15];
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -26,7 +28,7 @@ export class Hud {
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
-        this.updateCoin();
+        this.updateCoin(this.tick);
     }
     //Hud
     drawHud(projectionMatrix) {
@@ -259,10 +261,10 @@ export class Hud {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
-    updateCoin() {
+    updateCoin(tick) {
         const map = this.textureMap.coins;
         const coords = map[this.currentState] || map[States.Overworld];
-        this.animationManager = new AnimationManager(this.sheetProps, [], [{
+        this.animationManager = new AnimationManager(tick, this.sheetProps, [], [{
                 id: `coin-${this.currentState}`,
                 stars: 0,
                 coords: coords,
@@ -285,7 +287,7 @@ export class Hud {
     updateState() {
         this.currentState = this.levelState.getCurrentState();
         this.setHud();
-        this.updateCoin();
+        this.updateCoin(this.tick);
     }
     update(deltaTime) {
         var _a, _b;

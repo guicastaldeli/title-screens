@@ -1,5 +1,7 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
+
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -15,6 +17,7 @@ import { LevelState } from "./level-state.js";
 import { States } from "./texture-map.interface.js";
 
 export class Hud {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -35,6 +38,7 @@ export class Hud {
     private containerPosition: [number, number] = [-0.075, -0.15];
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
@@ -42,6 +46,9 @@ export class Hud {
         levelState: LevelState,
         sheetProps: SheetProps,
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -53,7 +60,7 @@ export class Hud {
 
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
-        this.updateCoin();
+        this.updateCoin(this.tick);
     }
 
     //Hud
@@ -390,11 +397,12 @@ export class Hud {
             this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
         }
 
-        private updateCoin(): void {
+        private updateCoin(tick: Tick): void {
             const map = this.textureMap.coins;
             const coords = map[this.currentState] || map[States.Overworld];
 
             this.animationManager = new AnimationManager(
+                tick,
                 this.sheetProps, 
                 [],
                 [{
@@ -421,7 +429,7 @@ export class Hud {
     public updateState(): void {
         this.currentState = this.levelState.getCurrentState();
         this.setHud();
-        this.updateCoin();
+        this.updateCoin(this.tick);
     }
 
     public update(deltaTime: number) {

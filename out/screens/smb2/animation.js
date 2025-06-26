@@ -1,5 +1,5 @@
 export class Animation {
-    constructor(sheetProps, groups, config = {}) {
+    constructor(tick, sheetProps, groups, config = {}) {
         this.currentGroup = null;
         this.availableGroups = [];
         this.isSync = false;
@@ -15,17 +15,12 @@ export class Animation {
         this.pausedFrameIndex = 0;
         this.animationTimer = 0;
         this.lastPhase = 'initial';
+        this.tick = tick;
+        tick.add(this.update.bind(this));
         this.sheetProps = sheetProps;
         this.groups = groups;
         this.config = Object.assign({ frameKeys: ['f', 's', 't'], initialSpeed: 70, flashSpeed: 1000, initialCycles: 6, flashDuration: 1000, pauseDuration: 2000, pauseInterval: 500, spriteSize: [0, 0], spriteSheetSize: [0, 0], defaultCoords: [0, 0] }, config);
         this.init();
-    }
-    generateAnimationId() {
-        var _a;
-        const effectiveIndex = this.externalFrameIndex !== null ? this.externalFrameIndex : this.currentFrameIndex;
-        const frameKey = this.getCurrentFrameKey();
-        const syncStatus = this.externalFrameIndex !== null ? ' [SYNCED]' : '';
-        return `${((_a = this.currentGroup) === null || _a === void 0 ? void 0 : _a.id) || 'animation'}: ${frameKey}-${effectiveIndex} [${this.currentPhase}]${syncStatus}`;
     }
     init() {
         this.generateAvailableGroups();
@@ -174,6 +169,8 @@ export class Animation {
         };
     }
     update(deltaTime) {
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         const time = deltaTime * 1000;
         if (this.isPaused) {
             this.pauseTimer += time;

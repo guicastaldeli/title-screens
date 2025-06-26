@@ -52,9 +52,9 @@ export class ScreenSmb extends BaseScreen {
     private entity: Entities;
 
     constructor(
+        tick: Tick,
         state: State,
         screenManager: ScreenManager,
-        tick: Tick,
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
         buffers: Buffers,
@@ -66,16 +66,16 @@ export class ScreenSmb extends BaseScreen {
 
         this.sheetProps = new SheetProps();
 
-        this.hud = new Hud(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
-        this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
+        this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.title = new Title(tick, gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
-        this.options = new Options(gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
+        this.options = new Options(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
 
-        this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.terrain = new Terrain(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
-        this.entity = new Entities(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.entity = new Entities(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
 
         this.setupInput();
     }

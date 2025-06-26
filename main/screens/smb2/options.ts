@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -13,6 +14,7 @@ import { States } from "./texture-map.interface.js";
 import { LevelState } from "./level-state.js";
 
 export class Options {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
 
     private buffers: Buffers;
@@ -43,6 +45,7 @@ export class Options {
     private prevSelectedIndex: any;
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers, 
         programInfo: ProgramInfo,
@@ -51,6 +54,9 @@ export class Options {
         sheetProps: SheetProps,
         cursor: Cursor
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -410,6 +416,7 @@ export class Options {
     }
 
     public update(deltaTime: number): void {
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
         this.waveTime += this.waveSpeed * deltaTime;
     }
 }

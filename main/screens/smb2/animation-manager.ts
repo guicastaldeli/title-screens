@@ -1,27 +1,39 @@
+import { Tick } from "../../tick";
 import { SheetProps } from "./sheet-props";
-import { Animation, FrameData } from "./animation.js"
+import { Animation } from "./animation.js"
 import { SpriteGroup } from "./animation.js";
 
 export class AnimationManager {
+    private tick: Tick;
     private sheetProps: SheetProps;
     private animations: Record<string, Animation> = {};
     private currentStars: number = 0;
 
     constructor(
+        tick: Tick,
         sheetProps: SheetProps, 
         titleGroups: SpriteGroup[], 
         coinGroups: SpriteGroup[]
     ) {
+        this.tick = tick;
         this.sheetProps = sheetProps;
         
-        this.animations.title = new Animation(sheetProps, titleGroups, {
+        this.animations.title = new Animation(
+            tick,
+            sheetProps, 
+            titleGroups, 
+        {
             frameKeys: ['f', 's', 't'],
-            spriteSize: sheetProps.titleProps().sheetSize,
+            spriteSize: sheetProps.titleProps().size,
             spriteSheetSize: sheetProps.titleProps().sheetSize,
             defaultCoords: [0, 0]
         });
 
-        this.animations.coin = new Animation(sheetProps, coinGroups, {
+        this.animations.coin = new Animation(
+            tick,
+            sheetProps, 
+            coinGroups, 
+        {
             frameKeys: ['f', 's', 't'],
             spriteSize: sheetProps.miscProps().spriteProps.coin.spriteSize,
             spriteSheetSize: sheetProps.miscProps().spriteSheetSize,
@@ -53,6 +65,7 @@ export class AnimationManager {
     }
 
     public update(deltaTime: number): void {
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
         this.animations.title.update(deltaTime);
         this.syncAnimation();
     }

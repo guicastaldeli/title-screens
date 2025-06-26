@@ -14,16 +14,17 @@ export class Entities {
     get startX() {
         return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
     }
-    constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
-        this.currentY = -0.48;
         //Direction
+        this.currentY = -0.48;
         this.defaultStartX = 1.8;
         this.castleStartX = 0.5;
-        //Entities Animation
         this.startY = -0.61;
         this.endX = -1.0;
-        this.walkSpeed = 0.5;
+        //
+        //Entities Animation
+        this.walkSpeed = 0.2;
         this.walkDirection = -1;
         this.walkPositionX = this.startX;
         this.walkSpriteToggleTime = 0;
@@ -44,6 +45,8 @@ export class Entities {
         this.jumpVelocity = { x: -2.5, y: -3.0 };
         this.spriteStateTime = 0;
         this.useStandingprite = true;
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -54,6 +57,7 @@ export class Entities {
         this.textureMap = new TextureMap();
         this.startJump();
         this.lastJumpTime = performance.now();
+        this.walkSpriteToggleTime = performance.now();
     }
     drawEntities(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -156,8 +160,9 @@ export class Entities {
     }
     //Entity Animation
     //Other Entities
-    updateWalk(currentTime) {
-        this.walkPositionX += this.walkDirection * this.walkSpeed * (currentTime - this.lastUpdateTime) / 2;
+    updateWalk(deltaTime) {
+        this.walkPositionX += this.walkDirection * this.walkSpeed * deltaTime;
+        const currentTime = performance.now();
         if (this.walkPositionX <= this.endX) {
             this.walkPositionX = this.endX;
             this.walkDirection = 1;
@@ -186,10 +191,10 @@ export class Entities {
             this.jumpVelocity = { x: 0.3, y: 1.5 };
         }
     }
-    updateJump(currentTime) {
+    updateJump(deltaTime) {
         if (!this.isJumping)
             return;
-        const deltaTime = (currentTime - this.jumpStartTime) / 50000;
+        const currentTime = performance.now();
         this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
         this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
         this.jumpVelocity.y += this.gravity * deltaTime;
@@ -228,7 +233,9 @@ export class Entities {
         this.currentState = this.levelState.getCurrentState();
     }
     update(deltaTime) {
-        const currentTime = performance.now();
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
+        const currentTime = deltaTime * 800;
         if (this.currentState === States.Overworld && this.textureMap.entity[this.currentState].koopa) {
             if (!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay)
                 this.startJump();
@@ -236,7 +243,7 @@ export class Entities {
                 this.updateJump(currentTime);
         }
         else {
-            this.updateWalk(deltaTime);
+            this.updateWalk(currentTime);
         }
     }
 }

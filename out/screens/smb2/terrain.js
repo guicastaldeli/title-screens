@@ -11,7 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 export class Terrain {
-    constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
         this.position = [-2.1, -1.2];
         this.size = [0.1, 0.1];
@@ -28,6 +28,8 @@ export class Terrain {
         this.cloudLength = 15;
         this.cloudGapX = () => Math.random() * (2 - 1.5) + 1.5;
         this.cloudGapY = () => Math.random() * (0.5 - (-0.5)) + (-0.5);
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -531,6 +533,8 @@ export class Terrain {
         this.currentState = this.levelState.getCurrentState();
     }
     update(deltaTime) {
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         const width = this.cols * this.size[0];
         this.scroll -= this.speed * deltaTime;
         this.updateClouds(deltaTime);

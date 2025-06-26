@@ -173,7 +173,7 @@ async function main(): Promise<void> {
         screenManager.registerScreen('dk', renderScreenDk);
 
         //Smb
-        renderScreenSmb = new ScreenSmb(state, screenManager, tick, gl, programInfo, buffers, levelState);
+        renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers, levelState);
         screenManager.registerScreen('smb', renderScreenSmb);
     //
 
@@ -252,7 +252,7 @@ function windowTitle() {
         }
 
         windowTitle();
-        tick.update(deltaTime);
+        tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
 

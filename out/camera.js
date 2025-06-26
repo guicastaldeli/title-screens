@@ -4,7 +4,7 @@ export class Camera {
         this.rotation = 0.0;
         this.speed = 1.0;
         this.tick = tick;
-        tick.addCall(this.update.bind(this));
+        tick.add(this.update.bind(this));
         this.gl = gl;
         this.programInfo = programInfo;
         this.buffers = buffers;

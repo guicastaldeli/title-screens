@@ -1,31 +1,32 @@
 export class Tick {
-    private lastTime: number = 0;
-    private time: number = 0;
-    private deltaTime: number = 0;
-    private length: number = 16;
-    private speed: number = 0.1;
+    private lastTime: number = 0.0;
+    public timeScale: number = 0.1;
     private tickCallback: Array<(deltaTime: number) => void> = [];
 
     constructor() {
         this.lastTime = performance.now();
     }
 
-    private setSpeedFactor(factor: number): void {
-        this.speed = Math.max(0, factor);
-    }
-
-    public addCall(callback: (deltaTime: number) => void): void {
+    public add(callback: (deltaTime: number) => void): void {
         this.tickCallback.push(callback);
     }
 
-    public update(deltaTime: number): void {
-        this.setSpeedFactor(this.speed);
+    public setTimeScale(scale: number): void {
+        this.timeScale = scale;
+    }
+
+    public update(): void {
+        if(this.timeScale === 0.0) return;
 
         const now = performance.now();
-        deltaTime = (now - this.lastTime) / 1000;
-        const scaledDelta = deltaTime * this.speed;
+        const deltaTime = now - this.lastTime;
+        const scaledDelta = (deltaTime * this.timeScale) / 1000;
         this.lastTime = now;
-
-        for(const cb of this.tickCallback) cb(scaledDelta);
+        
+        if(this.timeScale > 0.0) {
+            for(const cb of this.tickCallback) {
+                cb(scaledDelta);
+            }
+        }
     }
 }

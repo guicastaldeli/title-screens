@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -10,6 +11,7 @@ import { AnimationManager } from "./animation-manager.js";
 import { FrameData } from "./animation.js";
 
 export class Title {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -26,19 +28,23 @@ export class Title {
     private currentFrame!: FrameData;
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
         screen: ScreenSmb,
         sheetProps: SheetProps,
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+        
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
 
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.updateTitle();
+        this.updateTitle(tick);
     }
 
     public drawTitle(projectionMatrix: mat4): void {
@@ -112,10 +118,11 @@ export class Title {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
     }
 
-    private updateTitle(): void {
+    private updateTitle(tick: Tick): void {
         const titleCoords = this.sheetProps.titleProps().coords;
 
         this.animationManager = new AnimationManager(
+            tick,
             this.sheetProps,
             titleCoords.map(group => ({
                 id: group.groupId,
@@ -143,6 +150,7 @@ export class Title {
     }
 
     public update(deltaTime: number) {
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
         this.animationManager?.update(deltaTime);
         this.currentFrame = this.animationManager?.getTitleFrame();
     }

@@ -20,7 +20,7 @@ export class Camera {
         buffers: Buffers
     ) {
         this.tick = tick;
-        tick.addCall(this.update.bind(this));
+        tick.add(this.update.bind(this));
 
         this.gl = gl;
         this.programInfo = programInfo;

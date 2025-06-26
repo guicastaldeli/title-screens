@@ -10,16 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { AnimationManager } from "./animation-manager.js";
 export class Title {
-    constructor(gl, buffers, programInfo, screen, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, sheetProps) {
         this.texture = null;
         this.position = [0, 0.12];
         this.size = [1.0, 0.4];
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screen = screen;
         this.sheetProps = sheetProps;
-        this.updateTitle();
+        this.updateTitle(tick);
     }
     drawTitle(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -74,9 +76,9 @@ export class Title {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
-    updateTitle() {
+    updateTitle(tick) {
         const titleCoords = this.sheetProps.titleProps().coords;
-        this.animationManager = new AnimationManager(this.sheetProps, titleCoords.map(group => ({
+        this.animationManager = new AnimationManager(tick, this.sheetProps, titleCoords.map(group => ({
             id: group.groupId,
             coords: {
                 f: group.coords.f,
@@ -101,6 +103,8 @@ export class Title {
     }
     update(deltaTime) {
         var _a, _b;
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         (_a = this.animationManager) === null || _a === void 0 ? void 0 : _a.update(deltaTime);
         this.currentFrame = (_b = this.animationManager) === null || _b === void 0 ? void 0 : _b.getTitleFrame();
     }
