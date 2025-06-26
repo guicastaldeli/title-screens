@@ -156,7 +156,7 @@ export class Hud {
         const modelViewMatrix = mat4.create();
         const size = [0.04, 0.04];
         const map = this.textureMap.letters;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0.85]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],
@@ -195,6 +195,7 @@ export class Hud {
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isSelected, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -214,7 +215,7 @@ export class Hud {
         const sheetSize = this.sheetProps.miscProps().spriteSheetSize;
         const hudX = position[0] + this.containerPosition[0];
         const hudY = position[1] + this.screen['setSize'].h * 0.1 + this.containerPosition[1];
-        mat4.translate(modelViewMatrix, modelViewMatrix, [hudX, hudY, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [hudX, hudY, 0.85]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],

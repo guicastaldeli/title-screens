@@ -212,6 +212,7 @@ export class ScreenDk extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }

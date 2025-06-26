@@ -40,6 +40,9 @@ export interface ProgramInfo {
         isLava: WebGLUniformLocation | null;
         needTransp: WebGLUniformLocation | null;
         isPlayer: WebGLUniformLocation | null;
+        uOpacity: WebGLUniformLocation | null;
+        isCloud: WebGLUniformLocation | null;
+        cloudDepth: WebGLUniformLocation | null;
     }
 }
 
@@ -143,7 +146,10 @@ async function main(): Promise<void> {
             isGround: gl.getUniformLocation(shaderProgram, 'isGround'),
             isLava: gl.getUniformLocation(shaderProgram, 'isLava'),
             needTransp: gl.getUniformLocation(shaderProgram, 'needTransp'),
-            isPlayer: gl.getUniformLocation(shaderProgram, 'isPlayer')
+            isPlayer: gl.getUniformLocation(shaderProgram, 'isPlayer'),
+            uOpacity: gl.getUniformLocation(shaderProgram, 'uOpacity'),
+            isCloud: gl.getUniformLocation(shaderProgram, 'isCloud'),
+            cloudDepth: gl.getUniformLocation(shaderProgram, 'cloudDepth')
         }
     }
 

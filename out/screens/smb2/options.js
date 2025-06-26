@@ -101,7 +101,7 @@ export class Options {
         const modelViewMatrix = mat4.create();
         const size = [0.04, 0.04];
         const map = this.textureMap.letters;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 1]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],
@@ -144,6 +144,7 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         const shouldShowSelectedShader = isSelected && !this.cursor.selected && !optionSelected;

@@ -37,7 +37,9 @@ export class Terrain {
         y: number,
         speed: number,
         scale: number,
-        variant: keyof GroundPairedCoords
+        variant: keyof GroundPairedCoords,
+        depth: number,
+        z: number
     }> = [];
 
     constructor(
@@ -93,6 +95,8 @@ export class Terrain {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
@@ -217,15 +221,34 @@ export class Terrain {
                 private cloudGapY = () => Math.random() * (0.5 - (-0.5)) + (-0.5);
 
                 private initCloudVariants(): void {
-                    for(let i = 0; i < this.cloudLength; i++) {
-                        this.clouds.push({
-                            x: this.position[0] + (i * this.cloudGapX()),
-                            y: (this.size[1] * 2) + this.cloudGapY(),
-                            speed: Math.random() * 0.05 + 0.05,
-                            scale: 0.18,
-                            variant: Math.random() < 0.6 ? 'f' : 's'
-                        });
-                    }
+                    this.clouds = [];
+                    const layers = [
+                        { count: 5, depthRange: [0.5, 0.7], scaleRange: [0.1, 0.15], speedRange: [0.02, 0.03], yOffset: 2.5 },
+                        { count: 5, depthRange: [0.7, 0.85], scaleRange: [0.15, 0.2], speedRange: [0.03, 0.04], yOffset: 2.2 },
+                        { count: 5, depthRange: [0.85, 1.1], scaleRange: [0.2, 0.25], speedRange: [0.04, 0.05], yOffset: 2.0 }
+                    ];
+
+                    layers.forEach(layer => {
+                        for(let i = 0; i < this.cloudLength; i++) {
+                            const scale = this.randomLayer(layer.scaleRange[0], layer.scaleRange[1]);
+                            const depth = this.randomLayer(layer.depthRange[0], layer.depthRange[1]);;
+                            const speed = this.randomLayer(layer.speedRange[0], layer.speedRange[1]);;
+
+                            this.clouds.push({
+                                x: this.position[0] + (i * this.cloudGapX()),
+                                y: (this.size[1] * layer.yOffset) + this.cloudGapY(),
+                                speed: speed,
+                                scale: scale,
+                                variant: Math.random() < 0.5 ? 'f' : 's',
+                                depth: depth,
+                                z: depth
+                            });
+                        }
+                    })
+                }
+
+                private randomLayer(min: number, max: number): number {
+                    return Math.random() * (max - min) + min;
                 }
 
                 private updateClouds(deltaTime: number): void {
@@ -245,7 +268,7 @@ export class Terrain {
 
                             cloud.x = fCloud.x + this.cloudGapX();
                             cloud.y = (this.size[1] * 2) + this.cloudGapY();
-                            cloud.variant = Math.random() < 0.6 ? 'f' : 's'; 
+                            cloud.variant = Math.random() < 0.5 ? 'f' : 's'; 
                         }
                     }
                 }
@@ -253,10 +276,11 @@ export class Terrain {
                 private drawClouds(projectionMatrix: mat4): void {
                     const map = this.textureMap.elements.overworld.clouds as GroundPairedCoords;
                     const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                    const baseSize = [0.98, 0.6];
+                    const baseSize = [0.98, 0.65];
                     const spriteSizes = { f: [35, 25], s: [50, 30] }
+                    const sortedClouds = [...this.clouds].sort((a, b) => a.depth - b.depth);
 
-                    for(const c of this.clouds) {
+                    for(const c of sortedClouds) {
                         const modelViewMatrix = mat4.create();
                         const scaledWidth = baseSize[0] * c.scale;
                         const scaleHeight = baseSize[1] * c.scale;
@@ -264,7 +288,13 @@ export class Terrain {
                         mat4.translate(
                             modelViewMatrix,
                             modelViewMatrix,
-                            [c.x, c.y, 0]
+                            [c.x, c.y, c.z]
+                        );
+
+                        mat4.scale(
+                            modelViewMatrix,
+                            modelViewMatrix,
+                            [c.depth, c.depth, 1]
                         );
 
                         const positions = [
@@ -290,9 +320,12 @@ export class Terrain {
                             right, top
                         ];
 
+                        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 1);
+                        this.gl.uniform1f(this.programInfo.uniformLocations.cloudDepth, c.depth);
                         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
                         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
-                        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
+                        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
+                        this.gl.uniform1f(this.programInfo.uniformLocations.cloudDepth, 0);
                     }
                 }
             //
@@ -316,7 +349,7 @@ export class Terrain {
                 mat4.translate(
                     modelViewMatrix,
                     modelViewMatrix,
-                    [x + updX, y + updY, 0]
+                    [x + updX, y + updY, 0.85]
                 );
 
                 const positions = [
@@ -354,7 +387,7 @@ export class Terrain {
             ): void {
                 const map = this.textureMap.elements.overworld.trees as { f: [number, number], s: [number, number] }
                 const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-                const spriteSizes = { f: [15.5, 31.7], s: [15.5, 65] }
+                const spriteSizes = { f: [15.5, 31.7], s: [15.5, 55] }
                 const variants = ['f', 's'];
 
                 const updX = 3.2;
@@ -362,16 +395,17 @@ export class Terrain {
 
                 for(const variant of variants) {
                     const modelViewMatrix = mat4.create();
-                    const size = variant === 'f' ? [0.11, 0.2] : [0.11, 0.41];
+                    const size = variant === 'f' ? [0.11, 0.2] : [0.11, 0.35];
                     const xOffset = variant === 's' ? 0.5 : 0;
+                    const yOffset = variant === 's' ? 0.06 : 0;
 
                     mat4.translate(
                         modelViewMatrix,
                         modelViewMatrix,
                         [
                             x + updX + xOffset, 
-                            y + updY,
-                            0
+                            y + updY + yOffset,
+                            0.85
                         ]
                     );
 
@@ -680,7 +714,6 @@ export class Terrain {
                     right, top
                 ];
 
-                this.gl.enable(this.gl.DEPTH_TEST);
                 this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
                 this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
                 this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);

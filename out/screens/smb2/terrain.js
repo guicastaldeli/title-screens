@@ -61,6 +61,8 @@ export class Terrain {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
@@ -150,15 +152,33 @@ export class Terrain {
         }
     }
     initCloudVariants() {
-        for (let i = 0; i < this.cloudLength; i++) {
-            this.clouds.push({
-                x: this.position[0] + (i * this.cloudGapX()),
-                y: (this.size[1] * 2) + this.cloudGapY(),
-                speed: Math.random() * 0.05 + 0.05,
-                scale: 0.18,
-                variant: Math.random() < 0.6 ? 'f' : 's'
-            });
-        }
+        this.clouds = [];
+        const layers = [
+            { count: 5, depthRange: [0.5, 0.7], scaleRange: [0.1, 0.15], speedRange: [0.02, 0.03], yOffset: 2.5 },
+            { count: 5, depthRange: [0.7, 0.85], scaleRange: [0.15, 0.2], speedRange: [0.03, 0.04], yOffset: 2.2 },
+            { count: 5, depthRange: [0.85, 1.1], scaleRange: [0.2, 0.25], speedRange: [0.04, 0.05], yOffset: 2.0 }
+        ];
+        layers.forEach(layer => {
+            for (let i = 0; i < this.cloudLength; i++) {
+                const scale = this.randomLayer(layer.scaleRange[0], layer.scaleRange[1]);
+                const depth = this.randomLayer(layer.depthRange[0], layer.depthRange[1]);
+                ;
+                const speed = this.randomLayer(layer.speedRange[0], layer.speedRange[1]);
+                ;
+                this.clouds.push({
+                    x: this.position[0] + (i * this.cloudGapX()),
+                    y: (this.size[1] * layer.yOffset) + this.cloudGapY(),
+                    speed: speed,
+                    scale: scale,
+                    variant: Math.random() < 0.5 ? 'f' : 's',
+                    depth: depth,
+                    z: depth
+                });
+            }
+        });
+    }
+    randomLayer(min, max) {
+        return Math.random() * (max - min) + min;
     }
     updateClouds(deltaTime) {
         const lScreen = this.position[0];
@@ -173,20 +193,22 @@ export class Terrain {
                 }
                 cloud.x = fCloud.x + this.cloudGapX();
                 cloud.y = (this.size[1] * 2) + this.cloudGapY();
-                cloud.variant = Math.random() < 0.6 ? 'f' : 's';
+                cloud.variant = Math.random() < 0.5 ? 'f' : 's';
             }
         }
     }
     drawClouds(projectionMatrix) {
         const map = this.textureMap.elements.overworld.clouds;
         const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-        const baseSize = [0.98, 0.6];
+        const baseSize = [0.98, 0.65];
         const spriteSizes = { f: [35, 25], s: [50, 30] };
-        for (const c of this.clouds) {
+        const sortedClouds = [...this.clouds].sort((a, b) => a.depth - b.depth);
+        for (const c of sortedClouds) {
             const modelViewMatrix = mat4.create();
             const scaledWidth = baseSize[0] * c.scale;
             const scaleHeight = baseSize[1] * c.scale;
-            mat4.translate(modelViewMatrix, modelViewMatrix, [c.x, c.y, 0]);
+            mat4.translate(modelViewMatrix, modelViewMatrix, [c.x, c.y, c.z]);
+            mat4.scale(modelViewMatrix, modelViewMatrix, [c.depth, c.depth, 1]);
             const positions = [
                 -scaledWidth, -scaleHeight,
                 scaledWidth, -scaleHeight,
@@ -206,9 +228,12 @@ export class Terrain {
                 left, top,
                 right, top
             ];
+            this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 1);
+            this.gl.uniform1f(this.programInfo.uniformLocations.cloudDepth, c.depth);
             this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
             this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);
-            this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.cloudDepth, 0);
         }
     }
     //
@@ -220,7 +245,7 @@ export class Terrain {
         const spriteSize = [80, 80];
         const updX = 0.53;
         const updY = 0.79;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x + updX, y + updY, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x + updX, y + updY, 0.85]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],
@@ -247,18 +272,19 @@ export class Terrain {
     drawTrees(projectionMatrix, x, y) {
         const map = this.textureMap.elements.overworld.trees;
         const sheetSize = this.sheetProps.tilesetProps().spriteSheetSize;
-        const spriteSizes = { f: [15.5, 31.7], s: [15.5, 65] };
+        const spriteSizes = { f: [15.5, 31.7], s: [15.5, 55] };
         const variants = ['f', 's'];
         const updX = 3.2;
         const updY = 0.49;
         for (const variant of variants) {
             const modelViewMatrix = mat4.create();
-            const size = variant === 'f' ? [0.11, 0.2] : [0.11, 0.41];
+            const size = variant === 'f' ? [0.11, 0.2] : [0.11, 0.35];
             const xOffset = variant === 's' ? 0.5 : 0;
+            const yOffset = variant === 's' ? 0.06 : 0;
             mat4.translate(modelViewMatrix, modelViewMatrix, [
                 x + updX + xOffset,
-                y + updY,
-                0
+                y + updY + yOffset,
+                0.85
             ]);
             const positions = [
                 -size[0], -size[1],
@@ -455,7 +481,6 @@ export class Terrain {
             left, top,
             right, top
         ];
-        this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.glConfig(projectionMatrix, modelViewMatrix, positions, coords);

@@ -256,7 +256,7 @@ export class Hud {
             mat4.translate(
                 modelViewMatrix,
                 modelViewMatrix,
-                [x, y, 0]
+                [x, y, 0.85]
             );
 
             const positions = [
@@ -303,6 +303,7 @@ export class Hud {
             this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isSelected, 0);
             this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+            this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
             
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
             this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -333,7 +334,7 @@ export class Hud {
             mat4.translate(
                 modelViewMatrix,
                 modelViewMatrix,
-                [hudX, hudY, 0]
+                [hudX, hudY, 0.85]
             );
 
             const positions = [

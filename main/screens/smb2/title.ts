@@ -50,7 +50,7 @@ export class Title {
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [titleX, titleY, 0.1]
+            [titleX, titleY, 0.85]
         );
 
         const positions = [
@@ -96,6 +96,7 @@ export class Title {
         this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
         
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -104,9 +105,9 @@ export class Title {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
-        
+        this.gl.depthFunc(this.gl.LEQUAL);
         this.gl.enable(this.gl.BLEND);
+        
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4); 
     }

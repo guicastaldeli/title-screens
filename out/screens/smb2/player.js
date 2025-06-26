@@ -108,6 +108,7 @@ export class Player {
         this.gl.uniform1f(this.programInfo.uniformLocations.isGround, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
         const currentStateValue = Number(this.levelState.getStateId());
         this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uState, currentStateValue);
@@ -116,6 +117,7 @@ export class Player {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
         this.gl.enable(this.gl.BLEND);
+        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
