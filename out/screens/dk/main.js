@@ -14,7 +14,7 @@ import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
 export class ScreenDk extends BaseScreen {
-    constructor(state, screenManager, tick, gl, programInfo, buffers) {
+    constructor(tick, state, screenManager, gl, programInfo, buffers) {
         super(state, gl, programInfo, buffers, tick);
         this.rotation = 0.0;
         this.speed = 1.0;
@@ -31,7 +31,7 @@ export class ScreenDk extends BaseScreen {
         this.sheetProps = new SheetProps();
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
-        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps, this.cursor);
+        this.options = new Options(tick, gl, buffers, programInfo, this, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
         this.setupInput();

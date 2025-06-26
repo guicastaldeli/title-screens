@@ -130,7 +130,7 @@ function main() {
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
         //Dk
-        renderScreenDk = new ScreenDk(state, screenManager, tick, gl, programInfo, buffers);
+        renderScreenDk = new ScreenDk(tick, state, screenManager, gl, programInfo, buffers);
         screenManager.registerScreen('dk', renderScreenDk);
         //Smb
         renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers, levelState);

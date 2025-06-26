@@ -169,7 +169,7 @@ async function main(): Promise<void> {
         renderCamera.init();
 
         //Dk
-        renderScreenDk = new ScreenDk(state, screenManager, tick, gl, programInfo, buffers);
+        renderScreenDk = new ScreenDk(tick, state, screenManager, gl, programInfo, buffers);
         screenManager.registerScreen('dk', renderScreenDk);
 
         //Smb

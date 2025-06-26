@@ -38,9 +38,9 @@ export class ScreenDk extends BaseScreen {
     private cursor: Cursor;
 
     constructor(
+        tick: Tick,
         state: State,
         screenManager: ScreenManager,
-        tick: Tick,
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
         buffers: Buffers
@@ -51,7 +51,7 @@ export class ScreenDk extends BaseScreen {
         this.sheetProps = new SheetProps();
         this.title = new Title(gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
-        this.options = new Options(gl, buffers, programInfo, this, this.sheetProps, this.cursor);
+        this.options = new Options(tick, gl, buffers, programInfo, this, this.sheetProps, this.cursor);
         this.cursor.setOptions(this.options);
         this.cursor.setOptionPosition();
 
