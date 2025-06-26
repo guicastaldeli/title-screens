@@ -11,20 +11,36 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 export class Entities {
+    get startX() {
+        return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
+    }
     constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
         this.currentY = -0.48;
-        this.startY = -0.62;
-        this.startX = 2.3;
-        this.endX = -2.5;
+        //Direction
+        this.defaultStartX = 1.8;
+        this.castleStartX = 0.5;
+        //Entities Animation
+        this.startY = -0.61;
+        this.endX = -1.0;
+        this.walkSpeed = 0.5;
+        this.walkDirection = -1;
+        this.walkPositionX = this.startX;
+        this.walkSpriteToggleTime = 0;
+        this.walkSpriteInterval = 500;
+        this.useFirstWalkSprite = true;
+        this.lastUpdateTime = 0;
         //Koopa Animation
+        this.koopaStartY = -0.62;
+        this.koopaStartX = 2.3;
+        this.koopaEndX = -2.5;
         this.jumpStartTime = 0;
         this.isJumping = false;
         this.gravity = -3.2;
         this.jumpDelay = 3000;
         this.lastJumpTime = 0;
         this.left = true;
-        this.jumpPosition = { x: this.startX, y: this.currentY };
+        this.jumpPosition = { x: this.koopaStartX, y: this.currentY };
         this.jumpVelocity = { x: -2.5, y: -3.0 };
         this.spriteStateTime = 0;
         this.useStandingprite = true;
@@ -50,10 +66,12 @@ export class Entities {
         const data = stateEntity[type];
         let map;
         if (this.currentState === States.Overworld) {
-            map = this.useStandingprite ? data.s : data.f;
+            if (type === 'koopa')
+                map = this.useStandingprite ? data.s : data.f;
         }
         else {
-            map = data.f;
+            if (type !== 'koopa')
+                map = this.useFirstWalkSprite ? data.f : data.s;
         }
         const entityProps = this.sheetProps.entityProps();
         const sheetSize = entityProps.sheetSize;
@@ -63,12 +81,12 @@ export class Entities {
         const currentSize = sizes[boxSizeType];
         let x, y;
         if (this.currentState === States.Overworld) {
-            x = this.isJumping ? this.jumpPosition.x : this.startX;
-            y = this.isJumping ? this.jumpPosition.y : this.startY + currentSize.h;
+            x = this.isJumping ? this.jumpPosition.x : this.koopaStartX;
+            y = this.isJumping ? this.jumpPosition.y : this.koopaStartY + currentSize.h;
         }
         else {
-            x = this.startX;
-            y = this.currentY + currentSize.h;
+            x = this.walkPositionX;
+            y = this.startY + currentSize.h;
         }
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, -0.5]);
         if (!this.left) {
@@ -137,6 +155,24 @@ export class Entities {
         });
     }
     //Entity Animation
+    //Other Entities
+    updateWalk(currentTime) {
+        this.walkPositionX += this.walkDirection * this.walkSpeed * (currentTime - this.lastUpdateTime) / 2;
+        if (this.walkPositionX <= this.endX) {
+            this.walkPositionX = this.endX;
+            this.walkDirection = 1;
+            this.left = false;
+        }
+        else if (this.walkPositionX >= this.startX) {
+            this.walkPositionX = this.startX;
+            this.walkDirection = -1;
+            this.left = true;
+        }
+        if (currentTime - this.walkSpriteToggleTime > this.walkSpriteInterval) {
+            this.useFirstWalkSprite = !this.useFirstWalkSprite;
+            this.walkSpriteToggleTime = currentTime;
+        }
+    }
     //Koopa
     startJump() {
         this.isJumping = true;
@@ -157,13 +193,13 @@ export class Entities {
         this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
         this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
         this.jumpVelocity.y += this.gravity * deltaTime;
-        if (this.jumpPosition.x <= this.endX) {
-            this.jumpPosition.x = this.endX;
+        if (this.jumpPosition.x <= this.koopaEndX) {
+            this.jumpPosition.x = this.koopaEndX;
             this.jumpVelocity.x = Math.abs(this.jumpVelocity.x);
             this.left = false;
         }
-        else if (this.jumpPosition.x >= this.startX) {
-            this.jumpPosition.x = this.startX;
+        else if (this.jumpPosition.x >= this.koopaStartX) {
+            this.jumpPosition.x = this.koopaStartX;
             this.jumpVelocity.x = -Math.abs(this.jumpVelocity.x);
             this.left = true;
         }
@@ -193,9 +229,14 @@ export class Entities {
     }
     update(deltaTime) {
         const currentTime = performance.now();
-        if (!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay)
-            this.startJump();
-        if (this.isJumping)
-            this.updateJump(currentTime);
+        if (this.currentState === States.Overworld && this.textureMap.entity[this.currentState].koopa) {
+            if (!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay)
+                this.startJump();
+            if (this.isJumping)
+                this.updateJump(currentTime);
+        }
+        else {
+            this.updateWalk(deltaTime);
+        }
     }
 }

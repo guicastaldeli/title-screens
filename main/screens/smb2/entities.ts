@@ -22,19 +22,41 @@ export class Entities {
     private sheetProps: SheetProps;
     private textureMap: TextureMap;
 
-    private readonly currentY = -0.48;
-    private readonly startY = -0.62;
-    private readonly startX = 2.3;
-    private readonly endX = -2.5;
+    private readonly currentY: number = -0.48;
 
+    //Direction
+    private readonly defaultStartX: number = 1.8;
+    private readonly castleStartX: number = 0.5;
+
+    private get startX(): number {
+        return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
+    }
+
+
+    //Entities Animation
+    private readonly startY: number = -0.61;
+    private readonly endX: number = -1.0;
+
+    private walkSpeed: number = 0.5;
+    private walkDirection: number = -1;
+    private walkPositionX: number = this.startX;
+    private walkSpriteToggleTime: number = 0;
+    private walkSpriteInterval: number = 500;
+    private useFirstWalkSprite: boolean = true;
+    private lastUpdateTime: number = 0;
+    
     //Koopa Animation
+    private readonly koopaStartY = -0.62;
+    private readonly koopaStartX = 2.3;
+    private readonly koopaEndX = -2.5;
+    
     private jumpStartTime: number = 0;
     private isJumping: boolean = false;
     private gravity: number = -3.2;
     private jumpDelay: number = 3000;
     private lastJumpTime: number = 0;
     private left: boolean = true;
-    private jumpPosition: { x: number, y: number } = { x: this.startX, y: this.currentY }
+    private jumpPosition: { x: number, y: number } = { x: this.koopaStartX, y: this.currentY }
     private jumpVelocity: { x: number, y: number } = { x: -2.5, y: -3.0 }
     private spriteStateTime: number = 0;
     private useStandingprite: boolean = true;
@@ -75,9 +97,9 @@ export class Entities {
         let map;
 
         if(this.currentState === States.Overworld) {
-            map = this.useStandingprite ? data.s : data.f;
+            if(type === 'koopa') map = this.useStandingprite ? data.s : data.f;
         } else {
-            map = data.f;
+            if(type !== 'koopa') map = this.useFirstWalkSprite ? data.f : data.s;
         }
 
         const entityProps = this.sheetProps.entityProps();
@@ -92,11 +114,11 @@ export class Entities {
         let x, y;
         
         if(this.currentState === States.Overworld) {
-            x = this.isJumping ? this.jumpPosition.x : this.startX;
-            y = this.isJumping ? this.jumpPosition.y : this.startY + currentSize.h;
+            x = this.isJumping ? this.jumpPosition.x : this.koopaStartX;
+            y = this.isJumping ? this.jumpPosition.y : this.koopaStartY + currentSize.h;
         } else {
-            x = this.startX;
-            y = this.currentY + currentSize.h;
+            x = this.walkPositionX;
+            y = this.startY + currentSize.h;
         }
 
         mat4.translate(
@@ -185,6 +207,26 @@ export class Entities {
     }
 
     //Entity Animation
+        //Other Entities
+        private updateWalk(currentTime: number): void {
+            this.walkPositionX += this.walkDirection * this.walkSpeed * (currentTime - this.lastUpdateTime) / 2;
+
+            if(this.walkPositionX <= this.endX) {
+                this.walkPositionX = this.endX;
+                this.walkDirection = 1;
+                this.left = false;
+            } else if(this.walkPositionX >= this.startX) {
+                this.walkPositionX = this.startX;
+                this.walkDirection = -1;
+                this.left = true;
+            }
+
+            if(currentTime - this.walkSpriteToggleTime > this.walkSpriteInterval) {
+                this.useFirstWalkSprite = !this.useFirstWalkSprite;
+                this.walkSpriteToggleTime = currentTime;
+            }
+        }
+
         //Koopa
         private startJump(): void {
             this.isJumping = true;
@@ -208,12 +250,12 @@ export class Entities {
             this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
             this.jumpVelocity.y += this.gravity * deltaTime;
 
-            if(this.jumpPosition.x <= this.endX) {
-                this.jumpPosition.x = this.endX;
+            if(this.jumpPosition.x <= this.koopaEndX) {
+                this.jumpPosition.x = this.koopaEndX;
                 this.jumpVelocity.x = Math.abs(this.jumpVelocity.x);
                 this.left = false;
-            } else if(this.jumpPosition.x >= this.startX) {
-                this.jumpPosition.x = this.startX;
+            } else if(this.jumpPosition.x >= this.koopaStartX) {
+                this.jumpPosition.x = this.koopaStartX;
                 this.jumpVelocity.x = -Math.abs(this.jumpVelocity.x);
                 this.left = true;
             }
@@ -249,7 +291,11 @@ export class Entities {
     public update(deltaTime: number): void {
         const currentTime = performance.now();
 
-        if(!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay) this.startJump();   
-        if(this.isJumping) this.updateJump(currentTime);
+        if(this.currentState === States.Overworld && this.textureMap.entity[this.currentState].koopa) {
+            if(!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay) this.startJump();   
+            if(this.isJumping) this.updateJump(currentTime);
+        } else {
+            this.updateWalk(deltaTime);
+        }
     }
 }
