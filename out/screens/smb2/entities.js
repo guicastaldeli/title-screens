@@ -8,10 +8,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 export class Entities {
     constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
+        this.currentY = -0.48;
+        this.startY = -0.62;
+        this.startX = 2.3;
+        this.endX = -2.5;
+        //Koopa Animation
+        this.jumpStartTime = 0;
+        this.isJumping = false;
+        this.gravity = -3.2;
+        this.jumpDelay = 3000;
+        this.lastJumpTime = 0;
+        this.left = true;
+        this.jumpPosition = { x: this.startX, y: this.currentY };
+        this.jumpVelocity = { x: -2.5, y: -3.0 };
+        this.spriteStateTime = 0;
+        this.useStandingprite = true;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -20,6 +36,8 @@ export class Entities {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
+        this.startJump();
+        this.lastJumpTime = performance.now();
     }
     drawEntities(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -30,16 +48,32 @@ export class Entities {
         const stateEntity = this.textureMap.entity[this.currentState];
         const type = Object.keys(stateEntity)[0];
         const data = stateEntity[type];
-        const map = data.f;
+        let map;
+        if (this.currentState === States.Overworld) {
+            map = this.useStandingprite ? data.s : data.f;
+        }
+        else {
+            map = data.f;
+        }
         const entityProps = this.sheetProps.entityProps();
         const sheetSize = entityProps.sheetSize;
         const stateSpriteSizes = entityProps.spriteSize[this.currentState];
         const spriteSize = stateSpriteSizes[type];
         const boxSizeType = stateSpriteSizes.boxSize;
         const currentSize = sizes[boxSizeType];
-        const x = -1;
-        const y = -0.5;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        let x, y;
+        if (this.currentState === States.Overworld) {
+            x = this.isJumping ? this.jumpPosition.x : this.startX;
+            y = this.isJumping ? this.jumpPosition.y : this.startY + currentSize.h;
+        }
+        else {
+            x = this.startX;
+            y = this.currentY + currentSize.h;
+        }
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, -0.5]);
+        if (!this.left) {
+            mat4.scale(modelViewMatrix, modelViewMatrix, [-1, 1, 1]);
+        }
         const positions = [
             -currentSize.w, -currentSize.h,
             currentSize.w, -currentSize.h,
@@ -86,8 +120,8 @@ export class Entities {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
-        this.gl.enable(this.gl.BLEND);
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        this.gl.depthFunc(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.LEQUAL);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -102,6 +136,55 @@ export class Entities {
             }
         });
     }
+    //Entity Animation
+    //Koopa
+    startJump() {
+        this.isJumping = true;
+        this.jumpStartTime = performance.now();
+        this.lastJumpTime = this.jumpStartTime;
+        this.jumpPosition.y = this.currentY;
+        if (this.left) {
+            this.jumpVelocity = { x: -0.3, y: 1.5 };
+        }
+        else {
+            this.jumpVelocity = { x: 0.3, y: 1.5 };
+        }
+    }
+    updateJump(currentTime) {
+        if (!this.isJumping)
+            return;
+        const deltaTime = (currentTime - this.jumpStartTime) / 50000;
+        this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
+        this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
+        this.jumpVelocity.y += this.gravity * deltaTime;
+        if (this.jumpPosition.x <= this.endX) {
+            this.jumpPosition.x = this.endX;
+            this.jumpVelocity.x = Math.abs(this.jumpVelocity.x);
+            this.left = false;
+        }
+        else if (this.jumpPosition.x >= this.startX) {
+            this.jumpPosition.x = this.startX;
+            this.jumpVelocity.x = -Math.abs(this.jumpVelocity.x);
+            this.left = true;
+        }
+        if (this.jumpPosition.y > this.currentY) {
+            if (this.useStandingprite) {
+                if (this.spriteStateTime === 0)
+                    this.spriteStateTime = currentTime;
+                if ((currentTime - this.spriteStateTime) > 500)
+                    this.useStandingprite = false;
+            }
+        }
+        if (this.jumpPosition.y < this.currentY) {
+            this.jumpPosition.y = this.currentY;
+            this.isJumping = false;
+            this.lastJumpTime = currentTime;
+            this.useStandingprite = true;
+            this.spriteStateTime = 0;
+            this.startJump();
+        }
+    }
+    //
     initEntity(projectionMatrix) {
         this.drawEntities(projectionMatrix);
     }
@@ -109,5 +192,10 @@ export class Entities {
         this.currentState = this.levelState.getCurrentState();
     }
     update(deltaTime) {
+        const currentTime = performance.now();
+        if (!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay)
+            this.startJump();
+        if (this.isJumping)
+            this.updateJump(currentTime);
     }
 }

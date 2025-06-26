@@ -131,16 +131,19 @@ export class ScreenSmb extends BaseScreen {
             //Terrain
             this.terrain.initTerrain(projectionMatrix);
 
+            //HUD
             this.hud.drawHud(projectionMatrix);
             this.title.drawTitle(projectionMatrix);
-            this.options.initOptions(projectionMatrix);
-            this.cursor.drawCursor(projectionMatrix);
 
             //Player
             this.player.initPlayer(projectionMatrix);
 
             //Entity
             this.entity.initEntity(projectionMatrix);
+
+            //Options
+            this.options.initOptions(projectionMatrix);
+            this.cursor.drawCursor(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);

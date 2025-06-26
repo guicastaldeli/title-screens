@@ -22,7 +22,24 @@ export class Entities {
     private sheetProps: SheetProps;
     private textureMap: TextureMap;
 
-     constructor(
+    private readonly currentY = -0.48;
+    private readonly startY = -0.62;
+    private readonly startX = 2.3;
+    private readonly endX = -2.5;
+
+    //Koopa Animation
+    private jumpStartTime: number = 0;
+    private isJumping: boolean = false;
+    private gravity: number = -3.2;
+    private jumpDelay: number = 3000;
+    private lastJumpTime: number = 0;
+    private left: boolean = true;
+    private jumpPosition: { x: number, y: number } = { x: this.startX, y: this.currentY }
+    private jumpVelocity: { x: number, y: number } = { x: -2.5, y: -3.0 }
+    private spriteStateTime: number = 0;
+    private useStandingprite: boolean = true;
+
+    constructor(
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
@@ -39,6 +56,9 @@ export class Entities {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.textureMap = new TextureMap();
+
+        this.startJump();
+        this.lastJumpTime = performance.now();
     }
 
     private drawEntities(projectionMatrix: mat4): void {
@@ -52,7 +72,13 @@ export class Entities {
         const stateEntity = this.textureMap.entity[this.currentState];
         const type = Object.keys(stateEntity)[0];
         const data = stateEntity[type];
-        const map = data.f;
+        let map;
+
+        if(this.currentState === States.Overworld) {
+            map = this.useStandingprite ? data.s : data.f;
+        } else {
+            map = data.f;
+        }
 
         const entityProps = this.sheetProps.entityProps();
         const sheetSize = entityProps.sheetSize;
@@ -63,14 +89,29 @@ export class Entities {
         const boxSizeType = stateSpriteSizes.boxSize;
         const currentSize = sizes[boxSizeType];
 
-        const x = -1;
-        const y = -0.5;
+        let x, y;
+        
+        if(this.currentState === States.Overworld) {
+            x = this.isJumping ? this.jumpPosition.x : this.startX;
+            y = this.isJumping ? this.jumpPosition.y : this.startY + currentSize.h;
+        } else {
+            x = this.startX;
+            y = this.currentY + currentSize.h;
+        }
 
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [x, y, 0]
+            [x, y, -0.5]
         );
+
+        if(!this.left) {
+            mat4.scale(
+                modelViewMatrix,
+                modelViewMatrix,
+                [-1, 1, 1]
+            );
+        }
 
         const positions = [
             -currentSize.w, -currentSize.h,
@@ -128,8 +169,8 @@ export class Entities {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
-        this.gl.enable(this.gl.BLEND);
-        this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+        this.gl.depthFunc(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.LEQUAL);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -143,6 +184,60 @@ export class Entities {
         }
     }
 
+    //Entity Animation
+        //Koopa
+        private startJump(): void {
+            this.isJumping = true;
+            this.jumpStartTime = performance.now();
+            this.lastJumpTime = this.jumpStartTime;
+
+            this.jumpPosition.y = this.currentY;
+
+            if(this.left) {
+                this.jumpVelocity = { x: -0.3, y: 1.5 }
+            } else {
+                this.jumpVelocity = { x: 0.3, y: 1.5 }
+            }
+        }
+
+        private updateJump(currentTime: number): void {
+            if(!this.isJumping) return;
+            const deltaTime = (currentTime - this.jumpStartTime) / 50000;
+
+            this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
+            this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
+            this.jumpVelocity.y += this.gravity * deltaTime;
+
+            if(this.jumpPosition.x <= this.endX) {
+                this.jumpPosition.x = this.endX;
+                this.jumpVelocity.x = Math.abs(this.jumpVelocity.x);
+                this.left = false;
+            } else if(this.jumpPosition.x >= this.startX) {
+                this.jumpPosition.x = this.startX;
+                this.jumpVelocity.x = -Math.abs(this.jumpVelocity.x);
+                this.left = true;
+            }
+
+            if(this.jumpPosition.y > this.currentY) {
+                if(this.useStandingprite) {
+                    if(this.spriteStateTime === 0) this.spriteStateTime = currentTime;
+                    if((currentTime - this.spriteStateTime) > 500) this.useStandingprite = false;
+                }
+            }
+
+            if(this.jumpPosition.y < this.currentY) {
+                this.jumpPosition.y = this.currentY;
+                this.isJumping = false;
+                this.lastJumpTime = currentTime;
+
+                this.useStandingprite = true;
+                this.spriteStateTime = 0;
+
+                this.startJump();
+            }
+        }
+    //
+
     public initEntity(projectionMatrix: mat4): void {
         this.drawEntities(projectionMatrix);
     }
@@ -152,6 +247,9 @@ export class Entities {
     }
 
     public update(deltaTime: number): void {
+        const currentTime = performance.now();
 
+        if(!this.isJumping && (currentTime - this.lastJumpTime) > this.jumpDelay) this.startJump();   
+        if(this.isJumping) this.updateJump(currentTime);
     }
 }

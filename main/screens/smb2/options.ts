@@ -248,6 +248,8 @@ export class Options {
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
         this.gl.enable(this.gl.BLEND);
+        this.gl.depthFunc(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.LEQUAL);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
