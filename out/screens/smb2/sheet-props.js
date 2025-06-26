@@ -1,10 +1,13 @@
 import { TextureMap } from "./texture-map.js";
+import { States } from "./texture-map.interface.js";
 export class SheetProps {
     constructor() {
         this.map = new TextureMap();
         this.tilesetProps();
         this.miscProps();
         this.titleProps();
+        this.playersetProps();
+        this.entityProps();
     }
     //Tileset
     tilesetProps() {
@@ -68,6 +71,32 @@ export class SheetProps {
                     small: [16, 16],
                     big: [16, 32],
                 }
+            }
+        };
+        return {
+            sheetSize,
+            spriteSize
+        };
+    }
+    //Entities
+    entityProps() {
+        const sheetSize = [436, 508];
+        const spriteSize = {
+            [States.Overworld]: {
+                koopa: [16, 24],
+                boxSize: 'big'
+            },
+            [States.Underground]: {
+                goomba: [16, 16],
+                boxSize: 'normal'
+            },
+            [States.Underwater]: {
+                cheep: [16, 16],
+                boxSize: 'normal'
+            },
+            [States.Castle]: {
+                buzzy: [16, 16],
+                boxSize: 'normal'
             }
         };
         return {

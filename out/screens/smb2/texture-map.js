@@ -1,3 +1,4 @@
+import { States } from "./texture-map.interface.js";
 export class TextureMap {
     constructor() {
         this.letters = this.setLetters();
@@ -9,6 +10,8 @@ export class TextureMap {
         this.elements = this.setElements();
         //Player
         this.player = this.setPlayer();
+        //Entity
+        this.entity = this.setEntity();
     }
     setLetters() {
         const overworld = {
@@ -589,5 +592,35 @@ export class TextureMap {
             }
         };
         return { player };
+    }
+    //Entities
+    setEntity() {
+        return {
+            [States.Overworld]: {
+                koopa: {
+                    f: [36, 113],
+                    s: [53.9, 112]
+                }
+            },
+            [States.Underground]: {
+                goomba: {
+                    f: [74, 16],
+                    s: [92, 16]
+                }
+            },
+            [States.Underwater]: {
+                cheep: {
+                    f: [292, 164],
+                    s: [310, 164]
+                }
+            },
+            [States.Castle]: {
+                buzzy: {
+                    f: [148, 34],
+                    s: [166, 34]
+                }
+            },
+            [States.Info]: {}
+        };
     }
 }

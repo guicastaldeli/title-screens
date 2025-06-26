@@ -101,28 +101,41 @@ export type CoinMap = {
         }
     //
 
-    //Player
-    type PlayerSingleCoord = [number, number];
-
-    type PlayerPairedCoords = {
-        normal: PlayerSingleCoord;
-        swim: {
-            f: PlayerSingleCoord;
-            s: PlayerSingleCoord;
-        }
-    }
-
-    type CharCoords = {
-        small: PlayerPairedCoords;
-        big: PlayerPairedCoords;
-    }
-
-    export type PlayerCoords = {
-        mario: CharCoords;
-        luigi: CharCoords;
-    }
-
-    export interface PlayerMap {
-        player: PlayerCoords;
-    }
 //
+
+//Player
+type PlayerSingleCoord = [number, number];
+
+type PlayerPairedCoords = {
+    normal: PlayerSingleCoord;
+    swim: {
+        f: PlayerSingleCoord;
+        s: PlayerSingleCoord;
+    }
+}
+
+type CharCoords = {
+    small: PlayerPairedCoords;
+    big: PlayerPairedCoords;
+}
+
+export type PlayerCoords = {
+    mario: CharCoords;
+    luigi: CharCoords;
+}
+
+export interface PlayerMap {
+    player: PlayerCoords;
+}
+
+//Entities
+type EntitiesSingleCoord = [number, number];
+
+export type EntityCoord = {
+    f: EntitiesSingleCoord;
+    s: EntitiesSingleCoord;
+}
+
+export type EntityMap = {
+    [key in States]: Record<string, EntityCoord>;
+}

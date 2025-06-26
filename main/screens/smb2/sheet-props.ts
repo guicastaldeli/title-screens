@@ -1,5 +1,5 @@
 import { TextureMap } from "./texture-map.js";
-import { TitleMap } from "./texture-map.interface.js";
+import { States, TitleMap } from "./texture-map.interface.js";
 
 interface MiscProps {
     spriteSheetSize: [number, number];
@@ -53,6 +53,28 @@ interface PlayerProps {
     }
 }
 
+interface EntityProps {
+    sheetSize: [number, number];
+    spriteSize: {
+        [States.Overworld]: {
+            koopa: [number, number];
+            boxSize: string;
+        },
+        [States.Underground]: {
+            goomba: [number, number];
+            boxSize: string;
+        },
+        [States.Underwater]: {
+            cheep: [number, number];
+            boxSize: string;
+        },
+        [States.Castle]: {
+            buzzy: [number, number];
+            boxSize: string;
+        }
+    }
+}
+
 export class SheetProps {
     private map: TextureMap;
 
@@ -62,6 +84,8 @@ export class SheetProps {
         this.tilesetProps();
         this.miscProps();
         this.titleProps();
+        this.playersetProps();
+        this.entityProps();
     }
 
     //Tileset
@@ -163,6 +187,51 @@ export class SheetProps {
                     small: [16, 16],
                     big: [16, 32],
                 }
+            }
+        }
+
+        return {
+            sheetSize,
+            spriteSize
+        }
+    }
+
+    //Entities
+    public entityProps(): EntityProps {
+        const sheetSize: [number, number] = [436, 508];
+        const spriteSize: {
+            overworld: {
+                koopa: [number, number];
+                boxSize: string;
+            },
+            underground: {
+                goomba: [number, number];
+                boxSize: string;
+            },
+            underwater: {
+                cheep: [number, number];
+                boxSize: string;
+            },
+            castle: {
+                buzzy: [number, number];
+                boxSize: string;
+            }
+        } = {
+            [States.Overworld]: {
+                koopa: [16, 24],
+                boxSize: 'big'
+            },
+            [States.Underground]: {
+                goomba: [16, 16],
+                boxSize: 'normal'
+            },
+            [States.Underwater]: {
+                cheep: [16, 16],
+                boxSize: 'normal'
+            },
+            [States.Castle]: {
+                buzzy: [16, 16],
+                boxSize: 'normal'
             }
         }
 

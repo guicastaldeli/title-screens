@@ -50,7 +50,7 @@ export class Cursor {
         const size = [0.04, 0.04];
         const x = this.position[0];
         const y = this.position[1];
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 1]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],
@@ -93,6 +93,8 @@ export class Cursor {
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     setOptionPositions() {

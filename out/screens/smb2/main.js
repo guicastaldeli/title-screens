@@ -17,6 +17,7 @@ import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
 import { Terrain } from "./terrain.js";
 import { Player } from "./player.js";
+import { Entities } from "./entities.js";
 export class ScreenSmb extends BaseScreen {
     constructor(state, screenManager, tick, gl, programInfo, buffers, levelState) {
         super(state, gl, programInfo, buffers, tick);
@@ -42,6 +43,7 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.setOptionPosition();
         this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.entity = new Entities(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.setupInput();
     }
     //Bakcground
@@ -84,6 +86,8 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.drawCursor(projectionMatrix);
         //Player
         this.player.initPlayer(projectionMatrix);
+        //Entity
+        this.entity.initEntity(projectionMatrix);
         //
         this.gl.enable(this.gl.DEPTH_TEST);
     }
@@ -262,12 +266,14 @@ export class ScreenSmb extends BaseScreen {
             yield this.title.getTex();
             yield this.terrain.getTex();
             yield this.player.getTex();
+            yield this.entity.getTex();
         });
     }
     updateLevelState() {
         this.terrain.updateState();
         this.options.updateState();
         this.hud.updateState();
+        this.entity.updateState();
     }
     update(deltaTime) {
         if (this.state.isLoading())
@@ -278,6 +284,7 @@ export class ScreenSmb extends BaseScreen {
         this.options.update(deltaTime);
         this.cursor.update();
         this.player.update(deltaTime);
+        this.entity.update(deltaTime);
         this.setInit();
     }
     init() {

@@ -18,6 +18,7 @@ import { Cursor } from "./cursor.js";
 
 import { Terrain } from "./terrain.js";
 import { Player } from "./player.js";
+import { Entities } from "./entities.js";
 
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
@@ -48,6 +49,7 @@ export class ScreenSmb extends BaseScreen {
 
     private terrain: Terrain;
     private player: Player;
+    private entity: Entities;
 
     constructor(
         state: State,
@@ -73,6 +75,7 @@ export class ScreenSmb extends BaseScreen {
 
         this.terrain = new Terrain(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.entity = new Entities(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
 
         this.setupInput();
     }
@@ -135,6 +138,9 @@ export class ScreenSmb extends BaseScreen {
 
             //Player
             this.player.initPlayer(projectionMatrix);
+
+            //Entity
+            this.entity.initEntity(projectionMatrix);
         //
 
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -390,12 +396,14 @@ export class ScreenSmb extends BaseScreen {
         await this.title.getTex();
         await this.terrain.getTex();
         await this.player.getTex();
+        await this.entity.getTex();
     }
 
     public updateLevelState(): void {
         this.terrain.updateState();
         this.options.updateState();
         this.hud.updateState();
+        this.entity.updateState();
     }
 
     public update(deltaTime: number) {
@@ -408,6 +416,7 @@ export class ScreenSmb extends BaseScreen {
         this.options.update(deltaTime);
         this.cursor.update();
         this.player.update(deltaTime);
+        this.entity.update(deltaTime);
         
         this.setInit();
     }

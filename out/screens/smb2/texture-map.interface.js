@@ -7,4 +7,3 @@ export var States;
     States["Castle"] = "castle";
     States["Info"] = "info";
 })(States || (States = {}));
-//

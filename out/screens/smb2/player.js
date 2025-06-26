@@ -28,6 +28,14 @@ export class Player {
         this.animationTimer = 0;
         this.animationSpeed = 0.5;
         this.currentFrame = 'f';
+        this.isSizeChanging = false;
+        this.sizeChangeTimer = 0;
+        this.sizeChangeDuration = 0.8;
+        this.blinkInterval = 0.15;
+        this.nextBlinkTime = 0.15;
+        this.isVisible = true;
+        this.nextSizeState = 'small';
+        this.showNextSize = false;
         this.groundLevel = -0.61;
         this.seaLevel = -0.81;
         this.gl = gl;
@@ -45,14 +53,19 @@ export class Player {
         this.sizeState = this.charSizes[char];
     }
     drawPlayer(projectionMatrix) {
+        if (this.isSizeChanging && !this.isVisible)
+            return;
         const modelViewMatrix = mat4.create();
         this.updateActionState();
+        const displaySizeState = this.isSizeChanging && this.showNextSize
+            ? this.nextSizeState
+            : this.sizeState;
         const sizes = {
             small: { w: 0.1, h: 0.1 },
             big: { w: 0.1, h: 0.2 }
         };
-        const currentSize = sizes[this.sizeState];
-        const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
+        const currentSize = sizes[displaySizeState];
+        const map = this.textureMap.player.player[this.character][displaySizeState][this.actionState];
         let spriteCoords;
         if (this.actionState === 'normal') {
             spriteCoords = map;
@@ -66,7 +79,7 @@ export class Player {
             }
         }
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
-        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
+        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][displaySizeState];
         const x = -1.45;
         const y = this.currentY + currentSize.h;
         mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
@@ -150,8 +163,31 @@ export class Player {
             this.toggleSize();
     }
     toggleSize() {
-        this.charSizes[this.character] = this.charSizes[this.character] === 'small' ? 'big' : 'small';
-        this.sizeState = this.charSizes[this.character];
+        if (this.isSizeChanging)
+            return;
+        this.isSizeChanging = true;
+        this.sizeChangeTimer = 0;
+        this.nextBlinkTime = 0;
+        this.isVisible = true;
+        this.showNextSize = false;
+        this.nextSizeState = this.sizeState === 'small' ? 'big' : 'small';
+    }
+    updateSize(deltaTime) {
+        if (this.isSizeChanging) {
+            this.sizeChangeTimer += deltaTime;
+            if (this.sizeChangeTimer >= this.nextBlinkTime) {
+                this.isVisible = !this.isVisible;
+                if (this.isVisible)
+                    this.showNextSize = !this.showNextSize;
+                this.nextBlinkTime += this.blinkInterval;
+            }
+            if (this.sizeChangeTimer >= this.sizeChangeDuration) {
+                this.isSizeChanging = false;
+                this.isVisible = true;
+                this.charSizes[this.character] = this.nextSizeState;
+                this.sizeState = this.charSizes[this.character];
+            }
+        }
     }
     getTex() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -178,5 +214,6 @@ export class Player {
                 this.currentY += diff * this.transitionSpeed * deltaTime;
             }
         }
+        this.updateSize(deltaTime);
     }
 }

@@ -5,7 +5,7 @@ import { ProgramInfo } from "../../main.js";
 
 import { ScreenSmb } from "./main.js";
 import { LevelState } from "./level-state.js";
-import { GroundCoords, States } from "./texture-map.interface.js";
+import { States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 
@@ -40,6 +40,15 @@ export class Player {
     private animationSpeed: number = 0.5;
     private currentFrame: 'f' | 's' = 'f';
 
+    private isSizeChanging: boolean = false;
+    private sizeChangeTimer: number = 0;
+    private sizeChangeDuration: number = 0.8;
+    private blinkInterval: number = 0.15;
+    private nextBlinkTime: number = 0.15;
+    private isVisible: boolean = true;
+    private nextSizeState: 'small' | 'big' = 'small';
+    private showNextSize: boolean = false;
+
     private readonly groundLevel = -0.61;
     private readonly seaLevel = -0.81;
 
@@ -70,16 +79,22 @@ export class Player {
     }
 
     private drawPlayer(projectionMatrix: mat4): void {
+        if(this.isSizeChanging && !this.isVisible) return;
+
         const modelViewMatrix = mat4.create();
         this.updateActionState();
+
+        const displaySizeState = this.isSizeChanging && this.showNextSize
+        ? this.nextSizeState
+        : this.sizeState;
 
         const sizes = { 
             small: { w: 0.1, h: 0.1 }, 
             big: { w: 0.1, h: 0.2 } 
         };
-        const currentSize = sizes[this.sizeState];
 
-        const map = this.textureMap.player.player[this.character][this.sizeState][this.actionState];
+        const currentSize = sizes[displaySizeState];
+        const map = this.textureMap.player.player[this.character][displaySizeState][this.actionState];
         let spriteCoords: [number, number];
 
         if(this.actionState === 'normal') {
@@ -93,7 +108,7 @@ export class Player {
         }
 
         const sheetSize = this.sheetProps.playersetProps().sheetSize;
-        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][this.sizeState];
+        const spriteSize = this.sheetProps.playersetProps().spriteSize.player[this.character][displaySizeState];
 
         const x = -1.45;
         const y = this.currentY + currentSize.h;
@@ -195,8 +210,34 @@ export class Player {
     }
 
     private toggleSize(): void {
-        this.charSizes[this.character] = this.charSizes[this.character] === 'small' ? 'big' : 'small';
-        this.sizeState = this.charSizes[this.character];
+        if(this.isSizeChanging) return;
+
+        this.isSizeChanging = true;
+        this.sizeChangeTimer = 0;
+        this.nextBlinkTime = 0;
+        this.isVisible = true;
+        this.showNextSize = false;
+
+        this.nextSizeState = this.sizeState === 'small' ? 'big' : 'small';
+    }
+
+    private updateSize(deltaTime: number) {
+        if(this.isSizeChanging) {
+            this.sizeChangeTimer += deltaTime;
+
+            if(this.sizeChangeTimer >= this.nextBlinkTime) {
+                this.isVisible = !this.isVisible;
+                if(this.isVisible) this.showNextSize = !this.showNextSize;
+                this.nextBlinkTime += this.blinkInterval;
+            }
+
+            if(this.sizeChangeTimer >= this.sizeChangeDuration) {
+                this.isSizeChanging = false;
+                this.isVisible = true;
+                this.charSizes[this.character] = this.nextSizeState;
+                this.sizeState = this.charSizes[this.character];
+            }
+        }
     }
 
     public async getTex(): Promise<void> {
@@ -223,5 +264,7 @@ export class Player {
                 this.currentY += diff * this.transitionSpeed * deltaTime;
             }
         }
+
+        this.updateSize(deltaTime);
     }
 }

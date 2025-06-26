@@ -1,3 +1,4 @@
+import { States } from "./texture-map.interface.js";
 import { TitleMap } from "./texture-map.interface.js";
 import { CoinCoords } from "./texture-map.interface.js";
 import { CoinMap } from "./texture-map.interface.js";
@@ -9,6 +10,8 @@ import { ElementsCoords } from "./texture-map.interface.js";
 import { ElementsMap } from "./texture-map.interface.js";
 import { PlayerCoords } from "./texture-map.interface.js";
 import { PlayerMap } from "./texture-map.interface.js";
+import { EntityCoord } from "./texture-map.interface.js";
+import { EntityMap } from "./texture-map.interface.js";
 
 export class TextureMap {
     public title: TitleMap;
@@ -17,6 +20,7 @@ export class TextureMap {
     public ground: GroundMap;
     public elements: ElementsMap;
     public player: PlayerMap;
+    public entity: EntityMap;
 
     constructor() {
         this.letters = this.setLetters();
@@ -31,6 +35,9 @@ export class TextureMap {
 
         //Player
         this.player = this.setPlayer();
+
+        //Entity
+        this.entity = this.setEntity();
     }
 
     private setLetters(): LetterMap {
@@ -621,5 +628,36 @@ export class TextureMap {
         }
 
         return { player };
+    }
+    
+    //Entities
+    private setEntity(): EntityMap {
+        return {
+            [States.Overworld]: {
+                koopa: {
+                    f: [36, 113],
+                    s: [53.9, 112]
+                }
+            },
+            [States.Underground]: {
+                goomba: {
+                    f: [74, 16],
+                    s: [92, 16]
+                }
+            },
+            [States.Underwater]: {
+                cheep: {
+                    f: [292, 164],
+                    s: [310, 164]
+                }
+            },
+            [States.Castle]: {
+                buzzy: {
+                    f: [148, 34],
+                    s: [166, 34]
+                }
+            },
+            [States.Info]: {}
+        }
     }
 }
