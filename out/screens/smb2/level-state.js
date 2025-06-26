@@ -12,6 +12,16 @@ export class LevelState {
     getState() {
         return this.state;
     }
+    getStateId() {
+        const states = [
+            States.Overworld,
+            States.Underground,
+            States.Underwater,
+            States.Castle,
+            States.Info
+        ];
+        return states.indexOf(this.state);
+    }
     toggleState() {
         switch (this.state) {
             case States.Overworld:

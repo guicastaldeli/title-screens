@@ -86,6 +86,7 @@ export class Cursor {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.isSelected, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);

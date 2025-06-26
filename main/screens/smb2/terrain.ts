@@ -85,6 +85,7 @@ export class Terrain {
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isGround, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
             
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);

@@ -15,6 +15,18 @@ export class LevelState {
         return this.state;
     }
 
+    public getStateId(): number {
+        const states: States[] = [
+            States.Overworld,
+            States.Underground,
+            States.Underwater,
+            States.Castle,
+            States.Info
+        ];
+
+        return states.indexOf(this.state);
+    }
+
     public toggleState(): void {
         switch(this.state) {
             case States.Overworld:

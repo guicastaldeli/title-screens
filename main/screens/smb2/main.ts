@@ -97,6 +97,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
@@ -250,6 +251,7 @@ export class ScreenSmb extends BaseScreen {
         this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);

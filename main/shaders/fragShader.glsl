@@ -16,6 +16,7 @@ uniform bool isSelected;
 uniform bool haveState;
 uniform bool isLava;
 uniform bool needTransp;
+uniform bool isPlayer;
 
 uniform float uState;
 
@@ -25,16 +26,21 @@ uniform vec2 uTextStartPos;
 
 void main() {
     vec4 tex = texture2D(uSampler, vTextureCoord);
+    vec4 finalColor = tex;
 
     if(haveState) {
+        float overworldState = 0.1;
+        float undergroundState = 1.1;
+        float underwaterState = 2.1;
+
         if(!uTex && !isText && !isHud && !isCursor) {
             vec4 tileColor = vColor;
 
-            if(uState < 0.1) {
+            if(uState < overworldState) {
                 tileColor = vec4(0.580, 0.580, 1.0, 1.0);
-            } else if(uState < 1.1) {
+            } else if(uState < undergroundState) {
                 tileColor = vec4(0.0, 0.0, 0.0, 1.0);
-            } else if(uState < 2.1) {
+            } else if(uState < underwaterState) {
                 tileColor = vec4(0.2588, 0.2588, 1.0, 1.0);
             } else {
                 tileColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -136,6 +142,19 @@ void main() {
         bool fIsTransp = all(lessThan(abs(tex.rgb - fColor.rgb), threshold));
         bool sIsTransp = all(lessThan(abs(tex.rgb - sColor.rgb), threshold));
         if(fIsTransp || sIsTransp) discard;
+
+        if(isPlayer) {
+            if(haveState && abs(uState - 2.0) < 0.01) {
+                float intensity = 0.3;
+                vec4 color = vec4(0.2588, 0.2588, 1.0, 1.0);
+                tex.rgb = mix(tex.rgb, color.rgb, intensity * tex.a);
+                gl_FragColor = vec4(tex.rgb, tex.a);
+                return;
+            } else {
+                gl_FragColor = tex;
+                return;
+            }
+        }
     }
 
     if(isLava) {
