@@ -52,7 +52,7 @@ export class Entities {
         this.showLetter = false;
         this.letterPos = { x: 0, y: 0 };
         this.letterTimer = 0;
-        this.letterDuration = 1000;
+        this.letterDuration = 500;
         this.tick = tick;
         this.tick.add(this.update.bind(this));
         this.gl = gl;

@@ -75,7 +75,7 @@ export class Entities {
     private showLetter: boolean = false;
     private letterPos: { x: number, y: number } = { x: 0, y: 0 };
     private letterTimer: number = 0;
-    private letterDuration: number = 1000;
+    private letterDuration: number = 500;
 
     constructor(
         tick: Tick,
