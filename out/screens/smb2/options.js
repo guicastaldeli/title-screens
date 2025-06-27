@@ -167,27 +167,34 @@ export class Options {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     createOption(text, x, y, type) {
-        const width = text.length;
-        const height = 0.05;
+        const width = text.length * 0.08;
+        const height = 0.08;
         return {
             text,
             position: [x, y],
             selected: false,
             color: this.color,
             bounds: {
-                x: [x - width / 2, x + width / 2],
-                y: [y / 20 - height, y / 20 + height]
+                minX: x - width / 2,
+                maxX: x + width / 2,
+                minY: y - height / 2,
+                maxY: y + height / 2
             },
             type
         };
     }
-    selectedOption() {
+    selectedOption(x, y) {
         if (!this.cursor)
             return;
         const selectedIndex = this.cursor.getSelectedIndex();
-        if (selectedIndex >= 0 &&
-            selectedIndex < this.options.length) {
-            this.handleSelection(this.options[selectedIndex]);
+        if (selectedIndex >= 0 && selectedIndex < this.options.length) {
+            const option = this.options[selectedIndex];
+            if (x !== undefined && y !== undefined) {
+                if (!this.isPointOption(x, y, option)) {
+                    return;
+                }
+            }
+            this.handleSelection(option);
         }
     }
     handleSelection(option) {
@@ -245,6 +252,14 @@ export class Options {
                 this.containerPosition[1] + option.position[1]
             ];
         });
+    }
+    isPointOption(x, y, option) {
+        if (!option.bounds)
+            return false;
+        return x >= option.bounds.minX &&
+            x <= option.bounds.maxX &&
+            y >= option.bounds.minY &&
+            y <= option.bounds.maxY;
     }
     initOptions(projectionMatrix) {
         const originalContainerPosition = [...this.containerPosition];

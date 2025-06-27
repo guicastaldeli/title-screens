@@ -12,7 +12,7 @@ import { AnimationManager } from "./animation-manager.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 export class Hud {
-    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps, points) {
         this.texture = null;
         this.hudProps = [];
         this.color = [1.0, 1.0, 1.0, 1.0];
@@ -26,6 +26,7 @@ export class Hud {
         this.levelState = levelState;
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
+        this.points = points;
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
         this.updateCoin(this.tick);
@@ -99,17 +100,16 @@ export class Hud {
         });
     }
     setHud() {
-        const randomScore = Math.random();
-        const score = Math.floor(randomScore * 1000000);
-        const paddedScore = score.toString().padStart(6, '0').substring(0, 6);
         const worldId = this.setWorld();
+        const score = this.points.getScore();
+        const coins = this.points.getCoins();
         this.hudProps = [
             //Player
             this.createHudProps('MARIO', -0.72, 1.09, this.currentState),
-            this.createHudProps('000000', -0.68, 1.014, this.currentState),
+            this.createHudProps(score, -0.68, 1.014, this.currentState),
             //Coin
             this.createHudProps('x', -0.16, 1.014, this.currentState),
-            this.createHudProps('00', -0.04, 1.014, this.currentState),
+            this.createHudProps(coins, -0.04, 1.014, this.currentState),
             //World
             this.createHudProps('WORLD', 0.48, 1.09, this.currentState),
             this.createHudProps(worldId, 0.48, 1.01, this.currentState),

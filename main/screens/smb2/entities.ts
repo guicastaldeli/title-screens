@@ -10,6 +10,8 @@ import { States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 
+import { Points } from "./points.js";
+
 export class Entities {
     private tick: Tick;
     private gl: WebGLRenderingContext;
@@ -23,6 +25,8 @@ export class Entities {
     private currentState: States;
     private sheetProps: SheetProps;
     private textureMap: TextureMap;
+
+    private points: Points;
 
     //Direction
         private readonly currentY: number = -0.48;
@@ -61,6 +65,12 @@ export class Entities {
     private spriteStateTime: number = 0;
     private useStandingprite: boolean = true;
 
+    //Points
+    private clickHandler: (e: MouseEvent) => void;
+    private isClickable: boolean = true;
+    private clickCooldown: number = 500;
+    private lastClickTime: number = 0;
+
     constructor(
         tick: Tick,
         gl: WebGLRenderingContext,
@@ -69,6 +79,7 @@ export class Entities {
         screen: ScreenSmb,
         levelState: LevelState,
         sheetProps: SheetProps,
+        points: Points
     ) {
         this.tick = tick;
         this.tick.add(this.update.bind(this));
@@ -86,6 +97,10 @@ export class Entities {
         this.startJump();
         this.lastJumpTime = performance.now();
         this.walkSpriteToggleTime = performance.now();
+
+        this.points = points;
+        this.clickHandler = this.handleClick.bind(this);
+        document.addEventListener('click', this.clickHandler);
     }
 
     private drawEntities(projectionMatrix: mat4): void {
@@ -288,6 +303,43 @@ export class Entities {
             }
         }
     //
+
+    private handleClick(e: MouseEvent): void {
+        const currentTime = performance.now();
+        if(currentTime - this.lastClickTime < this.clickCooldown) return;
+        if(!this.isClickable) return;
+
+        this.lastClickTime = currentTime;
+
+        const canvas = this.gl.canvas;
+        if(!(canvas instanceof HTMLCanvasElement)) return;
+        const rect = canvas.getBoundingClientRect();
+
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        let entityX, entityY;
+
+        if(this.currentState === States.Overworld) {
+            entityX = this.isJumping ? this.jumpPosition.x : this.koopaStartX;
+            entityY = this.isJumping ? this.jumpPosition.y : this.koopaStartY;
+        } else {
+            entityX = this.walkPositionX;
+            entityY = this.startY;
+        }
+
+        const entityWidth = 0.1;
+        const entityHeight = 0.1;
+
+        if(x >= entityX - entityWidth &&
+            x <= entityX + entityWidth &&
+            y >= entityY - entityHeight &&
+            y <= entityY + entityHeight
+        ) {
+            this.points.addScore(1000);
+            this.points.addCoin();
+            this.screen.hud.setHud();
+        }
+    }
 
     public initEntity(projectionMatrix: mat4): void {
         this.drawEntities(projectionMatrix);

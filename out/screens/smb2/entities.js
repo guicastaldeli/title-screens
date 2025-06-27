@@ -14,7 +14,7 @@ export class Entities {
     get startX() {
         return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
     }
-    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps, points) {
         this.texture = null;
         //Direction
         this.currentY = -0.48;
@@ -45,6 +45,9 @@ export class Entities {
         this.jumpVelocity = { x: -2.5, y: -3.0 };
         this.spriteStateTime = 0;
         this.useStandingprite = true;
+        this.isClickable = true;
+        this.clickCooldown = 500;
+        this.lastClickTime = 0;
         this.tick = tick;
         this.tick.add(this.update.bind(this));
         this.gl = gl;
@@ -58,6 +61,9 @@ export class Entities {
         this.startJump();
         this.lastJumpTime = performance.now();
         this.walkSpriteToggleTime = performance.now();
+        this.points = points;
+        this.clickHandler = this.handleClick.bind(this);
+        document.addEventListener('click', this.clickHandler);
     }
     drawEntities(projectionMatrix) {
         const modelViewMatrix = mat4.create();
@@ -228,6 +234,39 @@ export class Entities {
         }
     }
     //
+    handleClick(e) {
+        const currentTime = performance.now();
+        if (currentTime - this.lastClickTime < this.clickCooldown)
+            return;
+        if (!this.isClickable)
+            return;
+        this.lastClickTime = currentTime;
+        const canvas = this.gl.canvas;
+        if (!(canvas instanceof HTMLCanvasElement))
+            return;
+        const rect = canvas.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        let entityX, entityY;
+        if (this.currentState === States.Overworld) {
+            entityX = this.isJumping ? this.jumpPosition.x : this.koopaStartX;
+            entityY = this.isJumping ? this.jumpPosition.y : this.koopaStartY;
+        }
+        else {
+            entityX = this.walkPositionX;
+            entityY = this.startY;
+        }
+        const entityWidth = 0.1;
+        const entityHeight = 0.1;
+        if (x >= entityX - entityWidth &&
+            x <= entityX + entityWidth &&
+            y >= entityY - entityHeight &&
+            y <= entityY + entityHeight) {
+            this.points.addScore(1000);
+            this.points.addCoin();
+            this.screen.hud.setHud();
+        }
+    }
     initEntity(projectionMatrix) {
         this.drawEntities(projectionMatrix);
     }

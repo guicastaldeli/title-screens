@@ -6,7 +6,13 @@ export interface Option {
     color?: [number, number, number, number];
     selected?: boolean,
     hovered?: boolean,
-    bounds: {
+    bounds?: {
+        minX: number;
+        maxX: number;
+        minY: number;
+        maxY: number;
+    },
+    boundsDk?: {
         x: [number, number],
         y: [number, number]
     }

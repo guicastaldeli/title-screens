@@ -15,6 +15,7 @@ import { Hud } from "./hud.js";
 import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
+import { Points } from "./points.js";
 import { Terrain } from "./terrain.js";
 import { Player } from "./player.js";
 import { Entities } from "./entities.js";
@@ -35,7 +36,8 @@ export class ScreenSmb extends BaseScreen {
         this.screenManager = screenManager;
         this.levelState = levelState;
         this.sheetProps = new SheetProps();
-        this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.points = new Points();
+        this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.points);
         this.title = new Title(tick, gl, buffers, programInfo, this, this.sheetProps);
         this.cursor = new Cursor(gl, buffers, programInfo, this, this.sheetProps);
         this.options = new Options(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.cursor);
@@ -43,7 +45,7 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.setOptionPosition();
         this.terrain = new Terrain(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.player = new Player(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
-        this.entity = new Entities(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.entity = new Entities(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.points);
         this.setupInput();
     }
     //Bakcground

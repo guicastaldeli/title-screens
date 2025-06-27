@@ -155,10 +155,12 @@ export class Cursor {
         const ndcY = -((y - rect.top) / rect.height * 2 - 1);
         for (let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
+            if (!option.boundsDk)
+                return;
             if (!option)
                 continue;
             const optionY = this.optionPosition[i][1];
-            const [minY, maxY] = option.bounds.y;
+            const [minY, maxY] = option.boundsDk.y;
             if (ndcY >= optionY + minY &&
                 ndcY <= optionY + maxY) {
                 if (this.selectedIndex !== i) {

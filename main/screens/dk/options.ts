@@ -220,7 +220,7 @@ export class Options {
             position: [x, y],
             selected: false,
             color: this.color,
-            bounds: {
+            boundsDk: {
                 x: [x - width / 2, x + width / 2],
                 y: [y / 20 - height, y / 20 + height]
             }

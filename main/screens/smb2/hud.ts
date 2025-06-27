@@ -16,6 +16,8 @@ import { TextureMap } from "./texture-map.js";
 import { LevelState } from "./level-state.js";
 import { States } from "./texture-map.interface.js";
 
+import { Points } from "./points.js";
+
 export class Hud {
     private tick: Tick;
     private gl: WebGLRenderingContext;
@@ -28,6 +30,7 @@ export class Hud {
     private levelState: LevelState;
     private currentState: States;
     private sheetProps: SheetProps;
+    private points: Points;
 
     private animationManager!: AnimationManager;
     private currentFrame!: FrameData;
@@ -45,6 +48,7 @@ export class Hud {
         screen: ScreenSmb,
         levelState: LevelState,
         sheetProps: SheetProps,
+        points: Points
     ) {
         this.tick = tick;
         this.tick.add(this.update.bind(this));
@@ -57,6 +61,7 @@ export class Hud {
         this.levelState = levelState;
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
+        this.points = points;
 
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
@@ -167,20 +172,19 @@ export class Hud {
             });
         }
 
-        private setHud(): void {
-            const randomScore = Math.random();
-            const score = Math.floor(randomScore * 1000000);
-            const paddedScore = score.toString().padStart(6, '0').substring(0, 6);
+        public setHud(): void {
             const worldId = this.setWorld();
+            const score = this.points.getScore();
+            const coins = this.points.getCoins();
             
             this.hudProps = [
                 //Player
                 this.createHudProps('MARIO', -0.72, 1.09, this.currentState),
-                this.createHudProps('000000', -0.68, 1.014, this.currentState),
+                this.createHudProps(score, -0.68, 1.014, this.currentState),
 
                 //Coin
                 this.createHudProps('x', -0.16, 1.014, this.currentState),
-                this.createHudProps('00', -0.04, 1.014, this.currentState),
+                this.createHudProps(coins, -0.04, 1.014, this.currentState),
 
                 //World
                 this.createHudProps('WORLD', 0.48, 1.09, this.currentState),

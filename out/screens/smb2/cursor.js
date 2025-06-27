@@ -160,70 +160,73 @@ export class Cursor {
                 break;
             case 'Enter':
                 this.selected = true;
-                this.options.selectedOption();
+                const selectedOptionPos = this.optionPosition[this.selectedIndex];
+                this.options.selectedOption(selectedOptionPos[0], selectedOptionPos[1]);
                 setTimeout(() => this.selected = false, this.options.intervalSelected);
                 break;
         }
+    }
+    screenCoords(clientX, clientY) {
+        const canvas = this.gl.canvas;
+        const rect = canvas.getBoundingClientRect();
+        const x = (clientX - rect.left) / rect.width * 2 - 1;
+        const y = -((clientY - rect.top) / rect.height * 2 - 1);
+        return [x, y];
     }
     handleMouseMove(x, y) {
         if (!this.options || !this.optionPosition || this.optionPosition.length === 0) {
             this.setOptionPosition();
             return;
         }
+        const [ndcX, ndcY] = this.screenCoords(x, y);
         this.isMouseControlled = true;
-        const canvas = (this.gl.canvas);
-        const rect = canvas.getBoundingClientRect();
-        const ndcY = -((y - rect.top) / rect.height * 2 - 1);
+        let hoveredIndex = -1;
         for (let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
-            if (!option)
-                continue;
-            const optionY = this.optionPosition[i][1];
-            const [minY, maxY] = option.bounds.y;
-            if (ndcY >= optionY + minY &&
-                ndcY <= optionY + maxY) {
-                if (this.selectedIndex !== i) {
-                    this.selectedIndex = i;
-                    this.cursorTargetPosition = [
-                        this.cursorTargetPosition[0],
-                        this.optionPosition[i][1]
-                    ];
-                    const defaultColor = [...this.options.color];
-                    this.options.options.forEach(option => {
-                        if (option.text !== 'MARIO GAME' &&
-                            option.text !== 'LUIGI GAME') {
-                            option.selected = false;
-                            option.color = defaultColor;
-                        }
-                    });
-                    if (this.isMouseControlled) {
-                        this.selected = false;
-                        this.options.options.forEach((option, idx) => {
-                            option.hovered = (idx === i);
-                            if (!option.selected &&
-                                option.text !== 'MARIO GAME' &&
-                                option.text !== 'LUIGI GAME') {
-                                option.color = idx === i ? this.selectedColor : defaultColor;
-                            }
-                        });
+            if (this.options.isPointOption(ndcX, ndcY, option)) {
+                hoveredIndex = i;
+                return;
+            }
+        }
+        if (hoveredIndex !== -1 && hoveredIndex !== this.selectedIndex) {
+            this.selectedIndex = hoveredIndex;
+            this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+            const defaultColor = [...this.options.color];
+            if (this.isMouseControlled) {
+                this.selected = false;
+                this.options.options.forEach((option, idx) => {
+                    option.hovered = (idx === hoveredIndex);
+                    if (!option.selected &&
+                        option.text !== 'MARIO GAME' &&
+                        option.text !== 'LUIGI GAME') {
+                        option.selected = false;
+                        option.color = defaultColor;
+                        option.color = idx === hoveredIndex ? this.selectedColor : defaultColor;
                     }
-                }
-                break;
+                });
             }
         }
     }
-    handleMouseClick() {
+    handleMouseClick(x, y) {
         var _a;
-        if (!this.selected && this.options) {
-            this.selected = true;
-            const selectedOption = this.options.options[this.selectedIndex];
-            if (selectedOption.text !== 'MARIO GAME' &&
-                selectedOption.text !== 'LUIGI GAME') {
-                setTimeout(() => {
-                    this.selected = false;
-                }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.intervalSelected) || 1000);
+        if (!this.options)
+            return;
+        const [ndX, ndcY] = this.screenCoords(x, y);
+        for (let i = 0; i < this.optionPosition.length; i++) {
+            const option = this.options.options[i];
+            if (this.options.isPointOption(x, y, option)) {
+                this.selectedIndex = i;
+                this.selected = true;
+                const selectedOption = this.options.options[this.selectedIndex];
+                if (selectedOption.text !== 'MARIO GAME' &&
+                    selectedOption.text !== 'LUIGI GAME') {
+                    setTimeout(() => {
+                        this.selected = false;
+                    }, ((_a = this.options) === null || _a === void 0 ? void 0 : _a.intervalSelected) || 1000);
+                }
+                this.options.selectedOption(ndX, ndcY);
+                break;
             }
-            this.options.selectedOption();
         }
     }
     getTex() {
