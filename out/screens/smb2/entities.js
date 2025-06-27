@@ -48,6 +48,11 @@ export class Entities {
         this.isClickable = true;
         this.clickCooldown = 100;
         this.lastClickTime = 0;
+        //Letter
+        this.showLetter = false;
+        this.letterPos = { x: 0, y: 0 };
+        this.letterTimer = 0;
+        this.letterDuration = 1000;
         this.tick = tick;
         this.tick.add(this.update.bind(this));
         this.gl = gl;
@@ -269,10 +274,82 @@ export class Entities {
             this.points.addTime();
             this.screen.hud.setHud();
             this.points.updateTopScore();
+            this.showLetter = true;
+            this.letterPos = { x: entityX, y: entityY };
+            this.letterTimer = currentTime;
         }
+    }
+    drawLetter(projectionMatrix) {
+        if (!this.showLetter)
+            return;
+        const currentTime = performance.now();
+        if (currentTime - this.letterTimer > this.letterDuration) {
+            this.showLetter = false;
+            return;
+        }
+        const progress = (currentTime - this.letterTimer) / this.letterDuration;
+        const yOffset = progress * 0.2;
+        const modelViewMatrix = mat4.create();
+        const size = [0.05, 0.05];
+        mat4.translate(modelViewMatrix, modelViewMatrix, [this.letterPos.x, this.letterPos.y + yOffset, -0.4]);
+        const positions = [
+            -size[0], -size[1],
+            size[0], -size[1],
+            -size[0], size[1],
+            size[0], size[1],
+        ];
+        const map = this.textureMap.letters[this.currentState];
+        const spriteCoords = map['+'] || map[' '];
+        const [spriteX, spriteY] = spriteCoords;
+        const [sheetWidth, sheetHeight] = this.sheetProps.miscProps().spriteSheetSize;
+        const [spriteWidth, spriteHeight] = this.sheetProps.miscProps().spriteProps.letter.spriteSize;
+        const left = spriteX / sheetWidth;
+        const right = (spriteX + spriteWidth) / sheetWidth;
+        const top = spriteY / sheetHeight;
+        const bottom = ((spriteY + spriteHeight) / sheetHeight);
+        const coords = [
+            left, bottom,
+            right, bottom,
+            left, top,
+            right, top
+        ];
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTileTextureCoord);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(coords), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.buffers.smbTileTexture);
+        this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isLava, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isSelected, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
+        const currentStateValue = Number(this.levelState.getStateId());
+        this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uState, currentStateValue);
+        this.gl.uniform4f(this.programInfo.uniformLocations.uColor, 1.0, 1.0, 1.0, 1.0); // White color
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.depthFunc(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.LEQUAL);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     initEntity(projectionMatrix) {
         this.drawEntities(projectionMatrix);
+        this.drawLetter(projectionMatrix);
     }
     updateState() {
         this.currentState = this.levelState.getCurrentState();
@@ -289,6 +366,9 @@ export class Entities {
         }
         else {
             this.updateWalk(currentTime);
+        }
+        if (this.showLetter && (performance.now() - this.letterTimer > this.letterDuration)) {
+            this.showLetter = false;
         }
     }
 }

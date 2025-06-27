@@ -85,6 +85,7 @@ export class TextureMap {
             ".": [327.05, 26],
             "©": [336.05, 26],
             ",": [354.1, 26],
+            "+": [372.1, 26],
         }
         const underground: LetterCoords = {
             " ": [373.05, 53],
@@ -130,6 +131,7 @@ export class TextureMap {
             ".": [471.05, 26],
             "©": [480.05, 26],
             ",": [489.075, 26],
+            "+": [515, 26],
         }
         const underwater: LetterCoords = {
             " ": [373.05, 53],
@@ -175,6 +177,7 @@ export class TextureMap {
             ".": [327.05, 26],
             "©": [336.05, 26],
             ",": [354.1, 26],
+            "+": [372.1, 26],
         }
         const castle: LetterCoords = {
             " ": [373.05, 53],
@@ -220,6 +223,7 @@ export class TextureMap {
             ".": [471.05, 53],
             "©": [480.05, 53],
             ",": [489.075, 53],
+            "+": [515, 53],
         }
         const info: LetterCoords = {
             " ": [373.05, 53],
