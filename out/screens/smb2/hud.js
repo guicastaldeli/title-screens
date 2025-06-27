@@ -27,12 +27,14 @@ export class Hud {
         this.currentState = this.levelState.getCurrentState();
         this.sheetProps = sheetProps;
         this.points = points;
+        this.points.addListener(() => this.setHud());
         this.textureMap = new TextureMap();
         this.color = this.screen.parseColor('rgb(255, 255, 255)');
         this.updateCoin(this.tick);
     }
     //Hud
     drawHud(projectionMatrix) {
+        this.setHud();
         const modelViewMatrix = mat4.create();
         const position = this.sheetProps.miscProps().spriteProps.hud.position;
         const size = this.sheetProps.miscProps().spriteProps.hud.size;
@@ -103,6 +105,7 @@ export class Hud {
         const worldId = this.setWorld();
         const score = this.points.getScore();
         const coins = this.points.getCoins();
+        const time = this.points.getTime();
         this.hudProps = [
             //Player
             this.createHudProps('MARIO', -0.72, 1.09, this.currentState),
@@ -115,7 +118,7 @@ export class Hud {
             this.createHudProps(worldId, 0.48, 1.01, this.currentState),
             //Time
             this.createHudProps('TIME', 1.0, 1.09, this.currentState),
-            this.createHudProps('000', 1.04, 1.01, this.currentState),
+            this.createHudProps(time, 1.04, 1.01, this.currentState),
             //Copyright
             this.createHudProps('©1986 NINTENDO', 0.55, 0.13, States.Info)
         ];

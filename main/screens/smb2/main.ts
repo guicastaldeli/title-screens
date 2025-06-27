@@ -67,7 +67,7 @@ export class ScreenSmb extends BaseScreen {
         this.levelState = levelState;
 
         this.sheetProps = new SheetProps();
-        this.points = new Points();
+        this.points = new Points(tick);
 
         this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.points);
         this.title = new Title(tick, gl, buffers, programInfo, this, this.sheetProps);

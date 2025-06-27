@@ -66,9 +66,9 @@ export class Entities {
     private useStandingprite: boolean = true;
 
     //Points
-    private clickHandler: (e: MouseEvent) => void;
+    private clickHandler: (e: globalThis.MouseEvent) => void;
     private isClickable: boolean = true;
-    private clickCooldown: number = 500;
+    private clickCooldown: number = 100;
     private lastClickTime: number = 0;
 
     constructor(
@@ -99,7 +99,8 @@ export class Entities {
         this.walkSpriteToggleTime = performance.now();
 
         this.points = points;
-        this.clickHandler = this.handleClick.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.clickHandler = (e: MouseEvent) => this.handleClick(e);
         document.addEventListener('click', this.clickHandler);
     }
 
@@ -327,16 +328,18 @@ export class Entities {
             entityY = this.startY;
         }
 
-        const entityWidth = 0.1;
-        const entityHeight = 0.1;
+        const entityWidth = 1.0;
+        const entityHeight = 1.0;
 
         if(x >= entityX - entityWidth &&
             x <= entityX + entityWidth &&
             y >= entityY - entityHeight &&
             y <= entityY + entityHeight
         ) {
-            this.points.addScore(1000);
+            const point = Math.floor(Math.random() * 200);
+            this.points.addScore(point);
             this.points.addCoin();
+            this.points.addTime();
             this.screen.hud.setHud();
         }
     }
