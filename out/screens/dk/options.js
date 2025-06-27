@@ -31,7 +31,8 @@ export class Options {
             this.createOption('1 PLAYER GAME A', 0, 0),
             this.createOption('1 PLAYER GAME B', 0, -0.15),
             this.createOption('2 PLAYER GAME A', 0, -0.30),
-            this.createOption('2 PLAYER GAME B', 0, -0.45)
+            this.createOption('2 PLAYER GAME B', 0, -0.45),
+            this.createOption('MUSIC OFF', 0, -0.58)
         ];
         this.copyrightText = [
             this.createOption('©1981 NINTENDO COZLTD.', 0, -0.75, true),
