@@ -380,8 +380,8 @@ export class ScreenSmb extends BaseScreen {
             this.cursor.handleMouseMove(e.clientX, e.clientY);
         });
 
-        canvas.addEventListener('click', () => {
-            if(!this.state.isLoading()) this.cursor.handleMouseClick();
+        canvas.addEventListener('click', (e) => {
+            if(!this.state.isLoading()) this.cursor.handleMouseClick(e.clientX, e.clientY);
         });
 
         //Keyboard

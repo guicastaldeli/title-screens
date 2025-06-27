@@ -41,7 +41,7 @@ export class Options {
     private waveTime: number = 0.0;
     private waveSpeed: number = 2.0;
     public intervalSelected: number = 1000;
-    private selectionTimeout: Map<Option, number> = new Map();
+    public selectionTimeout: Map<Option, number> = new Map();
     private prevSelectedIndex: any;
 
     constructor(
@@ -77,6 +77,7 @@ export class Options {
         const prevIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = this.options[prevIndex]?.text;
         const prevSelected = new Set<string>();
+        const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
 
         this.options.forEach(opt => {
             if(opt.selected) prevSelected.add(opt.text);
@@ -88,11 +89,13 @@ export class Options {
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
 
-        this.options.forEach(opt => {
+        this.options.forEach((opt, i) => {
             if(prevSelected.has(opt.text)) {
                 opt.selected = true;
                 opt.color = this.cursor.selectedColor;
             }
+
+            if(i === prevHoveredIndex) opt.hovered = true;
         });
 
         const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
@@ -155,7 +158,7 @@ export class Options {
                 textEndX,
                 isSelected,
                 type,
-                option?.selected || false
+                option?.selected || false,
             );
         });
 
@@ -215,6 +218,19 @@ export class Options {
         currentState === States.Underground ? 1 :
         currentState === States.Underwater ? 2 : 3
 
+        const option = this.options.find(opt => {
+            const optionX = this.containerPosition[0] + opt.position[0];
+            const optionY = this.containerPosition[1] + opt.position[1];
+            const width = opt.text.length * 0.08;
+            const height = 0.08
+
+            return Math.abs(x - optionX) < width &&
+                    Math.abs(y - optionY) < height;
+        });
+
+        const isHovered = option?.hovered ?? false;
+        const actuallySelected = option?.selected ?? false;
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -240,7 +256,7 @@ export class Options {
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
 
-        const shouldShowSelectedShader = isSelected && !this.cursor.selected && !optionSelected;
+        const shouldShowSelectedShader = isHovered && !actuallySelected;
         this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, shouldShowSelectedShader ? 1 : 0);
         if(shouldShowSelectedShader) this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
 
@@ -275,10 +291,10 @@ export class Options {
             selected: false,
             color: this.color,
             bounds: {
-                minX: x - width / 2,
-                maxX: x + width / 2,
-                minY: y - height / 2,
-                maxY: y + height / 2
+                minX: x - (width / 2),
+                maxX: x + (width / 2),
+                minY: y - height / 0.3,
+                maxY: y + height / 0.3
             },
             type
         }
@@ -373,6 +389,25 @@ export class Options {
                 y <= option.bounds.maxY;
     }
 
+    public clearSelection(): void {
+        const defaultColor = [...this.color] as [number, number, number, number];
+
+        this.options.forEach(option => {
+            if(option.text !== 'MARIO GAME' &&
+                option.text !== 'LUIGI GAME'
+            ) {
+                const timeoutId = this.selectionTimeout.get(option);
+
+                if(timeoutId) {
+                    clearTimeout(timeoutId);
+                    this.selectionTimeout.delete(option);
+                    option.selected = false;
+                    option.color = defaultColor;
+                }
+            }
+        });
+    }
+
     public initOptions(projectionMatrix: mat4): void {
         const originalContainerPosition = [...this.containerPosition];
 
@@ -404,6 +439,7 @@ export class Options {
         const prevSelectedIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = this.options[prevSelectedIndex]?.text;
         const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
+        const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
 
         this.selectionTimeout.forEach((timeoutId, option) => {
             clearTimeout(timeoutId);
@@ -415,7 +451,7 @@ export class Options {
         this.currentState = this.levelState.getCurrentState();
         this.setOptions();
 
-        this.options.forEach(opt => {
+        this.options.forEach((opt, i) => {
             if(opt.text === 'MARIO GAME' || opt.text === 'LUIGI GAME') {
                 const wasSelected = prevSelected.includes(opt.text);
                 opt.selected = wasSelected;
@@ -423,7 +459,7 @@ export class Options {
             } else {
                 opt.selected = false;
                 opt.color = this.color;
-                opt.hovered = false;
+                opt.hovered = (i === prevHoveredIndex);
             }
         });
 

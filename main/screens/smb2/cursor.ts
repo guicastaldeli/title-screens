@@ -171,11 +171,15 @@ export class Cursor {
         }
 
         const defaultColor = [...this.options.color] as [number, number, number, number];
+
+        this.options.clearSelection();
+
         this.options.options.forEach(option => {
-            if(option.text !== 'MARIO GAME' &&
-                option.text !== 'LUIGI GAME'
-            ) {
-                option.selected = false;
+            option.hovered = false;
+            
+            if(!option.selected &&
+                option.text !== 'MARIO GAME' &&
+                option.text !== 'LUIGI GAME') {
                 option.color = defaultColor;
             }
         });
@@ -183,13 +187,16 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
-
         const currentOption = this.options.options[this.selectedIndex];
-        if(currentOption && 
-            currentOption.text !== 'MARIO GAME' &&
-            currentOption.text !== 'LUIGI GAME'
-        )  {
-            currentOption.color = this.selectedColor;
+
+        if(currentOption) {
+            currentOption.hovered = true;
+
+            if(!currentOption.selected &&
+                currentOption.text !== 'MARIO GAME' &&
+                currentOption.text !== 'LUIGI GAME'){
+                currentOption.color = this.selectedColor;
+            }
         }
 
         this.getSelectedIndex();
@@ -217,11 +224,17 @@ export class Cursor {
                 break;
             case 'Enter':
                 this.selected = true;
-                const selectedOptionPos = this.optionPosition[this.selectedIndex];
-                this.options.selectedOption(
-                    selectedOptionPos[0],
-                    selectedOptionPos[1]
-                );
+                const currentOption = this.options.options[this.selectedIndex];
+
+                if(currentOption) {
+                    currentOption.hovered = true;
+                    
+                    this.options.selectedOption(
+                        this.optionPosition[this.selectedIndex][0],
+                        this.optionPosition[this.selectedIndex][1]
+                    );
+                }
+
                 setTimeout(() => this.selected = false, this.options.intervalSelected);
                 break;
         }
@@ -247,49 +260,54 @@ export class Cursor {
         this.isMouseControlled = true;
 
         let hoveredIndex = -1;
+        const defaultColor = [...this.options.color] as [number, number, number, number];
+
+        this.options.options.forEach(option => {
+            if(!option.selected &&
+                option.text !== 'MARIO GAME' &&
+                option.text !== 'LUIGI GAME') {
+                option.color = defaultColor;
+            }
+        });
+
         for(let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
 
             if(this.options.isPointOption(ndcX, ndcY, option)) {
                 hoveredIndex = i;
-                return;
+                option.hovered = true;
+
+                if(!option.selected &&
+                    option.text !== 'MARIO GAME' &&
+                    option.text !== 'LUIGI GAME') {
+                    option.color = this.selectedColor;
+                }
+
+                break;
             }
         }
 
         if(hoveredIndex !== -1 && hoveredIndex !== this.selectedIndex) {
+            const prev = this.options.options[this.selectedIndex];
+            prev.hovered = false;
             this.selectedIndex = hoveredIndex;
             this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-            const defaultColor = [...this.options.color] as [number, number, number, number];
-                    
-            if(this.isMouseControlled) {
-                this.selected = false;
-    
-                this.options.options.forEach((option, idx) => {
-                    option.hovered = (idx === hoveredIndex);
-                            
-                    if(!option.selected && 
-                        option.text !== 'MARIO GAME' && 
-                        option.text !== 'LUIGI GAME'
-                    ) {
-                        option.selected = false;
-                        option.color = defaultColor;
-                        option.color = idx === hoveredIndex ? this.selectedColor : defaultColor;
-                    }
-                });
-            }
+            this.options.clearSelection();
         }
     }
 
     public handleMouseClick(x: number, y: number): void {
         if(!this.options) return;
-        const [ndX, ndcY] = this.screenCoords(x, y);
+        const [ndcX, ndcY] = this.screenCoords(x, y);
 
         for(let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
 
-            if(this.options.isPointOption(x, y, option)) {
+            if(this.options.isPointOption(ndcX, ndcY, option)) {
                 this.selectedIndex = i;
                 this.selected = true;
+
+                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
                 const selectedOption = this.options.options[this.selectedIndex];
 
                 if(selectedOption.text !== 'MARIO GAME' && 
@@ -299,7 +317,7 @@ export class Cursor {
                     }, this.options?.intervalSelected || 1000);
                 }
 
-                this.options.selectedOption(ndX, ndcY);
+                this.options.selectedOption(ndcX, ndcY);
                 break;
             }
         }

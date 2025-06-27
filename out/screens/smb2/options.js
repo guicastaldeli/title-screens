@@ -40,6 +40,7 @@ export class Options {
         const prevIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = (_a = this.options[prevIndex]) === null || _a === void 0 ? void 0 : _a.text;
         const prevSelected = new Set();
+        const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
         this.options.forEach(opt => {
             if (opt.selected)
                 prevSelected.add(opt.text);
@@ -49,11 +50,13 @@ export class Options {
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
         ];
-        this.options.forEach(opt => {
+        this.options.forEach((opt, i) => {
             if (prevSelected.has(opt.text)) {
                 opt.selected = true;
                 opt.color = this.cursor.selectedColor;
             }
+            if (i === prevHoveredIndex)
+                opt.hovered = true;
         });
         const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
         this.cursor.selectedIndex = updIndex >= 0 ? updIndex : 0;
@@ -98,6 +101,7 @@ export class Options {
         this.color = originalColor;
     }
     drawLetter(projectionMatrix, letter, x, y, textStartX, textEndX, isSelected, type, optionSelected) {
+        var _a, _b;
         if (!type)
             return;
         const modelViewMatrix = mat4.create();
@@ -128,6 +132,16 @@ export class Options {
         const stateValue = currentState === States.Overworld ? 0 :
             currentState === States.Underground ? 1 :
                 currentState === States.Underwater ? 2 : 3;
+        const option = this.options.find(opt => {
+            const optionX = this.containerPosition[0] + opt.position[0];
+            const optionY = this.containerPosition[1] + opt.position[1];
+            const width = opt.text.length * 0.08;
+            const height = 0.08;
+            return Math.abs(x - optionX) < width &&
+                Math.abs(y - optionY) < height;
+        });
+        const isHovered = (_a = option === null || option === void 0 ? void 0 : option.hovered) !== null && _a !== void 0 ? _a : false;
+        const actuallySelected = (_b = option === null || option === void 0 ? void 0 : option.selected) !== null && _b !== void 0 ? _b : false;
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -149,7 +163,7 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.isCloud, 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        const shouldShowSelectedShader = isSelected && !this.cursor.selected && !optionSelected;
+        const shouldShowSelectedShader = isHovered && !actuallySelected;
         this.gl.uniform1i(this.programInfo.uniformLocations.isSelected, shouldShowSelectedShader ? 1 : 0);
         if (shouldShowSelectedShader)
             this.gl.uniform2f(this.programInfo.uniformLocations.uTextStartPos, textStartX, textEndX);
@@ -175,10 +189,10 @@ export class Options {
             selected: false,
             color: this.color,
             bounds: {
-                minX: x - width / 2,
-                maxX: x + width / 2,
-                minY: y - height / 2,
-                maxY: y + height / 2
+                minX: x - (width / 2),
+                maxX: x + (width / 2),
+                minY: y - height / 0.3,
+                maxY: y + height / 0.3
             },
             type
         };
@@ -261,6 +275,21 @@ export class Options {
             y >= option.bounds.minY &&
             y <= option.bounds.maxY;
     }
+    clearSelection() {
+        const defaultColor = [...this.color];
+        this.options.forEach(option => {
+            if (option.text !== 'MARIO GAME' &&
+                option.text !== 'LUIGI GAME') {
+                const timeoutId = this.selectionTimeout.get(option);
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    this.selectionTimeout.delete(option);
+                    option.selected = false;
+                    option.color = defaultColor;
+                }
+            }
+        });
+    }
     initOptions(projectionMatrix) {
         const originalContainerPosition = [...this.containerPosition];
         this.options.forEach(option => {
@@ -286,6 +315,7 @@ export class Options {
         const prevSelectedIndex = this.cursor.getSelectedIndex();
         const prevSelectedOpt = (_a = this.options[prevSelectedIndex]) === null || _a === void 0 ? void 0 : _a.text;
         const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
+        const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
         this.selectionTimeout.forEach((timeoutId, option) => {
             clearTimeout(timeoutId);
             option.selected = false;
@@ -294,7 +324,7 @@ export class Options {
         });
         this.currentState = this.levelState.getCurrentState();
         this.setOptions();
-        this.options.forEach(opt => {
+        this.options.forEach((opt, i) => {
             if (opt.text === 'MARIO GAME' || opt.text === 'LUIGI GAME') {
                 const wasSelected = prevSelected.includes(opt.text);
                 opt.selected = wasSelected;
@@ -303,7 +333,7 @@ export class Options {
             else {
                 opt.selected = false;
                 opt.color = this.color;
-                opt.hovered = false;
+                opt.hovered = (i === prevHoveredIndex);
             }
         });
         const updIndex = this.options.findIndex(opt => opt.text === prevSelectedOpt);
