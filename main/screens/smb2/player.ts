@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
+import { Tick } from "../../tick.js";
 import { Buffers } from "../../init-buffers.js";
 import { ProgramInfo } from "../../main.js";
 
@@ -10,6 +11,7 @@ import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 
 export class Player {
+    private tick: Tick;
     private gl: WebGLRenderingContext;
     private texture: WebGLTexture | null = null;
 
@@ -53,6 +55,7 @@ export class Player {
     private readonly seaLevel = -0.81;
 
     constructor(
+        tick: Tick,
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
@@ -60,6 +63,9 @@ export class Player {
         levelState: LevelState,
         sheetProps: SheetProps,
     ) {
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
+
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -254,6 +260,8 @@ export class Player {
     }
 
     public update(deltaTime: number): void {
+        if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
+        
         if(this.isTransitioning) {
             const diff = this.targetY - this.currentY;
 

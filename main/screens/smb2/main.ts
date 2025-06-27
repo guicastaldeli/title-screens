@@ -74,7 +74,7 @@ export class ScreenSmb extends BaseScreen {
         this.cursor.setOptionPosition();
 
         this.terrain = new Terrain(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
-        this.player = new Player(gl, buffers, programInfo, this, this.levelState, this.sheetProps);
+        this.player = new Player(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
         this.entity = new Entities(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps);
 
         this.setupInput();

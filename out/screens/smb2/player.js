@@ -11,7 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 export class Player {
-    constructor(gl, buffers, programInfo, screen, levelState, sheetProps) {
+    constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
         this.character = 'mario';
         this.sizeState = 'small';
@@ -38,6 +38,8 @@ export class Player {
         this.showNextSize = false;
         this.groundLevel = -0.61;
         this.seaLevel = -0.81;
+        this.tick = tick;
+        this.tick.add(this.update.bind(this));
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -204,6 +206,8 @@ export class Player {
         this.drawPlayer(projectionMatrix);
     }
     update(deltaTime) {
+        if (deltaTime <= 0 || this.tick.timeScale <= 0)
+            return;
         if (this.isTransitioning) {
             const diff = this.targetY - this.currentY;
             if (Math.abs(diff) < 0.001) {

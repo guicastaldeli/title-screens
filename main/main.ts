@@ -222,17 +222,34 @@ window.addEventListener('resize', async () => {
     renderScreenSmb.init();
 });
 
-function windowTitle() {
+function __windowConfig() {
     if(!state) return;
-
-    const titles = {
-        dk: 'Donkey Kong',
-        smb: 'Super Mario Bros. 2: The Lost Levels'
-    }
-
     const current = state.getCurrentState();
-    const title = titles[current];
-    document.title = title;
+
+    //Title
+        const titles = {
+            dk: 'Donkey Kong',
+            smb: 'Super Mario Bros. 2: The Lost Levels'
+        }
+
+        const title = titles[current];
+        document.title = title;
+    //
+
+    //Icon
+        const icons = {
+            dk: './assets/icon/dkfavicon.ico',
+            smb: './assets/icon/smbfavicon.ico'
+        }
+
+        const icon = icons[current];
+        const link: HTMLLinkElement = document.querySelector("link[rel*='icon'") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = icon;
+
+        if(!document.querySelector("link[rel*='icon']")) document.getElementsByTagName('head')[0].appendChild(link);
+    //
 }
 
 //Render
@@ -251,7 +268,7 @@ function windowTitle() {
             initialized = true;
         }
 
-        windowTitle();
+        __windowConfig();
         tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);

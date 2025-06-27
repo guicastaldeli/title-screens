@@ -72,7 +72,7 @@ export class Entities {
     ) {
         this.tick = tick;
         this.tick.add(this.update.bind(this));
-
+        
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
@@ -214,8 +214,9 @@ export class Entities {
     //Entity Animation
         //Other Entities
         private updateWalk(deltaTime: number): void {
-            this.walkPositionX += this.walkDirection * this.walkSpeed * deltaTime;
             const currentTime = performance.now();
+            const deltaTimeUpdate = deltaTime / 1000;
+            this.walkPositionX += this.walkDirection * this.walkSpeed * deltaTimeUpdate;
 
             if(this.walkPositionX <= this.endX) {
                 this.walkPositionX = this.endX;
@@ -252,9 +253,11 @@ export class Entities {
             if(!this.isJumping) return;
 
             const currentTime = performance.now();
-            this.jumpPosition.x += this.jumpVelocity.x * deltaTime;
-            this.jumpPosition.y += this.jumpVelocity.y * deltaTime + 0.5 * this.gravity * deltaTime * deltaTime;
-            this.jumpVelocity.y += this.gravity * deltaTime;
+            const deltaTimeUpdate = deltaTime / 1000;
+
+            this.jumpPosition.x += this.jumpVelocity.x * deltaTimeUpdate;
+            this.jumpPosition.y += this.jumpVelocity.y * deltaTimeUpdate + 0.5 * this.gravity * deltaTimeUpdate * deltaTimeUpdate;
+            this.jumpVelocity.y += this.gravity * deltaTimeUpdate;
 
             if(this.jumpPosition.x <= this.koopaEndX) {
                 this.jumpPosition.x = this.koopaEndX;
@@ -296,7 +299,6 @@ export class Entities {
 
     public update(deltaTime: number): void {
         if(deltaTime <= 0 || this.tick.timeScale <= 0) return;
-        
         const currentTime = deltaTime * 800;
 
         if(this.currentState === States.Overworld && this.textureMap.entity[this.currentState].koopa) {
