@@ -1,6 +1,10 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { LetterMap } from "./letter-map.js";
 export class Options {
+    get musicText() {
+        return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
+    }
+    //
     constructor(tick, gl, buffers, programInfo, screen, sheetProps, cursor) {
         this.containerPosition = [0.12, 0];
         this.isCopyright = false;
@@ -11,6 +15,8 @@ export class Options {
         this.waveSpeed = 2.0;
         this.intervalSelected = 1000;
         this.selectionTimeout = new Map();
+        //Music
+        this.isMusicOn = false;
         this.tick = tick;
         this.tick.add(this.update.bind(this));
         this.gl = gl;
@@ -32,7 +38,7 @@ export class Options {
             this.createOption('1 PLAYER GAME B', 0, -0.15),
             this.createOption('2 PLAYER GAME A', 0, -0.30),
             this.createOption('2 PLAYER GAME B', 0, -0.45),
-            this.createOption('MUSIC OFF', 0, -0.58)
+            this.createOption(this.musicText, 0, -0.58)
         ];
         this.copyrightText = [
             this.createOption('©1981 NINTENDO COZLTD.', 0, -0.75, true),
@@ -161,6 +167,10 @@ export class Options {
                 this.selectionTimeout.delete(option);
             }, this.intervalSelected);
             this.selectionTimeout.set(option, this.intervalSelected);
+        }
+        if (option.text.startsWith('MUSIC')) {
+            this.isMusicOn = !this.isMusicOn;
+            option.text = this.musicText;
         }
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;

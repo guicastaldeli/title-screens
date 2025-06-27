@@ -44,6 +44,14 @@ export class Options {
     public selectionTimeout: Map<Option, number> = new Map();
     private prevSelectedIndex: any;
 
+    //Music
+        private isMusicOn: boolean = false;
+
+        private get musicText(): string {
+            return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
+        }
+    //
+
     constructor(
         tick: Tick,
         gl: WebGLRenderingContext,
@@ -90,7 +98,7 @@ export class Options {
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
-            this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
+            this.createOption(this.musicText, 0, -0.30, this.currentState),
             this.createOption(score, 0, -0.45, this.currentState),
         ];
 
@@ -269,6 +277,7 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
         this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
 
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
@@ -347,6 +356,11 @@ export class Options {
             if(option.text === 'MARIO GAME') this.screen.setCurrentPlayer('mario');
             if(option.text === 'LUIGI GAME') this.screen.setCurrentPlayer('luigi');            
         } else {
+            if(option.text.startsWith('MUSIC')) {
+                this.isMusicOn = !this.isMusicOn;
+                option.text = this.musicText;
+            }
+
             const wasSelected = option.selected;
 
              this.options.forEach(opt => {
@@ -447,6 +461,11 @@ export class Options {
         const prevSelectedOpt = this.options[prevSelectedIndex]?.text;
         const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
         const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
+        const wasMusicOn = this.isMusicOn;
+
+        this.currentState = this.levelState.getCurrentState();
+        this.setOptions();
+        this.isMusicOn = wasMusicOn;
 
         this.selectionTimeout.forEach((timeoutId, option) => {
             clearTimeout(timeoutId);

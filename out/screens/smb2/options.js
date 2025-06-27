@@ -11,6 +11,10 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 export class Options {
+    get musicText() {
+        return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
+    }
+    //
     constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps, cursor) {
         this.containerPosition = [0.12, -0.20];
         this.isCopyright = false;
@@ -21,6 +25,8 @@ export class Options {
         this.waveSpeed = 2.0;
         this.intervalSelected = 1000;
         this.selectionTimeout = new Map();
+        //Music
+        this.isMusicOn = false;
         this.tick = tick;
         this.tick.add(this.update.bind(this));
         this.gl = gl;
@@ -52,7 +58,7 @@ export class Options {
         this.options = [
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
-            this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
+            this.createOption(this.musicText, 0, -0.30, this.currentState),
             this.createOption(score, 0, -0.45, this.currentState),
         ];
         this.options.forEach((opt, i) => {
@@ -176,6 +182,7 @@ export class Options {
         this.gl.uniform1f(this.programInfo.uniformLocations.uThreshold, 0.1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uTime, this.waveTime);
         this.gl.uniform1f(this.programInfo.uniformLocations.haveState, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 1);
         this.gl.uniform1f(this.programInfo.uniformLocations.uState, stateValue);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
         this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
@@ -241,6 +248,10 @@ export class Options {
                 this.screen.setCurrentPlayer('luigi');
         }
         else {
+            if (option.text.startsWith('MUSIC')) {
+                this.isMusicOn = !this.isMusicOn;
+                option.text = this.musicText;
+            }
             const wasSelected = option.selected;
             this.options.forEach(opt => {
                 if (!(opt.text === 'MARIO GAME' ||
@@ -323,6 +334,10 @@ export class Options {
         const prevSelectedOpt = (_a = this.options[prevSelectedIndex]) === null || _a === void 0 ? void 0 : _a.text;
         const prevSelected = this.options.filter(opt => opt.selected).map(opt => opt.text);
         const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
+        const wasMusicOn = this.isMusicOn;
+        this.currentState = this.levelState.getCurrentState();
+        this.setOptions();
+        this.isMusicOn = wasMusicOn;
         this.selectionTimeout.forEach((timeoutId, option) => {
             clearTimeout(timeoutId);
             option.selected = false;

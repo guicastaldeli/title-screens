@@ -39,6 +39,14 @@ export class Options {
     public intervalSelected: number = 1000;
     private selectionTimeout: Map<Option, number> = new Map();
 
+    //Music
+        private isMusicOn: boolean = false;
+
+        private get musicText(): string {
+            return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
+        }
+    //
+
     constructor(
         tick: Tick,
         gl: WebGLRenderingContext,
@@ -76,7 +84,7 @@ export class Options {
             this.createOption('1 PLAYER GAME B', 0, -0.15),
             this.createOption('2 PLAYER GAME A', 0, -0.30),
             this.createOption('2 PLAYER GAME B', 0, -0.45),
-            this.createOption('MUSIC OFF', 0, -0.58)
+            this.createOption(this.musicText, 0, -0.58)
         ];
         
         this.copyrightText = [
@@ -266,6 +274,11 @@ export class Options {
             }, this.intervalSelected);
 
             this.selectionTimeout.set(option, this.intervalSelected);
+        }
+
+        if(option.text.startsWith('MUSIC')) {
+            this.isMusicOn = !this.isMusicOn;
+            option.text = this.musicText;
         }
 
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
