@@ -6,6 +6,7 @@ export interface Option {
     color?: [number, number, number, number];
     selected?: boolean,
     hovered?: boolean,
+    interactive?: boolean,
     bounds?: {
         minX: number;
         maxX: number;

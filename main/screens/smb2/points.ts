@@ -9,6 +9,12 @@ export class Points {
     private lastUpdateTime: number = 0;
     private listeners: (() => void)[] = [];
 
+    private addedScore: number = 0;
+    private addedCoins: number = 0;
+    private addedTime: number = 0;
+    private topScoreKey = 'smb-top-score';
+    private sessionScoreKey = 'smb-session-score';
+
     private readonly maxScore = 999999;
     private readonly maxCoins = 99;
     private readonly maxTime = 999;
@@ -16,6 +22,7 @@ export class Points {
     constructor(tick: Tick) {
         this.tick = tick;
         this.startTimer(this.tick.timeScale);
+        this.loadTopScore();
     }
 
     private startTimer(timeScale: number): void {
@@ -37,17 +44,23 @@ export class Points {
     }
 
     public addScore(points: number): void {
-        this.score = Math.min(this.score + points, this.maxScore);
+        const currentPoints = Math.min(this.score + points, this.maxScore); 
+        this.score = currentPoints;
+        this.addedScore = currentPoints;
     }
 
     public addCoin(): void {
         const count = 1;
-        this.coins = Math.min(this.coins + count, this.maxCoins);
+        const currentCoins = Math.min(this.coins + count, this.maxCoins);
+        this.coins = currentCoins;
+        this.addedCoins = currentCoins;
     }
 
     public addTime(): void {
         const sec = 10;
-        this.time = Math.min(this.time + sec, this.maxTime);
+        const currentTime = Math.min(this.time + sec, this.maxTime);
+        this.time = currentTime;
+        this.addedTime = currentTime;
     }
 
     public getScore(): string {
@@ -64,5 +77,36 @@ export class Points {
 
     public addListener(cb: () => void): void {
         this.listeners.forEach(cb => cb());
+    }
+
+    public calculateTotalPoints(): number {
+        const coins = 100;
+        const time = 10;
+        return this.addedScore + (this.addedCoins * coins) + (this.addedTime * time);
+    }
+
+    public getTopScore(): number {
+        const topScore = localStorage.getItem(this.topScoreKey);
+        return topScore ? parseInt(topScore, 10) : 0;
+    }
+
+    public updateTopScore(): void {
+        const currentTotal = this.calculateTotalPoints();
+        localStorage.setItem(this.topScoreKey, currentTotal.toString());
+    }
+
+    private loadTopScore(): void {
+        const topScore = this.getTopScore();
+
+        if(topScore > 0) {
+            this.score = topScore;
+            this.addedScore = topScore;
+        }
+    }
+
+    public resetValues(): void {
+        this.addedScore = 0;
+        this.addedCoins = 0;
+        this.addedTime = 0;
     }
 }

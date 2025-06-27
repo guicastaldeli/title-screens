@@ -268,6 +268,7 @@ export class Entities {
             this.points.addCoin();
             this.points.addTime();
             this.screen.hud.setHud();
+            this.points.updateTopScore();
         }
     }
     initEntity(projectionMatrix) {

@@ -42,7 +42,7 @@ export class ScreenSmb extends BaseScreen {
 
     //Elements
     private sheetProps: SheetProps;
-    private points: Points;
+    public points: Points;
 
     public hud: Hud;
     private title: Title;

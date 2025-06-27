@@ -78,6 +78,10 @@ export class Options {
         const prevSelectedOpt = this.options[prevIndex]?.text;
         const prevSelected = new Set<string>();
         const prevHoveredIndex = this.options.findIndex(opt => opt.hovered);
+        const points = this.screen.points;
+        const topScore = points ? points.getTopScore() : 0;
+        const scoreFormat = `TOP- ${topScore.toString().padStart(6, '0').substring(0, 6)}`;
+        const score = this.options.find(opt => opt.text.startsWith('TOP-'))?.text || scoreFormat;
 
         this.options.forEach(opt => {
             if(opt.selected) prevSelected.add(opt.text);
@@ -87,6 +91,7 @@ export class Options {
             this.createOption('MARIO GAME', 0, 0, this.currentState),
             this.createOption('LUIGI GAME', 0, -0.15, this.currentState),
             this.createOption('MUSIC OFF', 0, -0.30, this.currentState),
+            this.createOption(score, 0, -0.45, this.currentState),
         ];
 
         this.options.forEach((opt, i) => {
@@ -284,12 +289,14 @@ export class Options {
     ): Option {
         const width = text.length * 0.08;
         const height = 0.08;
+        const interactive = !text.startsWith('TOP-');
 
         return {
             text,
             position: [x, y],
             selected: false,
             color: this.color,
+            interactive,
             bounds: {
                 minX: x - (width / 2),
                 maxX: x + (width / 2),

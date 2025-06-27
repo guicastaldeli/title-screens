@@ -61,6 +61,16 @@ export class Cursor {
             this.optionPosition = this.options.getOptionPositions();
 
             if(this.optionPosition.length > 0) {
+                if(this.options.options[this.selectedIndex].interactive === false) {
+                    const interactiveIndex = this.options.options.findIndex(opt => opt.interactive !== false);
+                    
+                    if(interactiveIndex !== -1) {
+                        this.selectedIndex = interactiveIndex
+                    } else {
+                        this.selectedIndex = 0;
+                    }
+                }
+
                 this.selectedIndex = Math.min(this.selectedIndex, this.optionPosition.length - 1);
                 this.selectedIndex = Math.max(0, this.selectedIndex);
                 
@@ -184,7 +194,22 @@ export class Cursor {
             }
         });
 
-        this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
+        let newIndex = this.selectedIndex;
+        let attempts = 0;
+        const maxAttempts = this.optionPosition.length * 2;
+
+        do {
+            newIndex = (newIndex + direction + this.optionPosition.length) % this.optionPosition.length;
+            attempts++;
+
+            const currentOption = this.options.options[newIndex];
+            if(currentOption.interactive !== false) break;
+        } while(attempts < maxAttempts);
+
+        if(attempts >= maxAttempts) return;
+        if(this.options.options[newIndex].interactive === false) return;
+
+        this.selectedIndex = newIndex;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
         const currentOption = this.options.options[this.selectedIndex];
@@ -272,6 +297,7 @@ export class Cursor {
 
         for(let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
+            if(option.interactive === false) continue;
 
             if(this.options.isPointOption(ndcX, ndcY, option)) {
                 hoveredIndex = i;
@@ -288,10 +314,15 @@ export class Cursor {
         }
 
         if(hoveredIndex !== -1 && hoveredIndex !== this.selectedIndex) {
+            const updOption = this.options.options[hoveredIndex]; 
             const prev = this.options.options[this.selectedIndex];
-            prev.hovered = false;
-            this.selectedIndex = hoveredIndex;
-            this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+            if(prev) prev.hovered = false;
+
+            if(updOption.interactive !== false) {
+                this.selectedIndex = hoveredIndex;
+                this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+            }
+
             this.options.clearSelection();
         }
     }
@@ -302,6 +333,7 @@ export class Cursor {
 
         for(let i = 0; i < this.optionPosition.length; i++) {
             const option = this.options.options[i];
+            if(!option || option.interactive === false) continue;
 
             if(this.options.isPointOption(ndcX, ndcY, option)) {
                 this.selectedIndex = i;
