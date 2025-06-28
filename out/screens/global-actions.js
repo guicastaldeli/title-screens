@@ -1,15 +1,52 @@
 import { ScreenPreview } from "./screen-preview.js";
+import { AudioManager } from "./audio-manager.js";
 export class GlobalActions {
-    constructor(gl, buffers, programInfo, screenManager, controller) {
+    constructor(gl, buffers, programInfo, screenManager, controller, screenSmb) {
         this.gl = gl;
+        this.buffers = buffers;
+        this.programInfo = programInfo;
         this.screenManager = screenManager;
         this.controller = controller;
+        this.screenSmb = screenSmb;
         this.screenPreview = new ScreenPreview(gl, buffers, programInfo, this.screenManager, this.controller, this);
-    }
-    initPlayPauseButton() {
+        this.audioManager = new AudioManager(gl, buffers, programInfo, this.screenManager, this.controller, this, this.screenSmb.levelState);
     }
     initScreenPreview() {
         this.screenPreview.initPreview();
+    }
+    initAudioManager() {
+        this.audioManager.initAudioManager();
+    }
+    glConfig(projectionMatrix, modelViewMatrix, positions, coords, texture) {
+        this.gl.disable(this.gl.DEPTH_TEST);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.vertexPosition);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTileTextureCoord);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(coords), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.programInfo.attribLocations.textureCoord, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.programInfo.attribLocations.textureCoord);
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.uniform1i(this.programInfo.uniformLocations.uSampler, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.uTex, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHud, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isShadowText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isHudText, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isGround, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
+        this.gl.uniformMatrix4fv(this.programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     loadTexture(gl, url) {
         const texture = gl.createTexture();
@@ -44,5 +81,9 @@ export class GlobalActions {
     }
     isPowerOf2(value) {
         return (value & (value - 1)) === 0;
+    }
+    init() {
+        this.initScreenPreview();
+        this.initAudioManager();
     }
 }

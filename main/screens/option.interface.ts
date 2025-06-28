@@ -21,11 +21,30 @@ export interface Option {
     type?: States
 }
 
-type ScreenCoord = [number, number];
-type BaseScreenMap = {
-    [key in ScreenStates]: ScreenCoord;
-}
+//Preview
+    type PreviewCoord = [number, number];
 
-export type ScreenMap = BaseScreenMap & {
-    shadow: ScreenCoord;
-}
+    type BasePreviewMap = {
+        [key in ScreenStates]: PreviewCoord;
+    }
+
+    export type PreviewMap = BasePreviewMap & {
+        shadow: PreviewCoord;
+    }
+//
+
+//Play-Pause
+    export type PlayPauseSingleCoord = [number, number];
+
+    export type PlayPausePairedCoords = {
+        play: PlayPauseSingleCoord;
+        pause: PlayPauseSingleCoord;
+    }
+
+    export type PlayPauseMap = {
+        [ScreenStates.Dk]: PlayPausePairedCoords;
+        [ScreenStates.Smb]: {
+            [key in States]: PlayPausePairedCoords;
+        }
+    }
+//

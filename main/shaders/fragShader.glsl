@@ -142,11 +142,15 @@ void main() {
     if(needTransp) {
         vec4 fColor = vec4(0.580, 0.580, 1.0, 1.0);
         vec4 sColor = vec4(0.0, 0.160784, 0.54902, 1.0);
+        vec4 tColor = vec4(0.8902, 0.0118, 0.9529, 1.0);
+        vec4 frColor = vec4(0.5843, 0.2275, 0.6471, 1.0);
         vec3 threshold = vec3(0.1);
 
         bool fIsTransp = all(lessThan(abs(tex.rgb - fColor.rgb), threshold));
         bool sIsTransp = all(lessThan(abs(tex.rgb - sColor.rgb), threshold));
-        if(fIsTransp || sIsTransp) discard;
+        bool tIsTransp = all(lessThan(abs(tex.rgb - tColor.rgb), threshold));
+        bool frIsTransp = all(lessThan(abs(tex.rgb - frColor.rgb), threshold));
+        if(fIsTransp || sIsTransp || tIsTransp || frIsTransp) discard;
 
         if(isPlayer) {
             if(haveState && abs(uState - 2.0) < 0.01) {

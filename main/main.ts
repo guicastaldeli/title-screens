@@ -188,7 +188,7 @@ async function main(): Promise<void> {
 
     await screenManager.current(ScreenStates.Dk);
     controller = new Contoller(state, screenManager);
-    globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller);
+    globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller, renderScreenSmb);
 
     state.setLoading(false);
     state.setRunning(true);
@@ -271,7 +271,7 @@ function __windowConfig() {
         
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        globalActions.initScreenPreview();
+        globalActions.init();
         
         requestAnimationFrame(render);
     }

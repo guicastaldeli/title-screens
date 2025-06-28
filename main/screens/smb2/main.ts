@@ -23,7 +23,7 @@ import { Entities } from "./entities.js";
 
 export class ScreenSmb extends BaseScreen {
     private screenManager: ScreenManager;
-    private levelState: LevelState;
+    public levelState: LevelState;
 
     private rotation: number = 0.0;
     private speed: number = 1.0;

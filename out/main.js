@@ -142,7 +142,7 @@ function main() {
         //
         yield screenManager.current(ScreenStates.Dk);
         controller = new Contoller(state, screenManager);
-        globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller);
+        globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller, renderScreenSmb);
         state.setLoading(false);
         state.setRunning(true);
         //Scene
@@ -209,7 +209,7 @@ function render() {
         tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        globalActions.initScreenPreview();
+        globalActions.init();
         requestAnimationFrame(render);
     });
 }
