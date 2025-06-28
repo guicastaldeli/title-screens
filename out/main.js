@@ -7,12 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
 import { initBuffers } from "./init-buffers.js";
 import { ScreenStates, State } from "./state.js";
 import { ScreenManager } from "./screen-manager.js";
 import { Contoller } from "./controller.js";
-import { ScreenController } from "./screens/controller.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 import { ScreenDk } from "./screens/dk/main.js";
@@ -124,7 +122,6 @@ function main() {
             }
         };
         gl.useProgram(programInfo.program);
-        const projectionMatrix = mat4.create();
         const buffers = initBuffers(gl);
         if (!buffers)
             return;
@@ -133,11 +130,8 @@ function main() {
         screenManager = new ScreenManager(state, gl, programInfo, buffers, tick);
         //Renders
         //Camera
-        renderCamera = new Camera(tick, gl, programInfo, buffers);
+        renderCamera = new Camera(tick, gl, programInfo, buffers, screenManager);
         renderCamera.init();
-        //Screen Controller
-        screenController = new ScreenController(gl, buffers, programInfo, screenManager);
-        screenController.initPreview(projectionMatrix);
         //Dk
         renderScreenDk = new ScreenDk(tick, state, screenManager, gl, programInfo, buffers);
         screenManager.registerScreen(ScreenStates.Dk, renderScreenDk);

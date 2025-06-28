@@ -3,12 +3,17 @@ import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
 import { Buffers } from "./init-buffers.js";
 import { ProgramInfo } from "./main.js";
 import { Tick } from "./tick.js";
+import { ScreenManager } from "./screen-manager.js";
+import { ScreenController } from "./screens/controller.js";
 
 export class Camera {
     private tick: Tick;
     private gl: WebGLRenderingContext;
     private programInfo: ProgramInfo;
     private buffers: Buffers;
+
+    private screenManager: ScreenManager;
+    public screenController: ScreenController;
 
     private rotation: number = 0.0;
     private speed: number = 1.0;
@@ -17,7 +22,8 @@ export class Camera {
         tick: Tick,
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
-        buffers: Buffers
+        buffers: Buffers,
+        screenManager: ScreenManager
     ) {
         this.tick = tick;
         tick.add(this.update.bind(this));
@@ -25,6 +31,9 @@ export class Camera {
         this.gl = gl;
         this.programInfo = programInfo;
         this.buffers = buffers;
+
+        this.screenManager = screenManager;
+        this.screenController = new ScreenController(gl, buffers, programInfo, screenManager);
     }
 
     private setCamera(): void {
@@ -114,7 +123,10 @@ export class Camera {
         this.setCamera();
     }
 
-    public init(): void {
+    public async init(): Promise<void> {
+        const projectionMatrix = mat4.create();
+
         this.setCamera();
+        await this.screenController.initPreview(projectionMatrix);
     }
 }

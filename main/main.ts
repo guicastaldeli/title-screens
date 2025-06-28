@@ -166,7 +166,6 @@ async function main(): Promise<void> {
 
     gl.useProgram(programInfo.program);
 
-    const projectionMatrix = mat4.create();
     const buffers = initBuffers(gl);
     if(!buffers) return;
 
@@ -176,12 +175,8 @@ async function main(): Promise<void> {
 
     //Renders
         //Camera
-        renderCamera = new Camera(tick, gl, programInfo, buffers);
+        renderCamera = new Camera(tick, gl, programInfo, buffers, screenManager);
         renderCamera.init();
-
-        //Screen Controller
-        screenController = new ScreenController(gl, buffers, programInfo, screenManager);
-        screenController.initPreview(projectionMatrix);
 
         //Dk
         renderScreenDk = new ScreenDk(tick, state, screenManager, gl, programInfo, buffers);
@@ -278,9 +273,10 @@ function __windowConfig() {
 
         __windowConfig();
         tick.update();
+        
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-
+        
         requestAnimationFrame(render);
     }
 //

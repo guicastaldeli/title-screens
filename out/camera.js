@@ -1,6 +1,16 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
+import { ScreenController } from "./screens/controller.js";
 export class Camera {
-    constructor(tick, gl, programInfo, buffers) {
+    constructor(tick, gl, programInfo, buffers, screenManager) {
         this.rotation = 0.0;
         this.speed = 1.0;
         this.tick = tick;
@@ -8,6 +18,8 @@ export class Camera {
         this.gl = gl;
         this.programInfo = programInfo;
         this.buffers = buffers;
+        this.screenManager = screenManager;
+        this.screenController = new ScreenController(gl, buffers, programInfo, screenManager);
     }
     setCamera() {
         const canvas = (this.gl.canvas);
@@ -54,6 +66,10 @@ export class Camera {
         this.setCamera();
     }
     init() {
-        this.setCamera();
+        return __awaiter(this, void 0, void 0, function* () {
+            const projectionMatrix = mat4.create();
+            this.setCamera();
+            yield this.screenController.initPreview(projectionMatrix);
+        });
     }
 }

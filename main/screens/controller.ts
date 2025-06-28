@@ -11,7 +11,7 @@ export class ScreenController {
     private programInfo: ProgramInfo;
     private screenManager: ScreenManager;
 
-    private texture: WebGLTexture | null = null
+    public texture: WebGLTexture | null = null
     private textureMap: TextureMap;
 
     private isHovered: boolean = false;
@@ -31,31 +31,32 @@ export class ScreenController {
         this.textureMap = new TextureMap();
     }
 
-    private loadTexture(gl: WebGLRenderingContext, url: string): Promise<WebGLTexture> {
+    private loadTexture(gl: WebGLRenderingContext, url: string): Promise<WebGLTexture> | boolean {
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        
+        const level = 0;
+        const internalFormat = gl.RGBA;
+        const width = 1;
+        const height = 1;
+        const border = 0;
+        const srcFormat = gl.RGBA;
+        const srcType = gl.UNSIGNED_BYTE;
+        const pixel = new Uint8Array([255, 255, 255, 255]);
+
+        gl.texImage2D(
+            gl.TEXTURE_2D, 
+            level, 
+            internalFormat, 
+            width, 
+            height, 
+            border, 
+            srcFormat, 
+            srcType, 
+            pixel
+        );
+            
         return new Promise((res, rej) => {
-            const texture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-
-            const level = 0;
-            const internalFormat = gl.RGBA;
-            const width = 1;
-            const height = 1;
-            const border = 0;
-            const srcFormat = gl.RGBA;
-            const srcType = gl.UNSIGNED_BYTE;
-            const pixel = new Uint8Array([255, 255, 255, 255]);
-            gl.texImage2D(
-                gl.TEXTURE_2D, 
-                level, 
-                internalFormat, 
-                width, 
-                height, 
-                border, 
-                srcFormat, 
-                srcType, 
-                pixel
-            );
-
             const img = new Image();
 
             img.onload = () => {
@@ -90,6 +91,8 @@ export class ScreenController {
     }
 
     private drawPreview(projectionMatrix: mat4): void {
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.LEQUAL);
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen.shadow, 0.9, true);
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen[this.screenManager.currentScreen()], 1.0, false);
     }
@@ -104,7 +107,7 @@ export class ScreenController {
     
         const sheetSize = [52, 52];
         const spriteSize = [16, 16];
-        const size = [0.1, 0.2];
+        const size = [0.05, 0.15];
     
         const x = isShadow ? 0.82 : 0.85;
         const y = isShadow ? 0.72 : 0.75;
@@ -112,7 +115,7 @@ export class ScreenController {
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [x, y, 1]
+            [x, y, 0.0]
         );
     
         const positions = [
@@ -150,6 +153,7 @@ export class ScreenController {
     
         this.lastHoverTime = now;
     
+        this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.smbTilePosition);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.DYNAMIC_DRAW);
         this.gl.vertexAttribPointer(this.programInfo.attribLocations.vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
@@ -204,7 +208,8 @@ export class ScreenController {
         }
     }
     
-    public initPreview(projectionMatrix: mat4): void {
+    public async initPreview(projectionMatrix: mat4): Promise<void> {
+        await this.getTex();
         this.drawPreview(projectionMatrix);
     }
 }
