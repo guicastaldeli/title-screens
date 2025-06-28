@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { ScreenStates } from "../../state.js";
 import { BaseScreen } from "../../screen.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { Title } from "./title.js";
@@ -252,7 +253,7 @@ export class ScreenDk extends BaseScreen {
         return __awaiter(this, void 0, void 0, function* () {
             this.initGrid();
             yield this.loadAssets();
-            this.state.markInit('dk');
+            this.state.markInit(ScreenStates.Dk);
             return this.createBackground();
         });
     }

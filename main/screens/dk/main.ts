@@ -1,6 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
-import { State } from "../../state.js";
+import { ScreenStates, State } from "../../state.js";
 import { ScreenManager } from "../../screen-manager.js";
 import { BaseScreen } from "../../screen.interface.js";
 
@@ -364,7 +364,7 @@ export class ScreenDk extends BaseScreen {
         this.initGrid();
         await this.loadAssets();
         
-        this.state.markInit('dk');
+        this.state.markInit(ScreenStates.Dk);
         return this.createBackground();
     }
 }

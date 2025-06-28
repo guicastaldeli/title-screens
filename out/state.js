@@ -1,8 +1,13 @@
+export var ScreenStates;
+(function (ScreenStates) {
+    ScreenStates["Dk"] = "dk";
+    ScreenStates["Smb"] = "smb";
+})(ScreenStates || (ScreenStates = {}));
 export class State {
     constructor() {
         this.loading = true;
         this.running = false;
-        this.current = 'dk';
+        this.current = ScreenStates.Dk;
         this.initializedStates = new Set();
     }
     setCurrentState(screen) {

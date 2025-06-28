@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { ScreenStates } from "../../state.js";
 import { BaseScreen } from "../../screen.interface.js";
 import { LevelState } from "./level-state.js";
 import { States } from "./texture-map.interface.js";
@@ -336,7 +337,7 @@ export class ScreenSmb extends BaseScreen {
         return __awaiter(this, void 0, void 0, function* () {
             this.initGrid();
             yield this.loadAssets();
-            yield this.state.markInit('smb');
+            yield this.state.markInit(ScreenStates.Smb);
             return this.setInit();
         });
     }

@@ -49,6 +49,10 @@ export class ScreenManager {
         return this.screens.get(this.state.getCurrentState());
     }
 
+    public currentScreen(): ScreenStates {
+        return this.state.getCurrentState();
+    }
+
     public update(deltaTime: number): void {
         if(!this.state.isRunning() || this.state.isLoading()) return;
 

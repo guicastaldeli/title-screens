@@ -1,13 +1,13 @@
-export type ScreenStates = 
-    'dk' |
-    'smb'
-;
+export enum ScreenStates {
+    Dk = 'dk',
+    Smb = 'smb'
+}
 
 export class State {
     private loading: boolean = true;
     private running: boolean = false;
 
-    private current: ScreenStates = 'dk';
+    private current: ScreenStates = ScreenStates.Dk;
     private initializedStates: Set<ScreenStates> = new Set();
 
     public setCurrentState(screen: ScreenStates): void {

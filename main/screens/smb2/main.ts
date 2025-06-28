@@ -1,6 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 
-import { State } from "../../state.js";
+import { ScreenStates, State } from "../../state.js";
 import { ScreenManager } from "../../screen-manager.js";
 import { BaseScreen } from "../../screen.interface.js";
 import { LevelState } from "./level-state.js";
@@ -480,7 +480,7 @@ export class ScreenSmb extends BaseScreen {
         this.initGrid();
         await this.loadAssets();
 
-        await this.state.markInit('smb');
+        await this.state.markInit(ScreenStates.Smb);
         return this.setInit();
     }
 }

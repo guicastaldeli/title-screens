@@ -7,10 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
 import { initBuffers } from "./init-buffers.js";
-import { State } from "./state.js";
+import { ScreenStates, State } from "./state.js";
 import { ScreenManager } from "./screen-manager.js";
 import { Contoller } from "./controller.js";
+import { ScreenController } from "./screens/controller.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 import { ScreenDk } from "./screens/dk/main.js";
@@ -25,6 +27,7 @@ let state;
 let levelState;
 let screenManager;
 let controller;
+let screenController;
 //Renders
 //Camera
 let renderCamera;
@@ -121,6 +124,7 @@ function main() {
             }
         };
         gl.useProgram(programInfo.program);
+        const projectionMatrix = mat4.create();
         const buffers = initBuffers(gl);
         if (!buffers)
             return;
@@ -131,14 +135,17 @@ function main() {
         //Camera
         renderCamera = new Camera(tick, gl, programInfo, buffers);
         renderCamera.init();
+        //Screen Controller
+        screenController = new ScreenController(gl, buffers, programInfo, screenManager);
+        screenController.initPreview(projectionMatrix);
         //Dk
         renderScreenDk = new ScreenDk(tick, state, screenManager, gl, programInfo, buffers);
-        screenManager.registerScreen('dk', renderScreenDk);
+        screenManager.registerScreen(ScreenStates.Dk, renderScreenDk);
         //Smb
         renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers);
-        screenManager.registerScreen('smb', renderScreenSmb);
+        screenManager.registerScreen(ScreenStates.Smb, renderScreenSmb);
         //
-        yield screenManager.current('smb');
+        yield screenManager.current(ScreenStates.Smb);
         controller = new Contoller(state, screenManager);
         state.setLoading(false);
         state.setRunning(true);

@@ -1,4 +1,5 @@
-import { States } from "./smb2/texture-map.interface";
+import { ScreenStates } from "../state.js";
+import { States } from "./smb2/texture-map.interface.js";
 
 export interface Option {
     text: string;
@@ -18,4 +19,13 @@ export interface Option {
         y: [number, number]
     }
     type?: States
+}
+
+type ScreenCoord = [number, number];
+type BaseScreenMap = {
+    [key in ScreenStates]: ScreenCoord;
+}
+
+export type ScreenMap = BaseScreenMap & {
+    shadow: ScreenCoord;
 }
