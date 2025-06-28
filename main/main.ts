@@ -6,11 +6,11 @@ import { LevelState } from "./screens/smb2/level-state.js";
 import { ScreenManager } from "./screen-manager.js";
 
 import { Contoller } from "./controller.js";
-import { ScreenController } from "./screens/controller.js";
 import { Tick } from "./tick.js";
 
 import { Camera } from "./camera.js";
 
+import { GlobalActions } from "./screens/global-actions.js";
 import { ScreenDk } from "./screens/dk/main.js";
 import { ScreenSmb } from "./screens/smb2/main.js";
 
@@ -65,7 +65,7 @@ let state: State;
 let levelState: LevelState;
 let screenManager: ScreenManager;
 let controller: Contoller;
-let screenController: ScreenController;
+let globalActions: GlobalActions;
 
 //Renders
     //Camera
@@ -188,13 +188,8 @@ async function main(): Promise<void> {
     //
 
     await screenManager.current(ScreenStates.Dk);
-
-    //Controller
     controller = new Contoller(state, screenManager);
-
-    //Screen Controller
-    screenController = new ScreenController(gl, buffers, programInfo, screenManager, controller);
-    screenController.initPreview();
+    globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller);
 
     state.setLoading(false);
     state.setRunning(true);
@@ -277,8 +272,7 @@ function __windowConfig() {
         
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        screenController.initPreview();
-        screenController.setupInput();
+        globalActions.initScreenControllerPreview();
         
         requestAnimationFrame(render);
     }

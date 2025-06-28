@@ -186,6 +186,7 @@ export class ScreenController {
             const projectionMatrix = mat4.create();
             this.drawPreview(projectionMatrix);
             yield this.getTex();
+            this.setupInput();
         });
     }
 }

@@ -11,9 +11,9 @@ import { initBuffers } from "./init-buffers.js";
 import { ScreenStates, State } from "./state.js";
 import { ScreenManager } from "./screen-manager.js";
 import { Contoller } from "./controller.js";
-import { ScreenController } from "./screens/controller.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
+import { GlobalActions } from "./screens/global-actions.js";
 import { ScreenDk } from "./screens/dk/main.js";
 import { ScreenSmb } from "./screens/smb2/main.js";
 const canvas = (document.getElementById('container'));
@@ -26,7 +26,7 @@ let state;
 let levelState;
 let screenManager;
 let controller;
-let screenController;
+let globalActions;
 //Renders
 //Camera
 let renderCamera;
@@ -141,11 +141,8 @@ function main() {
         screenManager.registerScreen(ScreenStates.Smb, renderScreenSmb);
         //
         yield screenManager.current(ScreenStates.Dk);
-        //Controller
         controller = new Contoller(state, screenManager);
-        //Screen Controller
-        screenController = new ScreenController(gl, buffers, programInfo, screenManager, controller);
-        screenController.initPreview();
+        globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller);
         state.setLoading(false);
         state.setRunning(true);
         //Scene
@@ -212,8 +209,7 @@ function render() {
         tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        screenController.initPreview();
-        screenController.setupInput();
+        globalActions.initScreenControllerPreview();
         requestAnimationFrame(render);
     });
 }

@@ -259,6 +259,6 @@ export class ScreenController {
 
         this.drawPreview(projectionMatrix);
         await this.getTex();
-        
+        this.setupInput();
     }
 }
