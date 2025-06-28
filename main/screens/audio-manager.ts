@@ -7,7 +7,7 @@ import { ScreenManager } from "../screen-manager.js";
 import { ScreenStates } from "../state.js";
 import { Contoller } from "../controller.js";
 import { GlobalActions } from "./global-actions.js";
-import { LevelState } from "./smb2/level-state.js";
+import { EventEmitter } from "./event-emitter.js";
 import { States } from "./smb2/texture-map.interface.js";
 import { PlayPausePairedCoords, PlayPauseSingleCoord } from "./option.interface.js";
 
@@ -18,10 +18,13 @@ export class AudioManager {
     private screenManager: ScreenManager;
     private controller: Contoller;
     private globalActions: GlobalActions;
-    private levelState: LevelState;
 
     public texture: WebGLTexture | null = null
     private textureMap: TextureMap;
+    private currentState: States | null = null;
+
+    //Audio
+    private isAudioPlaying: boolean = false;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -30,7 +33,6 @@ export class AudioManager {
         screenManager: ScreenManager,
         controller: Contoller,
         globalActions: GlobalActions,
-        levelState: LevelState
     ) {
         this.gl = gl;
         this.buffers = buffers;
@@ -38,22 +40,55 @@ export class AudioManager {
         this.screenManager = screenManager;
         this.controller = controller;
         this.globalActions = globalActions;
-        this.levelState = levelState;
+
         this.textureMap = new TextureMap();
+        this.requestState();
+        this.toggleAudio();
+        this.levelStateChange();
+    }
+
+    private requestState(): void {
+        EventEmitter.emit('req-current-level-state');
+        EventEmitter.on('res-current-level-state', (state: States) => {
+            this.currentState = state;
+        });
+    }
+
+    private toggleAudio(): void {
+        EventEmitter.on('toggle-music', (isOn: boolean) => {
+            this.isAudioPlaying = isOn;
+        });
+    }
+
+    private levelStateChange(): void {
+        EventEmitter.on('level-state-changed', (e: {
+            newState: States;
+            prevState: States | null;
+            stateId: number;
+            stateName: string
+        }) => {
+            this.currentState = e.newState;
+        });
     }
 
     private drawPlayPause(projectionMatrix: mat4): void {
         const modelViewMatrix = mat4.create();
     
         const currentScreen = this.screenManager.currentScreen();
-        const currentState = this.levelState.getCurrentState();
         const map = this.textureMap.playPause[currentScreen];
         let spriteCoords: PlayPauseSingleCoord;
 
         if(currentScreen === ScreenStates.Dk) {
-            spriteCoords = (map as PlayPausePairedCoords).pause; 
+            spriteCoords = this.isAudioPlaying
+            ? (map as PlayPausePairedCoords).pause
+            : (map as PlayPausePairedCoords).play;
         } else {
-            spriteCoords = (map as Record<States, PlayPausePairedCoords>)[currentState].pause;
+            const stateMap = (map as Record<States, PlayPausePairedCoords>);
+            const currentState = this.currentState ?? States.Overworld;
+
+            spriteCoords = this.isAudioPlaying
+            ? stateMap[currentState].pause
+            : stateMap[currentState].play; 
         }
 
         const sheetSize = [52, 52];

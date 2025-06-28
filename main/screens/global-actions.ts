@@ -9,8 +9,6 @@ import { ScreenManager } from "../screen-manager.js";
 import { ScreenPreview } from "./screen-preview.js";
 import { AudioManager } from "./audio-manager.js";
 
-import { ScreenSmb } from "./smb2/main.js";
-
 export class GlobalActions {
     private gl: WebGLRenderingContext;
     private buffers: Buffers;
@@ -18,7 +16,6 @@ export class GlobalActions {
 
     private screenManager: ScreenManager;
     private controller: Contoller;
-    private screenSmb: ScreenSmb;
 
     private screenPreview: ScreenPreview;
     private audioManager: AudioManager;
@@ -29,7 +26,6 @@ export class GlobalActions {
         programInfo: ProgramInfo,
         screenManager: ScreenManager,
         controller: Contoller,
-        screenSmb: ScreenSmb
     ) {
         this.gl = gl;
         this.buffers = buffers;
@@ -37,10 +33,9 @@ export class GlobalActions {
 
         this.screenManager = screenManager;
         this.controller = controller;
-        this.screenSmb = screenSmb;
 
         this.screenPreview = new ScreenPreview(gl, buffers, programInfo, this.screenManager, this.controller, this);
-        this.audioManager = new AudioManager(gl, buffers, programInfo, this.screenManager, this.controller, this, this.screenSmb.levelState);
+        this.audioManager = new AudioManager(gl, buffers, programInfo, this.screenManager, this.controller, this);
     }
 
     public initScreenPreview(): void {

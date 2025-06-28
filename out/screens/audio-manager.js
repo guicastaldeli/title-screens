@@ -10,29 +10,58 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { ScreenStates } from "../state.js";
+import { EventEmitter } from "./event-emitter.js";
+import { States } from "./smb2/texture-map.interface.js";
 export class AudioManager {
-    constructor(gl, buffers, programInfo, screenManager, controller, globalActions, levelState) {
+    constructor(gl, buffers, programInfo, screenManager, controller, globalActions) {
         this.texture = null;
+        this.currentState = null;
+        //Audio
+        this.isAudioPlaying = false;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screenManager = screenManager;
         this.controller = controller;
         this.globalActions = globalActions;
-        this.levelState = levelState;
         this.textureMap = new TextureMap();
+        this.requestState();
+        this.toggleAudio();
+        this.levelStateChange();
+    }
+    requestState() {
+        EventEmitter.emit('req-current-level-state');
+        EventEmitter.on('res-current-level-state', (state) => {
+            this.currentState = state;
+        });
+    }
+    toggleAudio() {
+        EventEmitter.on('toggle-music', (isOn) => {
+            this.isAudioPlaying = isOn;
+        });
+    }
+    levelStateChange() {
+        EventEmitter.on('level-state-changed', (e) => {
+            this.currentState = e.newState;
+        });
     }
     drawPlayPause(projectionMatrix) {
+        var _a;
         const modelViewMatrix = mat4.create();
         const currentScreen = this.screenManager.currentScreen();
-        const currentState = this.levelState.getCurrentState();
         const map = this.textureMap.playPause[currentScreen];
         let spriteCoords;
         if (currentScreen === ScreenStates.Dk) {
-            spriteCoords = map.pause;
+            spriteCoords = this.isAudioPlaying
+                ? map.pause
+                : map.play;
         }
         else {
-            spriteCoords = map[currentState].pause;
+            const stateMap = map;
+            const currentState = (_a = this.currentState) !== null && _a !== void 0 ? _a : States.Overworld;
+            spriteCoords = this.isAudioPlaying
+                ? stateMap[currentState].pause
+                : stateMap[currentState].play;
         }
         const sheetSize = [52, 52];
         const spriteSize = [16, 16];

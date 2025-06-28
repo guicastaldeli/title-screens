@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
+import { EventEmitter } from "../event-emitter.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -251,6 +252,7 @@ export class Options {
             if (option.text.startsWith('MUSIC')) {
                 this.isMusicOn = !this.isMusicOn;
                 option.text = this.musicText;
+                EventEmitter.emit('toggle-music', this.isMusicOn);
             }
             const wasSelected = option.selected;
             this.options.forEach(opt => {

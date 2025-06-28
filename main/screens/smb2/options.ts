@@ -12,6 +12,7 @@ import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 import { LevelState } from "./level-state.js";
+import { EventEmitter } from "../event-emitter.js";
 
 export class Options {
     private tick: Tick;
@@ -60,7 +61,7 @@ export class Options {
         screen: ScreenSmb,
         levelState: LevelState,
         sheetProps: SheetProps,
-        cursor: Cursor
+        cursor: Cursor,
     ) {
         this.tick = tick;
         this.tick.add(this.update.bind(this));
@@ -359,6 +360,7 @@ export class Options {
             if(option.text.startsWith('MUSIC')) {
                 this.isMusicOn = !this.isMusicOn;
                 option.text = this.musicText;
+                EventEmitter.emit('toggle-music', this.isMusicOn);
             }
 
             const wasSelected = option.selected;

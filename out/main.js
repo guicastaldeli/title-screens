@@ -142,7 +142,7 @@ function main() {
         //
         yield screenManager.current(ScreenStates.Dk);
         controller = new Contoller(state, screenManager);
-        globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller, renderScreenSmb);
+        globalActions = new GlobalActions(gl, buffers, programInfo, screenManager, controller);
         state.setLoading(false);
         state.setRunning(true);
         //Scene

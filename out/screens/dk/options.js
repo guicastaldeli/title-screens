@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { LetterMap } from "./letter-map.js";
+import { EventEmitter } from "../event-emitter.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -171,6 +172,7 @@ export class Options {
         if (option.text.startsWith('MUSIC')) {
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
+            EventEmitter.emit('toggle-music', this.isMusicOn);
         }
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;

@@ -10,6 +10,7 @@ import { Title } from "./title.js";
 import { Cursor } from "./cursor.js";
 import { SheetProps } from "./sheet-props.js";
 import { LetterMap } from "./letter-map.js";
+import { EventEmitter } from "../event-emitter.js";
 
 export class Options {
     private tick: Tick;
@@ -40,7 +41,7 @@ export class Options {
     private selectionTimeout: Map<Option, number> = new Map();
 
     //Music
-        private isMusicOn: boolean = false;
+        public isMusicOn: boolean = false;
 
         private get musicText(): string {
             return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -54,7 +55,7 @@ export class Options {
         programInfo: ProgramInfo,
         screen: ScreenDk,
         sheetProps: SheetProps,
-        cursor: Cursor
+        cursor: Cursor,
     ) {
         this.tick = tick;
         this.tick.add(this.update.bind(this));
@@ -279,6 +280,7 @@ export class Options {
         if(option.text.startsWith('MUSIC')) {
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
+            EventEmitter.emit('toggle-music', this.isMusicOn);
         }
 
         option.color = this.screen.parseColor('rgb(102, 102, 102)');

@@ -5,6 +5,7 @@ import { ProgramInfo } from "../../main.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 import { SheetProps } from "./sheet-props.js";
+import { EventEmitter } from "../event-emitter.js";
 import { ScreenSmb } from "./main.js";
 
 export class LevelState {
@@ -35,6 +36,9 @@ export class LevelState {
         this.textureMap = new TextureMap();
         this.sheetProps = sheetProps;
         this.screen = screen;
+
+        this.emitState();
+        this.emitStateChange(this.state, null);
     }
 
     public getCurrentState(): States {
@@ -47,6 +51,12 @@ export class LevelState {
 
     public getState(): States {
         return this.state;
+    }
+
+    private emitState() {
+        EventEmitter.on('req-current-level-state', () => {
+            EventEmitter.emit('res-current-level-state', this.state);
+        });
     }
 
     public getStateId(): number {
@@ -62,6 +72,8 @@ export class LevelState {
     }
 
     public toggleState(): void {
+        const prevState = this.state;
+
         switch(this.state) {
             case States.Overworld:
                 this.state = States.Underground;
@@ -78,6 +90,17 @@ export class LevelState {
             default:
                 this.state = States.Overworld;
         }
+
+        this.emitStateChange(this.state, prevState);
+    }
+
+    private emitStateChange(newState: States, prevState: States | null): void {
+        EventEmitter.emit('level-state-changed', {
+            newState,
+            prevState,
+            stateId: this.getStateId(),
+            stateName: States[newState]
+        });
     }
 
     private drawPreview(projectionMatrix: mat4): void {

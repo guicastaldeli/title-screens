@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
+import { EventEmitter } from "../event-emitter.js";
 export class LevelState {
     constructor(gl, buffers, programInfo, sheetProps, screen) {
         this.state = States.Overworld;
@@ -23,6 +24,8 @@ export class LevelState {
         this.textureMap = new TextureMap();
         this.sheetProps = sheetProps;
         this.screen = screen;
+        this.emitState();
+        this.emitStateChange(this.state, null);
     }
     getCurrentState() {
         return this.state;
@@ -32,6 +35,11 @@ export class LevelState {
     }
     getState() {
         return this.state;
+    }
+    emitState() {
+        EventEmitter.on('req-current-level-state', () => {
+            EventEmitter.emit('res-current-level-state', this.state);
+        });
     }
     getStateId() {
         const states = [
@@ -44,6 +52,7 @@ export class LevelState {
         return states.indexOf(this.state);
     }
     toggleState() {
+        const prevState = this.state;
         switch (this.state) {
             case States.Overworld:
                 this.state = States.Underground;
@@ -60,6 +69,15 @@ export class LevelState {
             default:
                 this.state = States.Overworld;
         }
+        this.emitStateChange(this.state, prevState);
+    }
+    emitStateChange(newState, prevState) {
+        EventEmitter.emit('level-state-changed', {
+            newState,
+            prevState,
+            stateId: this.getStateId(),
+            stateName: States[newState]
+        });
     }
     drawPreview(projectionMatrix) {
         this.drawPreviewElement(projectionMatrix, this.textureMap.levelState.shadow, 0.9, true);

@@ -1,15 +1,14 @@
 import { ScreenPreview } from "./screen-preview.js";
 import { AudioManager } from "./audio-manager.js";
 export class GlobalActions {
-    constructor(gl, buffers, programInfo, screenManager, controller, screenSmb) {
+    constructor(gl, buffers, programInfo, screenManager, controller) {
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screenManager = screenManager;
         this.controller = controller;
-        this.screenSmb = screenSmb;
         this.screenPreview = new ScreenPreview(gl, buffers, programInfo, this.screenManager, this.controller, this);
-        this.audioManager = new AudioManager(gl, buffers, programInfo, this.screenManager, this.controller, this, this.screenSmb.levelState);
+        this.audioManager = new AudioManager(gl, buffers, programInfo, this.screenManager, this.controller, this);
     }
     initScreenPreview() {
         this.screenPreview.initPreview();

@@ -34,7 +34,7 @@ export class ScreenDk extends BaseScreen {
     //Elements
     private sheetProps: SheetProps;
     private title: Title;
-    private options: Options;
+    public options: Options;
     private cursor: Cursor;
 
     constructor(

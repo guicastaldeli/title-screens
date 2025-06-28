@@ -15,6 +15,7 @@ import { Hud } from "./hud.js";
 import { Title } from "./title.js";
 import { Options } from "./options.js";
 import { Cursor } from "./cursor.js";
+import { AudioManager } from "../audio-manager.js";
 
 import { Points } from "./points.js";
 import { Terrain } from "./terrain.js";
