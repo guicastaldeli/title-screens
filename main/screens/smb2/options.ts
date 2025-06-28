@@ -12,7 +12,7 @@ import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 import { LevelState } from "./level-state.js";
-import { EventEmitter } from "../event-emitter.js";
+import { EventEmitter } from "../../event-emitter.js";
 
 export class Options {
     private tick: Tick;
@@ -41,7 +41,7 @@ export class Options {
     public options: Option[] = [];
     private waveTime: number = 0.0;
     private waveSpeed: number = 2.0;
-    public intervalSelected: number = 1000;
+    public intervalSelected: number = 500;
     public selectionTimeout: Map<Option, number> = new Map();
     private prevSelectedIndex: any;
 
@@ -78,6 +78,7 @@ export class Options {
 
         this.setOptions();
         this.textureMap = new TextureMap();
+        this.toggleAudio();
 
         this.prevSelectedIndex = this.cursor.selectedIndex;
     }
@@ -358,9 +359,36 @@ export class Options {
             if(option.text === 'LUIGI GAME') this.screen.setCurrentPlayer('luigi');            
         } else {
             if(option.text.startsWith('MUSIC')) {
+                const exTimeout = this.selectionTimeout.get(option)
+                if(exTimeout) {
+                    clearTimeout(exTimeout);
+                    this.selectionTimeout.delete(option);
+                }
+
                 this.isMusicOn = !this.isMusicOn;
                 option.text = this.musicText;
                 EventEmitter.emit('toggle-music', this.isMusicOn);
+
+                if(this.isMusicOn) {
+                    const timeoutId = setTimeout(() => {
+                       if(this.options[this.cursor.selectedIndex] === option) {
+                            option.color = this.cursor.selectedColor
+                       } else {
+                            option.color = defaultColor;
+                       }
+
+                       option.selected = false;
+                       this.selectionTimeout.delete(option);
+
+                       this.isMusicOn = false;
+                       option.text = this.musicText;
+                       EventEmitter.emit('toggle-music', false);
+                    }, this.intervalSelected) as unknown as number;
+
+                    this.selectionTimeout.set(option, timeoutId);
+                }
+
+                return;
             }
 
             const wasSelected = option.selected;
@@ -430,6 +458,32 @@ export class Options {
             }
         });
     }
+
+    //Audio State
+        private updateMusicOptionText(): void {
+            const option = this.options.find(opt => opt.text.startsWith('MUSIC'));
+            if(option) option.text = this.musicText;
+        }
+
+        private toggleAudio(): void {
+            this.isMusicOn = false;
+            this.updateMusicOptionText();
+
+            EventEmitter.on('level-state-changed', () => {
+                this.setAudioState(false);
+            });
+
+            EventEmitter.on('screen-changed', () => {
+                this.setAudioState(false);
+            });
+        }
+
+        private setAudioState(isOn: boolean): void {
+            this.isMusicOn = isOn;
+            this.updateMusicOptionText();
+            EventEmitter.emit('toggle-music', isOn);
+        }
+    //
 
     public initOptions(projectionMatrix: mat4): void {
         const originalContainerPosition = [...this.containerPosition];

@@ -1,6 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { LetterMap } from "./letter-map.js";
-import { EventEmitter } from "../event-emitter.js";
+import { EventEmitter } from "../../event-emitter.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -31,6 +31,7 @@ export class Options {
                 this.screen.parseColor('rgb(255, 255, 255)') :
                 this.screen.parseColor('rgb(252, 152, 56)');
         this.setOptions();
+        this.toggleAudio();
         this.letterMap = LetterMap;
     }
     setOptions() {
@@ -170,13 +171,54 @@ export class Options {
             this.selectionTimeout.set(option, this.intervalSelected);
         }
         if (option.text.startsWith('MUSIC')) {
+            const exTimeout = this.selectionTimeout.get(option);
+            if (exTimeout) {
+                clearTimeout(exTimeout);
+                this.selectionTimeout.delete(option);
+            }
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
             EventEmitter.emit('toggle-music', this.isMusicOn);
+            if (this.isMusicOn) {
+                const timeoutId = setTimeout(() => {
+                    if (this.options[this.cursor.selectedIndex] === option) {
+                        option.color = this.cursor.selectedColor;
+                    }
+                    else {
+                        option.color = defaultColor;
+                    }
+                    option.selected = false;
+                    this.selectionTimeout.delete(option);
+                    this.isMusicOn = false;
+                    option.text = this.musicText;
+                    EventEmitter.emit('toggle-music', false);
+                }, this.intervalSelected);
+                this.selectionTimeout.set(option, timeoutId);
+            }
+            return;
         }
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;
     }
+    //Audio State
+    updateMusicOptionText() {
+        const option = this.options.find(opt => opt.text.startsWith('MUSIC'));
+        if (option)
+            option.text = this.musicText;
+    }
+    toggleAudio() {
+        this.isMusicOn = false;
+        this.updateMusicOptionText();
+        EventEmitter.on('screen-changed', () => {
+            this.setAudioState(false);
+        });
+    }
+    setAudioState(isOn) {
+        this.isMusicOn = isOn;
+        this.updateMusicOptionText();
+        EventEmitter.emit('toggle-music', isOn);
+    }
+    //
     getOptionPositions() {
         return this.options.map(option => {
             return [

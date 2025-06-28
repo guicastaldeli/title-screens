@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
-import { EventEmitter } from "../event-emitter.js";
+import { EventEmitter } from "../../event-emitter.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -24,7 +24,7 @@ export class Options {
         this.options = [];
         this.waveTime = 0.0;
         this.waveSpeed = 2.0;
-        this.intervalSelected = 1000;
+        this.intervalSelected = 500;
         this.selectionTimeout = new Map();
         //Music
         this.isMusicOn = false;
@@ -40,6 +40,7 @@ export class Options {
         this.cursor = cursor;
         this.setOptions();
         this.textureMap = new TextureMap();
+        this.toggleAudio();
         this.prevSelectedIndex = this.cursor.selectedIndex;
     }
     setOptions() {
@@ -250,9 +251,31 @@ export class Options {
         }
         else {
             if (option.text.startsWith('MUSIC')) {
+                const exTimeout = this.selectionTimeout.get(option);
+                if (exTimeout) {
+                    clearTimeout(exTimeout);
+                    this.selectionTimeout.delete(option);
+                }
                 this.isMusicOn = !this.isMusicOn;
                 option.text = this.musicText;
                 EventEmitter.emit('toggle-music', this.isMusicOn);
+                if (this.isMusicOn) {
+                    const timeoutId = setTimeout(() => {
+                        if (this.options[this.cursor.selectedIndex] === option) {
+                            option.color = this.cursor.selectedColor;
+                        }
+                        else {
+                            option.color = defaultColor;
+                        }
+                        option.selected = false;
+                        this.selectionTimeout.delete(option);
+                        this.isMusicOn = false;
+                        option.text = this.musicText;
+                        EventEmitter.emit('toggle-music', false);
+                    }, this.intervalSelected);
+                    this.selectionTimeout.set(option, timeoutId);
+                }
+                return;
             }
             const wasSelected = option.selected;
             this.options.forEach(opt => {
@@ -310,6 +333,28 @@ export class Options {
             }
         });
     }
+    //Audio State
+    updateMusicOptionText() {
+        const option = this.options.find(opt => opt.text.startsWith('MUSIC'));
+        if (option)
+            option.text = this.musicText;
+    }
+    toggleAudio() {
+        this.isMusicOn = false;
+        this.updateMusicOptionText();
+        EventEmitter.on('level-state-changed', () => {
+            this.setAudioState(false);
+        });
+        EventEmitter.on('screen-changed', () => {
+            this.setAudioState(false);
+        });
+    }
+    setAudioState(isOn) {
+        this.isMusicOn = isOn;
+        this.updateMusicOptionText();
+        EventEmitter.emit('toggle-music', isOn);
+    }
+    //
     initOptions(projectionMatrix) {
         const originalContainerPosition = [...this.containerPosition];
         this.options.forEach(option => {

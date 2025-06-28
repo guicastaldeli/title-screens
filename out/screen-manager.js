@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { EventEmitter } from "./event-emitter.js";
 export class ScreenManager {
     constructor(state, gl, programInfo, buffers, tick) {
         this.state = state;
@@ -34,7 +35,13 @@ export class ScreenManager {
                     yield this.screens.get(name).init();
                     this.state.markInit(name);
                 }
+                const prevScreen = this.state.getCurrentState();
                 this.state.setCurrentState(name);
+                EventEmitter.emit('screen-changed', {
+                    prev: prevScreen,
+                    current: name,
+                    isInit: this.state.isInit(name)
+                });
             }
             catch (err) {
                 console.log(err);

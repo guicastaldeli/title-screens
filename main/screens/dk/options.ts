@@ -10,7 +10,7 @@ import { Title } from "./title.js";
 import { Cursor } from "./cursor.js";
 import { SheetProps } from "./sheet-props.js";
 import { LetterMap } from "./letter-map.js";
-import { EventEmitter } from "../event-emitter.js";
+import { EventEmitter } from "../../event-emitter.js";
 
 export class Options {
     private tick: Tick;
@@ -75,6 +75,7 @@ export class Options {
         ;
 
         this.setOptions();
+        this.toggleAudio();
 
         this.letterMap = LetterMap;
     }
@@ -278,14 +279,63 @@ export class Options {
         }
 
         if(option.text.startsWith('MUSIC')) {
+            const exTimeout = this.selectionTimeout.get(option)
+            if(exTimeout) {
+                clearTimeout(exTimeout);
+                this.selectionTimeout.delete(option);
+            }
+
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
             EventEmitter.emit('toggle-music', this.isMusicOn);
+
+            if(this.isMusicOn) {
+                const timeoutId = setTimeout(() => {
+                    if(this.options[this.cursor.selectedIndex] === option) {
+                        option.color = this.cursor.selectedColor
+                    } else {
+                        option.color = defaultColor;
+                    }
+
+                    option.selected = false;
+                    this.selectionTimeout.delete(option);
+
+                    this.isMusicOn = false;
+                    option.text = this.musicText;
+                    EventEmitter.emit('toggle-music', false);
+                }, this.intervalSelected) as unknown as number;
+
+                this.selectionTimeout.set(option, timeoutId);
+            }
+
+            return;
         }
 
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;
     }
+
+    //Audio State
+        private updateMusicOptionText(): void {
+            const option = this.options.find(opt => opt.text.startsWith('MUSIC'));
+            if(option) option.text = this.musicText;
+        }
+
+        private toggleAudio(): void {
+            this.isMusicOn = false;
+            this.updateMusicOptionText();
+
+            EventEmitter.on('screen-changed', () => {
+                this.setAudioState(false);
+            });
+        }
+
+        private setAudioState(isOn: boolean): void {
+            this.isMusicOn = isOn;
+            this.updateMusicOptionText();
+            EventEmitter.emit('toggle-music', isOn);
+        }
+    //
 
     public getOptionPositions(): [number, number][] {
         return this.options.map(option => {

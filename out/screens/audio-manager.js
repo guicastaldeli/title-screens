@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { ScreenStates } from "../state.js";
-import { EventEmitter } from "./event-emitter.js";
+import { EventEmitter } from "../event-emitter.js";
 import { States } from "./smb2/texture-map.interface.js";
 export class AudioManager {
     constructor(gl, buffers, programInfo, screenManager, controller, globalActions) {

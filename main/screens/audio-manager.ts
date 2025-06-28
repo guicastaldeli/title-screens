@@ -7,7 +7,7 @@ import { ScreenManager } from "../screen-manager.js";
 import { ScreenStates } from "../state.js";
 import { Contoller } from "../controller.js";
 import { GlobalActions } from "./global-actions.js";
-import { EventEmitter } from "./event-emitter.js";
+import { EventEmitter } from "../event-emitter.js";
 import { States } from "./smb2/texture-map.interface.js";
 import { PlayPausePairedCoords, PlayPauseSingleCoord } from "./option.interface.js";
 

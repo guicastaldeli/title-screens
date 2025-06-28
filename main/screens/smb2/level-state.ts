@@ -5,7 +5,7 @@ import { ProgramInfo } from "../../main.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
 import { SheetProps } from "./sheet-props.js";
-import { EventEmitter } from "../event-emitter.js";
+import { EventEmitter } from "../../event-emitter.js";
 import { ScreenSmb } from "./main.js";
 
 export class LevelState {

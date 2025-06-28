@@ -4,6 +4,7 @@ import { intScreen } from "./screen.interface";
 import { ProgramInfo } from "./main";
 import { Buffers } from "./init-buffers";
 import { Tick } from "./tick";
+import { EventEmitter } from "./event-emitter.js";
 
 export class ScreenManager {
     private screens: Map<ScreenStates, intScreen> = new Map();
@@ -37,7 +38,14 @@ export class ScreenManager {
                 this.state.markInit(name);
             }
 
+            const prevScreen = this.state.getCurrentState();
             this.state.setCurrentState(name);
+
+            EventEmitter.emit('screen-changed', {
+                prev: prevScreen,
+                current: name,
+                isInit: this.state.isInit(name)
+            });
         } catch(err) {
             console.log(err);
         } finally {
