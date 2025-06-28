@@ -1,4 +1,3 @@
-import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
 import { initBuffers } from "./init-buffers.js";
 
 import { ScreenStates, State } from "./state.js";
@@ -272,7 +271,7 @@ function __windowConfig() {
         
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        globalActions.initScreenControllerPreview();
+        globalActions.initScreenPreview();
         
         requestAnimationFrame(render);
     }

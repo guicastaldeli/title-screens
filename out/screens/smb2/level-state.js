@@ -94,7 +94,7 @@ export class LevelState {
         ];
         const now = performance.now();
         const deltaTime = (now - this.lastHoverTime) / 1000;
-        const hoverSpeed = 5.0;
+        const hoverSpeed = 10.0;
         if (this.isHovered) {
             this.hoverProgress = Math.min(1, this.hoverProgress + deltaTime * hoverSpeed);
         }

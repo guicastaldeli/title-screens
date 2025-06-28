@@ -209,7 +209,7 @@ function render() {
         tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
-        globalActions.initScreenControllerPreview();
+        globalActions.initScreenPreview();
         requestAnimationFrame(render);
     });
 }
