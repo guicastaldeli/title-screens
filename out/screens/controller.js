@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 export class ScreenController {
-    constructor(gl, buffers, programInfo, screenManager) {
+    constructor(gl, buffers, programInfo, screenManager, controller) {
         this.texture = null;
         this.isHovered = false;
         this.hoverProgress = 0;
@@ -19,6 +19,7 @@ export class ScreenController {
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screenManager = screenManager;
+        this.controller = controller;
         this.textureMap = new TextureMap();
     }
     loadTexture(gl, url) {
@@ -56,8 +57,6 @@ export class ScreenController {
         return (value & (value - 1)) === 0;
     }
     drawPreview(projectionMatrix) {
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.enable(this.gl.LEQUAL);
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen.shadow, 0.9, true);
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen[this.screenManager.currentScreen()], 1.0, false);
     }
@@ -65,10 +64,10 @@ export class ScreenController {
         const modelViewMatrix = mat4.create();
         const sheetSize = [52, 52];
         const spriteSize = [16, 16];
-        const size = [0.05, 0.15];
-        const x = isShadow ? 0.82 : 0.85;
-        const y = isShadow ? 0.72 : 0.75;
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0.0]);
+        const size = [0.09, 0.2];
+        const x = isShadow ? 0.82 : 0.83;
+        const y = isShadow ? 0.71 : 0.74;
+        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, -0.9]);
         const positions = [
             -size[0], -size[1],
             size[0], -size[1],
@@ -119,6 +118,7 @@ export class ScreenController {
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.previewTransp, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadow, isShadow ? 1 : 0);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
@@ -147,10 +147,45 @@ export class ScreenController {
             }
         });
     }
-    initPreview(projectionMatrix) {
+    setupInput() {
+        const canvas = (this.gl.canvas);
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const glX = (x / canvas.width) * 2 - 1;
+            const glY = (y / canvas.height) * 2;
+            const previewX = 0.83;
+            const previewY = 0.25;
+            const previewWidth = 0.4;
+            const previewHeight = 0.4;
+            this.isHovered =
+                glX >= previewX - previewWidth / 2 &&
+                    glX <= previewX + previewWidth / 2 &&
+                    glY >= previewY - previewHeight &&
+                    glY <= previewY + previewHeight;
+            this.setHoverState(this.isHovered);
+        });
+        canvas.addEventListener('click', () => {
+            if (this.isHovered && this.controller) {
+                this.controller.toggleScreen();
+            }
+        });
+        canvas.addEventListener('mouseleave', () => {
+            this.setHoverState(false);
+            this.isHovered = false;
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === '1' && this.controller) {
+                this.controller.toggleScreen();
+            }
+        });
+    }
+    initPreview() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.getTex();
+            const projectionMatrix = mat4.create();
             this.drawPreview(projectionMatrix);
+            yield this.getTex();
         });
     }
 }

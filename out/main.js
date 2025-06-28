@@ -11,6 +11,7 @@ import { initBuffers } from "./init-buffers.js";
 import { ScreenStates, State } from "./state.js";
 import { ScreenManager } from "./screen-manager.js";
 import { Contoller } from "./controller.js";
+import { ScreenController } from "./screens/controller.js";
 import { Tick } from "./tick.js";
 import { Camera } from "./camera.js";
 import { ScreenDk } from "./screens/dk/main.js";
@@ -139,17 +140,16 @@ function main() {
         renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers);
         screenManager.registerScreen(ScreenStates.Smb, renderScreenSmb);
         //
-        yield screenManager.current(ScreenStates.Smb);
+        yield screenManager.current(ScreenStates.Dk);
+        //Controller
         controller = new Contoller(state, screenManager);
+        //Screen Controller
+        screenController = new ScreenController(gl, buffers, programInfo, screenManager, controller);
+        screenController.initPreview();
         state.setLoading(false);
         state.setRunning(true);
         //Scene
         initScene(gl, programInfo, buffers);
-        document.addEventListener('keydown', (event) => {
-            if (event.key === '1') {
-                controller.toggleScreen();
-            }
-        });
     });
 }
 function initScene(gl, programInfo, buffers) {
@@ -212,6 +212,8 @@ function render() {
         tick.update();
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
+        screenController.initPreview();
+        screenController.setupInput();
         requestAnimationFrame(render);
     });
 }

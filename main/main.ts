@@ -187,19 +187,20 @@ async function main(): Promise<void> {
         screenManager.registerScreen(ScreenStates.Smb, renderScreenSmb);
     //
 
-    await screenManager.current(ScreenStates.Smb);
+    await screenManager.current(ScreenStates.Dk);
+
+    //Controller
     controller = new Contoller(state, screenManager);
+
+    //Screen Controller
+    screenController = new ScreenController(gl, buffers, programInfo, screenManager, controller);
+    screenController.initPreview();
+
     state.setLoading(false);
     state.setRunning(true);
 
     //Scene
     initScene(gl, programInfo, buffers);
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === '1') {
-            controller.toggleScreen();
-        }
-    });
 }
 
 function initScene(
@@ -276,6 +277,8 @@ function __windowConfig() {
         
         renderCamera.update(deltaTime);
         screenManager.update(deltaTime);
+        screenController.initPreview();
+        screenController.setupInput();
         
         requestAnimationFrame(render);
     }

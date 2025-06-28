@@ -4,7 +4,6 @@ import { Buffers } from "./init-buffers.js";
 import { ProgramInfo } from "./main.js";
 import { Tick } from "./tick.js";
 import { ScreenManager } from "./screen-manager.js";
-import { ScreenController } from "./screens/controller.js";
 
 export class Camera {
     private tick: Tick;
@@ -13,7 +12,6 @@ export class Camera {
     private buffers: Buffers;
 
     private screenManager: ScreenManager;
-    public screenController: ScreenController;
 
     private rotation: number = 0.0;
     private speed: number = 1.0;
@@ -33,7 +31,6 @@ export class Camera {
         this.buffers = buffers;
 
         this.screenManager = screenManager;
-        this.screenController = new ScreenController(gl, buffers, programInfo, screenManager);
     }
 
     private setCamera(): void {
@@ -124,9 +121,6 @@ export class Camera {
     }
 
     public async init(): Promise<void> {
-        const projectionMatrix = mat4.create();
-
         this.setCamera();
-        await this.screenController.initPreview(projectionMatrix);
     }
 }

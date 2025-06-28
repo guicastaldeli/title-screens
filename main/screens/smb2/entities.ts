@@ -335,7 +335,7 @@ export class Entities {
         }
 
         const entityWidth = 1.0;
-        const entityHeight = 1.0;
+        const entityHeight = 0.5;
 
         if(x >= entityX - entityWidth &&
             x <= entityX + entityWidth &&

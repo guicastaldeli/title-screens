@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { ScreenStates } from "./state.js";
 export class Contoller {
     constructor(state, screenManager) {
         this.state = state;
@@ -17,7 +18,7 @@ export class Contoller {
             if (this.state.isLoading())
                 return;
             const current = this.state.getCurrentState();
-            const updScreen = current === 'dk' ? 'smb' : 'dk';
+            const updScreen = current === ScreenStates.Dk ? ScreenStates.Smb : ScreenStates.Dk;
             yield this.switch(updScreen);
         });
     }

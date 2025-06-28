@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { mat4 } from "../node_modules/gl-matrix/esm/index.js";
-import { ScreenController } from "./screens/controller.js";
 export class Camera {
     constructor(tick, gl, programInfo, buffers, screenManager) {
         this.rotation = 0.0;
@@ -19,7 +18,6 @@ export class Camera {
         this.programInfo = programInfo;
         this.buffers = buffers;
         this.screenManager = screenManager;
-        this.screenController = new ScreenController(gl, buffers, programInfo, screenManager);
     }
     setCamera() {
         const canvas = (this.gl.canvas);
@@ -67,9 +65,7 @@ export class Camera {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            const projectionMatrix = mat4.create();
             this.setCamera();
-            yield this.screenController.initPreview(projectionMatrix);
         });
     }
 }

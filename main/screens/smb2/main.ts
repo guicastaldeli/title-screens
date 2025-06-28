@@ -224,7 +224,11 @@ export class ScreenSmb extends BaseScreen {
         const x = startX + gridX * tileWidth;
         const y = startY - (gridY + 1) * tileHeight;
 
-        mat4.translate(modelViewMatrix, modelViewMatrix, [x, y, 0]);
+        mat4.translate(
+            modelViewMatrix, 
+            modelViewMatrix, 
+            [x, y, 0]
+        );
 
         const positions = [
             0, 0,

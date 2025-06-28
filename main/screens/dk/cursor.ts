@@ -217,6 +217,7 @@ export class Cursor {
         const canvas = <HTMLCanvasElement>(this.gl.canvas);
         const rect = canvas.getBoundingClientRect();
 
+        const ndcX = ((x - rect.left) / rect.width) * 2 - 1;
         const ndcY = -((y - rect.top) / rect.height * 2 - 1);
 
         for(let i = 0; i < this.optionPosition.length; i++) {
@@ -224,10 +225,14 @@ export class Cursor {
             if(!option.boundsDk) return;
             if(!option) continue;
 
+            const optionX = this.optionPosition[i][0];
             const optionY = this.optionPosition[i][1];
+            const [minX, maxX] = option.boundsDk.x;
             const [minY, maxY] = option.boundsDk.y;
 
             if(
+                ndcX >= optionX + minX &&
+                ndcX <= optionX + maxX &&
                 ndcY >= optionY + minY &&
                 ndcY <= optionY + maxY
             ) {
@@ -239,15 +244,15 @@ export class Cursor {
                         this.optionPosition[i][1]
                     ];
                     
-                    if(this.isMouseControlled) {
-                        this.selected = false;
+                    this.selected = false;
 
-                        const defaultColor = [...this.options.color] as [number, number, number, number];
+                    const defaultColor = [...this.options.color] as [number, number, number, number];
     
-                        this.options.options.forEach((option, idx) => {
-                            option.color = idx === i ? this.selectedColor : defaultColor;
-                        });
-                    }
+                    this.options.options.forEach((option, idx) => {
+                        option.color = idx === i ? this.selectedColor : defaultColor;
+                    });
+
+                    option.color = this.selectedColor;
                 }
 
                 break;
@@ -255,14 +260,47 @@ export class Cursor {
         }
     }
 
-    public handleMouseClick(): void {
-        if(!this.selected) {
-            this.selected = true;
-            if(this.options) this.options.selectedOption();
+    public handleMouseClick(x: number, y: number): void {
+        if(!this.options || !this.optionPosition || this.optionPosition.length === 0) {
+            this.setOptionPosition();
+            return;
+        } 
 
-            setTimeout(() => {
-               this.selected = false;
-            }, this.options?.intervalSelected || 1000);
+        const canvas = <HTMLCanvasElement>(this.gl.canvas);
+        const rect = canvas.getBoundingClientRect();
+
+        const ndcX = ((x - rect.left) / rect.width) * 2 - 1;
+        const ndcY = -((y - rect.top) / rect.height * 2 - 1);
+
+        for(let i = 0; i < this.optionPosition.length; i++) {
+            const option = this.options.options[i];
+            if(!option.boundsDk || !option) continue;
+
+            const optionX = this.optionPosition[i][0];
+            const optionY = this.optionPosition[i][1];
+            const [minX, maxX] = option.boundsDk.x;
+            const [minY, maxY] = option.boundsDk.y;
+
+            if(
+                ndcX >= optionX + minX &&
+                ndcX <= optionX + maxX &&
+                ndcY >= optionY + minY &&
+                ndcY <= optionY + maxY
+            ) {
+                this.selectedIndex = i;
+                this.selected = true;
+                this.options.selectedOption();
+
+                const defaultColor = [...this.options.color] as [number, number, number, number];
+                this.options.options.forEach(opt => opt.color = defaultColor);
+                option.color = this.selectedColor;
+
+                setTimeout(() => {
+                    this.selected = false;
+                }, this.options.intervalSelected);
+
+                break;
+            }
         }
     }
 

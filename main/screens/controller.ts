@@ -4,12 +4,14 @@ import { Buffers } from "../init-buffers.js";
 import { ProgramInfo } from "../main.js";
 import { TextureMap } from "./texture-map.js";
 import { ScreenManager } from "../screen-manager.js";
+import { Contoller } from "../controller.js";
 
 export class ScreenController {
     private gl: WebGLRenderingContext;
     private buffers: Buffers;
     private programInfo: ProgramInfo;
     private screenManager: ScreenManager;
+    private controller: Contoller;
 
     public texture: WebGLTexture | null = null
     private textureMap: TextureMap;
@@ -22,12 +24,14 @@ export class ScreenController {
         gl: WebGLRenderingContext,
         buffers: Buffers,
         programInfo: ProgramInfo,
-        screenManager: ScreenManager
+        screenManager: ScreenManager,
+        controller: Contoller
     ) {
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screenManager = screenManager;
+        this.controller = controller;
         this.textureMap = new TextureMap();
     }
 
@@ -90,9 +94,7 @@ export class ScreenController {
         return (value & (value - 1)) === 0;
     }
 
-    private drawPreview(projectionMatrix: mat4): void {
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.enable(this.gl.LEQUAL);
+    public drawPreview(projectionMatrix: mat4): void {
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen.shadow, 0.9, true);
         this.drawPreviewElement(projectionMatrix, this.textureMap.screen[this.screenManager.currentScreen()], 1.0, false);
     }
@@ -107,15 +109,15 @@ export class ScreenController {
     
         const sheetSize = [52, 52];
         const spriteSize = [16, 16];
-        const size = [0.05, 0.15];
+        const size = [0.09, 0.2];
     
-        const x = isShadow ? 0.82 : 0.85;
-        const y = isShadow ? 0.72 : 0.75;
+        const x = isShadow ? 0.82 : 0.83;
+        const y = isShadow ? 0.71 : 0.74;
     
         mat4.translate(
             modelViewMatrix,
             modelViewMatrix,
-            [x, y, 0.0]
+            [x, y, -0.9]
         );
     
         const positions = [
@@ -176,6 +178,7 @@ export class ScreenController {
         this.gl.uniform1f(this.programInfo.uniformLocations.isPlayer, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.needTransp, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.previewTransp, 1);
+        this.gl.uniform1f(this.programInfo.uniformLocations.isCursor, 0);
         this.gl.uniform1f(this.programInfo.uniformLocations.isShadow, isShadow ? 1 : 0);
                 
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
@@ -194,7 +197,7 @@ export class ScreenController {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
     }
     
-    public setHoverState(hovered: boolean): void {
+    private setHoverState(hovered: boolean): void {
         this.isHovered = hovered;
         this.lastHoverTime = performance.now();
     }
@@ -207,9 +210,55 @@ export class ScreenController {
             console.log(err);
         }
     }
+
+    public setupInput(): void {
+        const canvas = <HTMLCanvasElement>(this.gl.canvas);
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const glX = (x / canvas.width) * 2 - 1;
+            const glY = (y / canvas.height) * 2;
+
+            const previewX = 0.83;
+            const previewY = 0.25;
+            const previewWidth = 0.4;
+            const previewHeight = 0.4;
+
+            this.isHovered =
+            glX >= previewX - previewWidth / 2 && 
+            glX <= previewX + previewWidth / 2 &&
+            glY >= previewY - previewHeight &&
+            glY <= previewY + previewHeight;
+
+            this.setHoverState(this.isHovered);
+        });
+
+        canvas.addEventListener('click', () => {
+            if(this.isHovered && this.controller) {
+                this.controller.toggleScreen();
+            }
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            this.setHoverState(false);
+            this.isHovered = false;
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === '1' && this.controller) {
+                this.controller.toggleScreen();
+            }
+        })
+    }
     
-    public async initPreview(projectionMatrix: mat4): Promise<void> {
-        await this.getTex();
+    public async initPreview(): Promise<void> {
+        const projectionMatrix = mat4.create();
+
         this.drawPreview(projectionMatrix);
+        await this.getTex();
+        
     }
 }

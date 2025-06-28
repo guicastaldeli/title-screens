@@ -5,8 +5,8 @@ export class TextureMap {
     }
     setScreen() {
         return {
-            [ScreenStates.Dk]: [0, 0],
-            [ScreenStates.Smb]: [0, 0],
+            [ScreenStates.Dk]: [18, 18],
+            [ScreenStates.Smb]: [35, 18],
             shadow: [1.0, 35]
         };
     }

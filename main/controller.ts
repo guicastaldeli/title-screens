@@ -15,7 +15,7 @@ export class Contoller {
         if(this.state.isLoading()) return;
 
         const current = this.state.getCurrentState();
-        const updScreen = current === 'dk' ? 'smb' : 'dk';
+        const updScreen = current === ScreenStates.Dk ? ScreenStates.Smb : ScreenStates.Dk;
         await this.switch(updScreen);
     }
 

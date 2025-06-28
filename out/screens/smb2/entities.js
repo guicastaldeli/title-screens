@@ -263,7 +263,7 @@ export class Entities {
             entityY = this.startY;
         }
         const entityWidth = 1.0;
-        const entityHeight = 1.0;
+        const entityHeight = 0.5;
         if (x >= entityX - entityWidth &&
             x <= entityX + entityWidth &&
             y >= entityY - entityHeight &&
