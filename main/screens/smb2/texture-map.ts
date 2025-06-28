@@ -12,6 +12,7 @@ import { PlayerCoords } from "./texture-map.interface.js";
 import { PlayerMap } from "./texture-map.interface.js";
 import { EntityCoord } from "./texture-map.interface.js";
 import { EntityMap } from "./texture-map.interface.js";
+import { LevelStateMap } from "./texture-map.interface.js";
 
 export class TextureMap {
     public title: TitleMap;
@@ -21,6 +22,7 @@ export class TextureMap {
     public elements: ElementsMap;
     public player: PlayerMap;
     public entity: EntityMap;
+    public levelState: LevelStateMap;
 
     constructor() {
         this.letters = this.setLetters();
@@ -38,6 +40,9 @@ export class TextureMap {
 
         //Entity
         this.entity = this.setEntity();
+
+        //Level State
+        this.levelState = this.setLevelState();
     }
 
     private setLetters(): LetterMap {
@@ -662,6 +667,18 @@ export class TextureMap {
                 }
             },
             [States.Info]: {}
+        }
+    }
+
+    //Level State
+    private setLevelState(): LevelStateMap {
+        return {
+            [States.Overworld]: [17.0, 1.1],
+            [States.Underground]: [34.0, 1.1],
+            [States.Underwater]: [1.1, 18.0],
+            [States.Castle]: [1.0, 1.1],
+            [States.Info]: [0, 0],
+            shadow: [1.0, 35]
         }
     }
 }

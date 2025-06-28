@@ -75,6 +75,11 @@ interface EntityProps {
     }
 }
 
+interface LevelStateProps {
+    sheetSize: [number, number];
+    spriteSize: [number, number]
+}
+
 export class SheetProps {
     private map: TextureMap;
 
@@ -86,6 +91,7 @@ export class SheetProps {
         this.titleProps();
         this.playersetProps();
         this.entityProps();
+        this.levelStateProps();
     }
 
     //Tileset
@@ -234,6 +240,16 @@ export class SheetProps {
                 boxSize: 'normal'
             }
         }
+
+        return {
+            sheetSize,
+            spriteSize
+        }
+    }
+
+    public levelStateProps(): LevelStateProps {
+        const sheetSize: [number, number] = [52, 52];
+        const spriteSize: [number, number] = [16, 16];
 
         return {
             sheetSize,

@@ -12,6 +12,8 @@ export class TextureMap {
         this.player = this.setPlayer();
         //Entity
         this.entity = this.setEntity();
+        //Level State
+        this.levelState = this.setLevelState();
     }
     setLetters() {
         const overworld = {
@@ -625,6 +627,17 @@ export class TextureMap {
                 }
             },
             [States.Info]: {}
+        };
+    }
+    //Level State
+    setLevelState() {
+        return {
+            [States.Overworld]: [17.0, 1.1],
+            [States.Underground]: [34.0, 1.1],
+            [States.Underwater]: [1.1, 18.0],
+            [States.Castle]: [1.0, 1.1],
+            [States.Info]: [0, 0],
+            shadow: [1.0, 35]
         };
     }
 }

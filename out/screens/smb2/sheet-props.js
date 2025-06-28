@@ -8,6 +8,7 @@ export class SheetProps {
         this.titleProps();
         this.playersetProps();
         this.entityProps();
+        this.levelStateProps();
     }
     //Tileset
     tilesetProps() {
@@ -99,6 +100,14 @@ export class SheetProps {
                 boxSize: 'normal'
             }
         };
+        return {
+            sheetSize,
+            spriteSize
+        };
+    }
+    levelStateProps() {
+        const sheetSize = [52, 52];
+        const spriteSize = [16, 16];
         return {
             sheetSize,
             spriteSize

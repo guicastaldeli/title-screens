@@ -18,9 +18,13 @@ uniform bool isLava;
 uniform bool needTransp;
 uniform bool isPlayer;
 uniform bool isCloud;
-uniform float cloudDepth;
+uniform bool previewTransp;
+uniform bool isHovered;
+uniform bool isShadow;
 
 uniform float uState;
+uniform float hoverProgress;
+uniform float cloudDepth;
 
 uniform vec4 uColor;
 uniform float uThreshold;
@@ -162,6 +166,26 @@ void main() {
             vec4 color = vec4(0.2588, 0.2588, 1.0, 1.0);
             tex.rgb = mix(tex.rgb, color.rgb, intensity * tex.a);
             gl_FragColor = vec4(tex.rgb, tex.a);
+            return;
+        }
+    }
+
+    if(previewTransp) {
+        vec4 color = vec4(0.8902, 0.0118, 0.9529, 1.0);
+        vec3 threshold = vec3(0.1);
+
+        bool isTransp = all(lessThan(abs(tex.rgb - color.rgb), threshold));
+        if(isTransp) discard;
+
+        float targetAlpha = isHovered ? 1.0 : 0.5;
+        float currentAlpha = mix(0.5, 1.0, hoverProgress);
+        gl_FragColor = vec4(tex.rgb, tex.a * currentAlpha);
+        return;
+
+        if(isShadow) {
+            float targetAlpha = isHovered ? hoverProgress : 0.5;
+            vec4 color = vec4(tex.rgb, tex.a * targetAlpha);
+            gl_FragColor = color;
             return;
         }
     }

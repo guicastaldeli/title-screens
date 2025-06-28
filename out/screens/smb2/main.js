@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { BaseScreen } from "../../screen.interface.js";
+import { LevelState } from "./level-state.js";
 import { States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { Hud } from "./hud.js";
@@ -20,7 +21,7 @@ import { Terrain } from "./terrain.js";
 import { Player } from "./player.js";
 import { Entities } from "./entities.js";
 export class ScreenSmb extends BaseScreen {
-    constructor(tick, state, screenManager, gl, programInfo, buffers, levelState) {
+    constructor(tick, state, screenManager, gl, programInfo, buffers) {
         super(state, gl, programInfo, buffers, tick);
         this.rotation = 0.0;
         this.speed = 1.0;
@@ -34,8 +35,8 @@ export class ScreenSmb extends BaseScreen {
         this.gridDimensions = [50, 50];
         this.tileMap = [];
         this.screenManager = screenManager;
-        this.levelState = levelState;
         this.sheetProps = new SheetProps();
+        this.levelState = new LevelState(gl, buffers, programInfo, this.sheetProps, this);
         this.points = new Points(tick);
         this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.points);
         this.title = new Title(tick, gl, buffers, programInfo, this, this.sheetProps);
@@ -80,6 +81,8 @@ export class ScreenSmb extends BaseScreen {
         //Tile
         this.drawTile(projectionMatrix);
         //Elements
+        //Level State
+        this.levelState.initPreview(projectionMatrix);
         //Terrain
         this.terrain.initTerrain(projectionMatrix);
         //HUD
@@ -243,8 +246,8 @@ export class ScreenSmb extends BaseScreen {
         return [0, 0, 0, 1];
     }
     setupInput() {
-        //Mouse
         const canvas = (this.gl.canvas);
+        //Mouse
         canvas.addEventListener('mousemove', (e) => {
             this.cursor.handleMouseMove(e.clientX, e.clientY);
         });
@@ -252,11 +255,48 @@ export class ScreenSmb extends BaseScreen {
             if (!this.state.isLoading())
                 this.cursor.handleMouseClick(e.clientX, e.clientY);
         });
+        //
         //Keyboard
         document.addEventListener('keydown', (e) => {
             if (!this.state.isLoading())
                 this.cursor.handleInput(e.key);
         });
+        //State
+        let isHovering = false;
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const glX = (x / canvas.width) * 2 - 1;
+            const glY = (y / canvas.height) * 2;
+            const previewX = -0.84;
+            const previewY = 0.22;
+            const previewWidth = 0.4;
+            const previewHeight = 0.4;
+            isHovering =
+                glX >= previewX - previewWidth / 2 &&
+                    glX <= previewX + previewWidth / 2 &&
+                    glY >= previewY - previewHeight / 2 &&
+                    glY <= previewY + previewHeight / 2;
+            this.levelState.setHoverState(isHovering);
+        });
+        canvas.addEventListener('click', () => {
+            if (isHovering) {
+                this.levelState.toggleState();
+                this.updateLevelState();
+            }
+        });
+        canvas.addEventListener('mouseleave', () => {
+            this.levelState.setHoverState(false);
+            isHovering = false;
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '2') {
+                this.levelState.toggleState();
+                this.updateLevelState();
+            }
+        });
+        //
     }
     setCurrentPlayer(char) {
         this.player.character = char;
@@ -264,6 +304,7 @@ export class ScreenSmb extends BaseScreen {
     }
     loadAssets() {
         return __awaiter(this, void 0, void 0, function* () {
+            yield this.levelState.getTex();
             yield this.cursor.getTex();
             yield this.options.getTex();
             yield this.hud.getTex();

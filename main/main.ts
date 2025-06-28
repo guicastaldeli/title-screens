@@ -43,6 +43,10 @@ export interface ProgramInfo {
         uOpacity: WebGLUniformLocation | null;
         isCloud: WebGLUniformLocation | null;
         cloudDepth: WebGLUniformLocation | null;
+        previewTransp: WebGLUniformLocation | null;
+        isHovered: WebGLUniformLocation | null;
+        hoverProgress: WebGLUniformLocation | null;
+        isShadow: WebGLUniformLocation | null;
     }
 }
 
@@ -149,7 +153,11 @@ async function main(): Promise<void> {
             isPlayer: gl.getUniformLocation(shaderProgram, 'isPlayer'),
             uOpacity: gl.getUniformLocation(shaderProgram, 'uOpacity'),
             isCloud: gl.getUniformLocation(shaderProgram, 'isCloud'),
-            cloudDepth: gl.getUniformLocation(shaderProgram, 'cloudDepth')
+            cloudDepth: gl.getUniformLocation(shaderProgram, 'cloudDepth'),
+            previewTransp: gl.getUniformLocation(shaderProgram, 'previewTransp'),
+            isHovered: gl.getUniformLocation(shaderProgram, 'isHovered'),
+            hoverProgress: gl.getUniformLocation(shaderProgram, 'hoverProgress'),
+            isShadow: gl.getUniformLocation(shaderProgram, 'isShadow')
         }
     }
 
@@ -160,7 +168,6 @@ async function main(): Promise<void> {
 
     //State
     state = new State();
-    levelState = new LevelState();
     screenManager = new ScreenManager(state, gl, programInfo, buffers, tick);
 
     //Renders
@@ -173,7 +180,7 @@ async function main(): Promise<void> {
         screenManager.registerScreen('dk', renderScreenDk);
 
         //Smb
-        renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers, levelState);
+        renderScreenSmb = new ScreenSmb(tick, state, screenManager, gl, programInfo, buffers);
         screenManager.registerScreen('smb', renderScreenSmb);
     //
 
@@ -190,13 +197,6 @@ async function main(): Promise<void> {
             controller.toggleScreen();
         }
     });
-
-    document.addEventListener('keydown', (e) => {
-        if(e.key === '2') {
-            levelState.toggleState();
-            renderScreenSmb.updateLevelState();
-        }
-    })
 }
 
 function initScene(

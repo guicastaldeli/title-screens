@@ -60,13 +60,12 @@ export class ScreenSmb extends BaseScreen {
         gl: WebGLRenderingContext,
         programInfo: ProgramInfo,
         buffers: Buffers,
-        levelState: LevelState
     ) {
         super(state, gl, programInfo, buffers, tick);
         this.screenManager = screenManager;
-        this.levelState = levelState;
-
+        
         this.sheetProps = new SheetProps();
+        this.levelState = new LevelState(gl, buffers, programInfo, this.sheetProps, this);
         this.points = new Points(tick);
 
         this.hud = new Hud(tick, gl, buffers, programInfo, this, this.levelState, this.sheetProps, this.points);
@@ -131,6 +130,9 @@ export class ScreenSmb extends BaseScreen {
         this.drawTile(projectionMatrix);
 
         //Elements
+            //Level State
+            this.levelState.initPreview(projectionMatrix);
+
             //Terrain
             this.terrain.initTerrain(projectionMatrix);
 
@@ -373,21 +375,67 @@ export class ScreenSmb extends BaseScreen {
     }
 
     private setupInput(): void {
-        //Mouse
         const canvas = <HTMLCanvasElement>(this.gl.canvas);
 
-        canvas.addEventListener('mousemove', (e) => {
-            this.cursor.handleMouseMove(e.clientX, e.clientY);
-        });
+        //Mouse
+            canvas.addEventListener('mousemove', (e) => {
+                this.cursor.handleMouseMove(e.clientX, e.clientY);
+            });
 
-        canvas.addEventListener('click', (e) => {
-            if(!this.state.isLoading()) this.cursor.handleMouseClick(e.clientX, e.clientY);
-        });
+            canvas.addEventListener('click', (e) => {
+                if(!this.state.isLoading()) this.cursor.handleMouseClick(e.clientX, e.clientY);
+            });
+        //
 
         //Keyboard
         document.addEventListener('keydown', (e) => {
             if(!this.state.isLoading()) this.cursor.handleInput(e.key);
         });
+
+        //State
+            let isHovering: boolean = false;
+
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const glX = (x / canvas.width) * 2 - 1;
+                const glY = (y / canvas.height) * 2;
+
+                const previewX = -0.84;
+                const previewY = 0.22;
+                const previewWidth = 0.4;
+                const previewHeight = 0.4;
+
+                isHovering =
+                glX >= previewX - previewWidth / 2 && 
+                glX <= previewX + previewWidth / 2 &&
+                glY >= previewY - previewHeight / 2 &&
+                glY <= previewY + previewHeight / 2;
+
+                this.levelState.setHoverState(isHovering);
+            });
+
+            canvas.addEventListener('click', () => {
+                if(isHovering) {
+                    this.levelState.toggleState();
+                    this.updateLevelState();
+                }
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                this.levelState.setHoverState(false);
+                isHovering = false;
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if(e.key === '2') {
+                    this.levelState.toggleState();
+                    this.updateLevelState();
+                }
+            });
+        //
     }
 
     public setCurrentPlayer(char: 'mario' | 'luigi'): void {
@@ -396,6 +444,7 @@ export class ScreenSmb extends BaseScreen {
     }
 
     private async loadAssets(): Promise<void> {
+        await this.levelState.getTex();
         await this.cursor.getTex();
         await this.options.getTex();
         await this.hud.getTex();

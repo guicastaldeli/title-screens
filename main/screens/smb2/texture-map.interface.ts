@@ -139,3 +139,13 @@ export type EntityCoord = {
 export type EntityMap = {
     [key in States]: Record<string, EntityCoord>;
 }
+
+//Level State
+type LevelStateCoord = [number, number];
+type BaseLevelStateMap = {
+    [key in States]: LevelStateCoord;
+}
+
+export type LevelStateMap = BaseLevelStateMap & {
+    shadow: LevelStateCoord;
+}
