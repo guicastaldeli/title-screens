@@ -673,8 +673,8 @@ export class TextureMap {
     //Level State
     private setLevelState(): LevelStateMap {
         return {
-            [States.Overworld]: [17.0, 1.1],
-            [States.Underground]: [34.0, 1.1],
+            [States.Overworld]: [18.0, 1.1],
+            [States.Underground]: [35.0, 1.1],
             [States.Underwater]: [1.1, 18.0],
             [States.Castle]: [1.0, 1.1],
             [States.Info]: [0, 0],

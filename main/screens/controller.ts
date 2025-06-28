@@ -111,7 +111,7 @@ export class ScreenController {
         const spriteSize = [16, 16];
         const size = [0.09, 0.2];
     
-        const x = isShadow ? 0.82 : 0.83;
+        const x = isShadow ? 0.85 : 0.865;
         const y = isShadow ? 0.71 : 0.74;
     
         mat4.translate(
