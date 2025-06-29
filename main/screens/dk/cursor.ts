@@ -7,6 +7,7 @@ import { SheetProps } from "./sheet-props.js";
 import { ScreenDk } from "./main.js";
 import { Options } from "./options.js";
 import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 
 export class Cursor {
     private gl: WebGLRenderingContext;
@@ -67,7 +68,7 @@ export class Cursor {
                 this.selectedIndex = 0;
 
                 this.position = [this.cursorOffsetX, this.optionPosition[0][0]];
-                EventEmitter.emit('play-audio', 'option');
+                EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
                 this.updateCursor();
             }
         }
@@ -174,6 +175,7 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
+        EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
 
         if(this.options && this.options.options[this.selectedIndex]) this.options.options[this.selectedIndex].color = this.selectedColor;
 
@@ -239,6 +241,8 @@ export class Cursor {
                 ndcY <= optionY + maxY
             ) {
                 if(this.selectedIndex !== i) {
+                    EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
+                    
                     this.selectedIndex = i;
 
                     this.cursorTargetPosition = [

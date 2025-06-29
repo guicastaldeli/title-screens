@@ -1,5 +1,6 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.52, 0];
@@ -32,7 +33,7 @@ export class Cursor {
                 this.cursorTargetPosition = [...this.optionPosition[0]];
                 this.selectedIndex = 0;
                 this.position = [this.cursorOffsetX, this.optionPosition[0][0]];
-                EventEmitter.emit('play-audio', 'option');
+                EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
                 this.updateCursor();
             }
         }
@@ -115,6 +116,7 @@ export class Cursor {
         this.selectedIndex = (this.selectedIndex + direction + this.optionPosition.length) % this.optionPosition.length;
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
+        EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
         if (this.options && this.options.options[this.selectedIndex])
             this.options.options[this.selectedIndex].color = this.selectedColor;
         this.getSelectedIndex();
@@ -171,6 +173,7 @@ export class Cursor {
                 ndcY >= optionY + minY &&
                 ndcY <= optionY + maxY) {
                 if (this.selectedIndex !== i) {
+                    EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Dk });
                     this.selectedIndex = i;
                     this.cursorTargetPosition = [
                         this.cursorTargetPosition[0],

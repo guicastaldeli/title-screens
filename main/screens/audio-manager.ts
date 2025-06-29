@@ -80,6 +80,7 @@ export class AudioManager {
         this.initAudio();
         this.requestState();
         this.toggleAudio();
+        this.initAudioScreens();
         
         this.levelStateChange();
         this.handleScreenChange();
@@ -102,6 +103,11 @@ export class AudioManager {
         this.preloadAudio();
     }
 
+    private initAudioScreens(): void {
+        this.audioStates.set(ScreenStates.Dk, false);
+        this.audioStates.set(ScreenStates.Smb, false);
+    }
+
     private getSource(): void {
         //Path
             //Global
@@ -122,12 +128,16 @@ export class AudioManager {
             const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
             const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
             const castleSong = './screens/smb2/assets/sounds/state/smb2-castle-song.ogg';
+
+            //Hit
+            const hitSoundPath = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
         //
 
         //Source
         this.optionSound.src = optionSoundPath;
         this.blockSound.src = blockSoundPath;
         this.selectedSound.src = selectedSoundPath;
+        this.hitSound.src = hitSoundPath;
         playerSoundPath.forEach((path, player) => {
             const audio = new Audio(path);
             this.playerSound.set(player, audio);
@@ -334,8 +344,10 @@ export class AudioManager {
         const currentScreen = this.screenManager.currentScreen();
         let isAudioPlaying = this.audioStates.get(currentScreen);
 
-        EventEmitter.on('toggle-music', (isOn: boolean) => {
-            isAudioPlaying = isOn;
+        EventEmitter.on('toggle-music', (data: { isOn: boolean, screen: ScreenStates }) => {
+            const screen = data.screen ?? currentScreen;
+            isAudioPlaying = data.isOn;
+            this.audioStates.set(screen, data.isOn);
         });
     }
 
@@ -356,6 +368,7 @@ export class AudioManager {
                 } else {
                     if(state !== undefined) this.currentState = state;
                     isAudioPlaying = isOn;
+                    this.audioStates.set(currentScreen, isOn);
     
                     if(isOn) {
                         if(screenConfig) {
@@ -445,6 +458,7 @@ export class AudioManager {
     
         const currentScreen = this.screenManager.currentScreen();
         const isAudioPlaying = this.audioStates.get(currentScreen);
+
         const map = this.textureMap.playPause[currentScreen];
         let spriteCoords: PlayPauseSingleCoord;
 

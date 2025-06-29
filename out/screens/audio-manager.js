@@ -35,6 +35,7 @@ export class AudioManager {
         this.initAudio();
         this.requestState();
         this.toggleAudio();
+        this.initAudioScreens();
         this.levelStateChange();
         this.handleScreenChange();
         this.textureMap = new TextureMap();
@@ -51,6 +52,10 @@ export class AudioManager {
         this.hitSound = new Audio();
         this.getSource();
         this.preloadAudio();
+    }
+    initAudioScreens() {
+        this.audioStates.set(ScreenStates.Dk, false);
+        this.audioStates.set(ScreenStates.Smb, false);
     }
     getSource() {
         //Path
@@ -69,11 +74,14 @@ export class AudioManager {
         const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
         const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
         const castleSong = './screens/smb2/assets/sounds/state/smb2-castle-song.ogg';
+        //Hit
+        const hitSoundPath = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
         //
         //Source
         this.optionSound.src = optionSoundPath;
         this.blockSound.src = blockSoundPath;
         this.selectedSound.src = selectedSoundPath;
+        this.hitSound.src = hitSoundPath;
         playerSoundPath.forEach((path, player) => {
             const audio = new Audio(path);
             this.playerSound.set(player, audio);
@@ -258,8 +266,11 @@ export class AudioManager {
     toggleAudio() {
         const currentScreen = this.screenManager.currentScreen();
         let isAudioPlaying = this.audioStates.get(currentScreen);
-        EventEmitter.on('toggle-music', (isOn) => {
-            isAudioPlaying = isOn;
+        EventEmitter.on('toggle-music', (data) => {
+            var _a;
+            const screen = (_a = data.screen) !== null && _a !== void 0 ? _a : currentScreen;
+            isAudioPlaying = data.isOn;
+            this.audioStates.set(screen, data.isOn);
         });
     }
     //Emits
@@ -277,6 +288,7 @@ export class AudioManager {
                 if (state !== undefined)
                     this.currentState = state;
                 isAudioPlaying = isOn;
+                this.audioStates.set(currentScreen, isOn);
                 if (isOn) {
                     if (screenConfig) {
                         const songKey = screenConfig.hasStates ? this.currentState : 'default';

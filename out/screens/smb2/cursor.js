@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.45, 0];
@@ -50,7 +51,7 @@ export class Cursor {
                 this.selectedIndex = Math.max(0, this.selectedIndex);
                 this.cursorCurrentPosition = [...this.optionPosition[this.selectedIndex]];
                 this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
-                EventEmitter.emit('play-audio', 'option');
+                EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Smb });
                 this.position = [this.cursorOffsetX, this.optionPosition[this.selectedIndex][1]];
                 this.updateCursor();
             }
@@ -158,6 +159,7 @@ export class Cursor {
         this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
         this.cursorCurrentPosition = [...this.cursorTargetPosition];
         const currentOption = this.options.options[this.selectedIndex];
+        EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Smb });
         if (currentOption) {
             currentOption.hovered = true;
             if (!currentOption.selected &&
@@ -238,6 +240,7 @@ export class Cursor {
             }
         }
         if (hoveredIndex !== -1 && hoveredIndex !== this.selectedIndex) {
+            EventEmitter.emit('play-audio', { type: 'option', screen: ScreenStates.Smb });
             const updOption = this.options.options[hoveredIndex];
             const prev = this.options.options[this.selectedIndex];
             if (prev)
