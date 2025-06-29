@@ -362,7 +362,7 @@ export class Options {
         this.isMusicOn = false;
         this.updateMusicOptionText();
         EventEmitter.on('level-state-changed', () => {
-            this.setAudioState(false);
+            this.setAudioState(true);
         });
         EventEmitter.on('screen-changed', () => {
             this.setAudioState(false);

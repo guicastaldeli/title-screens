@@ -354,9 +354,8 @@ export class AudioManager {
     levelStateChange() {
         EventEmitter.on('level-state-changed', (e) => {
             if (this.currentState !== e.newState) {
-                this.stopAudio('song');
-                this.isStateChanged = true;
                 this.currentState = e.newState;
+                this.isStateChanged = true;
                 const currentScreen = this.screenManager.currentScreen();
                 let isAudioPlaying = this.audioStates.get(currentScreen);
                 if (isAudioPlaying)
