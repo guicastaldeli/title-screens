@@ -68,14 +68,16 @@ export class AudioManager {
         //Smb
         const playerSoundPath = new Map([
             ['mario', './screens/smb2/assets/sounds/player/mario-sound.ogg'],
-            ['luigi', './screens/smb2/assets/sounds/player/luigi-sound.ogg']
+            ['luigi', './screens/smb2/assets/sounds/player/luigi-sound.ogg'],
+            ['grow', './screens/smb2/assets/sounds/player/grow-sound.ogg'],
+            ['hitTaken', './screens/smb2/assets/sounds/player/hit-taken-sound.ogg']
         ]);
         const overworldSong = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
         const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
         const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
         const castleSong = './screens/smb2/assets/sounds/state/smb2-castle-song.ogg';
         //Hit
-        const hitSoundPath = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
+        const hitSoundPath = './screens/smb2/assets/sounds/player/hit-sound.ogg';
         //
         //Source
         this.optionSound.src = optionSoundPath;
@@ -194,6 +196,8 @@ export class AudioManager {
         this.isPaused = false;
         this.pausedTime = 0;
         this.isStateChanged = true;
+        if (type === 'song')
+            this.currentSong = null;
     }
     stopAllAudio() {
         this.stopAudio('song');

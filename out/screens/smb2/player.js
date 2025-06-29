@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
+import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Player {
     constructor(tick, gl, buffers, programInfo, screen, levelState, sheetProps) {
         this.texture = null;
@@ -172,7 +174,13 @@ export class Player {
         this.nextBlinkTime = 0;
         this.isVisible = true;
         this.showNextSize = false;
+        const soundType = this.sizeState === 'small' ? 'grow' : 'hitTaken';
         this.nextSizeState = this.sizeState === 'small' ? 'big' : 'small';
+        EventEmitter.emit('play-audio', {
+            type: 'player',
+            screen: ScreenStates.Smb,
+            player: soundType
+        });
     }
     updateSize(deltaTime) {
         if (this.isSizeChanging) {

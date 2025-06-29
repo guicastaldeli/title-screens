@@ -11,6 +11,8 @@ import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
 
 import { Points } from "./points.js";
+import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 
 export class Entities {
     private tick: Tick;
@@ -352,6 +354,7 @@ export class Entities {
             this.showLetter = true;
             this.letterPos = { x: entityX, y: entityY }
             this.letterTimer = currentTime;
+            EventEmitter.emit('play-audio', { type: 'hit', screen: ScreenStates.Smb });
         }
     }
 

@@ -9,6 +9,8 @@ import { LevelState } from "./level-state.js";
 import { States } from "./texture-map.interface.js";
 import { SheetProps } from "./sheet-props.js";
 import { TextureMap } from "./texture-map.js";
+import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 
 export class Player {
     private tick: Tick;
@@ -224,7 +226,14 @@ export class Player {
         this.isVisible = true;
         this.showNextSize = false;
 
+        const soundType = this.sizeState === 'small' ? 'grow' : 'hitTaken';
         this.nextSizeState = this.sizeState === 'small' ? 'big' : 'small';
+        
+        EventEmitter.emit('play-audio', {
+            type: 'player',
+            screen: ScreenStates.Smb,
+            player: soundType
+        })
     }
 
     private updateSize(deltaTime: number) {

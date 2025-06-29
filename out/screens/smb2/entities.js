@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { States } from "./texture-map.interface.js";
 import { TextureMap } from "./texture-map.js";
+import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Entities {
     get startX() {
         return this.currentState === States.Castle ? this.castleStartX : this.defaultStartX;
@@ -277,6 +279,7 @@ export class Entities {
             this.showLetter = true;
             this.letterPos = { x: entityX, y: entityY };
             this.letterTimer = currentTime;
+            EventEmitter.emit('play-audio', { type: 'hit', screen: ScreenStates.Smb });
         }
     }
     drawLetter(projectionMatrix) {
