@@ -174,6 +174,10 @@ export class Options {
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
             EventEmitter.emit('toggle-music', this.isMusicOn);
+            EventEmitter.emit('toggle-song', {
+                isOn: this.isMusicOn,
+                state: 'default'
+            });
             if (this.isMusicOn) {
                 EventEmitter.on('song-ended', () => {
                     this.isMusicOn = false;
@@ -210,6 +214,10 @@ export class Options {
         this.updateMusicOptionText();
         EventEmitter.on('screen-changed', () => {
             this.setAudioState(false);
+            EventEmitter.emit('toggle-song', {
+                isOn: false,
+                state: 'default'
+            });
         });
     }
     setAudioState(isOn) {

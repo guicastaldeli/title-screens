@@ -477,6 +477,11 @@ export class Options {
 
             EventEmitter.on('screen-changed', () => {
                 this.setAudioState(false);
+
+                EventEmitter.emit('toggle-song', {
+                    isOn: false,
+                    state: this.currentState
+                });
             });
         }
 

@@ -79,9 +79,10 @@ export class AudioManager {
         this.getSource();
         this.preloadAudio();
 
-        this.textureMap = new TextureMap();
         this.levelStateChange();
         this.handleScreenChange();
+        this.emitScreenChange();
+        this.textureMap = new TextureMap();
     }
 
     private getSource(): void {
@@ -96,7 +97,7 @@ export class AudioManager {
 
             //Smb
             const marioSound = './screens/smb2/assets/sounds/player/mario-sound.ogg';
-            const luigiSound = './screns/smb2/assets/sounds/player/luigi-sound.ogg';
+            const luigiSound = './screens/smb2/assets/sounds/player/luigi-sound.ogg';
             const overworldSong = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
             const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
             const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
@@ -242,13 +243,22 @@ export class AudioManager {
     }
 
     private handleScreenChange(updScreen?: ScreenStates): void {
-        const screen = updScreen ?? this.screenManager.currentScreen();
         this.stopAudio('song');
-
+        
+        const screen = updScreen ?? this.screenManager.currentScreen();
         const screenConfig = this.songMap.get(screen);
         if(!screenConfig) return;
 
-        if(!screenConfig.hasStates) this.currentSong = null;
+        if(!screenConfig.hasStates) {
+            this.currentSong = null;
+            this.currentState = null;
+        }
+
+        this.isStateChanged = true;
+        this.lastPlayedState = null;
+        this.isPaused = false;
+        this.pausedTime = 0;
+
         if(this.isAudioPlaying) this.playStateSong();
     }
 
@@ -305,6 +315,12 @@ export class AudioManager {
 
         EventEmitter.on('level-state-changed', () => {
             this.isStateChanged = true;
+        });
+    }
+
+    private emitScreenChange(): void {
+        EventEmitter.on('screen-changed', (newScreen: ScreenStates) => {
+            this.handleScreenChange(newScreen);
         });
     }
 
