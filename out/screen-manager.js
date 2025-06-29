@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { ScreenStates } from "./state.js";
 import { EventEmitter } from "./event-emitter.js";
 export class ScreenManager {
     constructor(state, gl, programInfo, buffers, tick) {
@@ -16,6 +17,7 @@ export class ScreenManager {
         this.buffers = buffers;
         this.tick = tick;
         this.screens = new Map();
+        this.lastScreen = ScreenStates.Dk;
         this.state = state;
         this.gl = gl;
         this.programInfo = programInfo;
@@ -56,6 +58,11 @@ export class ScreenManager {
     }
     currentScreen() {
         return this.state.getCurrentState();
+    }
+    setCurrentScreen(screen) {
+        let currentScreen = this.state.getCurrentState();
+        this.lastScreen = currentScreen;
+        currentScreen = screen;
     }
     update(deltaTime) {
         if (!this.state.isRunning() || this.state.isLoading())

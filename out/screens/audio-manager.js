@@ -14,20 +14,188 @@ import { EventEmitter } from "../event-emitter.js";
 import { States } from "./smb2/texture-map.interface.js";
 export class AudioManager {
     constructor(gl, buffers, programInfo, screenManager, controller, globalActions) {
+        //Audio
+        this.isPlayed = new Set();
+        this.songMap = new Map();
+        this.isAudioPlaying = false;
+        this.currentSong = null;
+        this.isPaused = false;
+        this.pausedTime = 0;
+        this.lastPlayedState = null;
+        this.isStateChanged = false;
         this.texture = null;
         this.currentState = null;
-        //Audio
-        this.isAudioPlaying = false;
         this.gl = gl;
         this.buffers = buffers;
         this.programInfo = programInfo;
         this.screenManager = screenManager;
         this.controller = controller;
         this.globalActions = globalActions;
-        this.textureMap = new TextureMap();
+        this.song = new Audio();
+        this.optionSound = new Audio();
+        this.selectedSound = new Audio();
+        this.blockSound = new Audio();
+        this.hitSound = new Audio();
         this.requestState();
+        this.emitSong();
         this.toggleAudio();
+        this.getSource();
+        this.preloadAudio();
+        this.textureMap = new TextureMap();
         this.levelStateChange();
+        this.handleScreenChange();
+    }
+    getSource() {
+        //Path
+        //Global
+        const optionSoundPath = './assets/sounds/option-sound.ogg';
+        const selectedSoundPath = './assets/sounds/selected-sound.ogg';
+        const blockSoundPath = "./assets/sounds/block-sound.ogg";
+        //Dk
+        const dkSong = './screens/dk/assets/sounds/dk-song.ogg';
+        //Smb
+        const marioSound = './screens/smb2/assets/sounds/player/mario-sound.ogg';
+        const luigiSound = './screns/smb2/assets/sounds/player/luigi-sound.ogg';
+        const overworldSong = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
+        const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
+        const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
+        const castleSong = './screens/smb2/assets/sounds/state/smb2-castle-song.ogg';
+        //
+        //Source
+        this.optionSound.src = optionSoundPath;
+        this.blockSound.src = blockSoundPath;
+        this.selectedSound.src = selectedSoundPath;
+        this.songMap.set(ScreenStates.Dk, {
+            hasStates: false,
+            songs: new Map([['default', dkSong]])
+        });
+        this.songMap.set(ScreenStates.Smb, {
+            hasStates: true,
+            songs: new Map([
+                [States.Overworld, overworldSong],
+                [States.Underground, undergroundSong],
+                [States.Underwater, underwaterSong],
+                [States.Castle, castleSong]
+            ])
+        });
+    }
+    getSound(type) {
+        switch (type) {
+            case 'song':
+                return this.song;
+            case 'option':
+                return this.optionSound;
+            case 'block':
+                return this.blockSound;
+            case 'selected':
+                return this.selectedSound;
+            case 'hit':
+                return this.hitSound;
+            default:
+                console.warn(`Unknown sound type: ${type}`);
+                return null;
+        }
+    }
+    preloadAudio() {
+        this.song.load();
+        this.optionSound.load();
+        this.selectedSound.load();
+        this.blockSound.load();
+        this.hitSound.load();
+    }
+    playAudio(type) {
+        if (type === 'song') {
+            this.playStateSong();
+            return;
+        }
+        const sound = this.getSound(type);
+        if (!sound || this.isPlayed.has(type))
+            return;
+        try {
+            sound.currentTime = 0;
+            sound.play().then(() => {
+                this.isPlayed.add(type);
+                sound.onended = () => this.isPlayed.delete(type);
+            }).catch(e => console.warn(`${type} sound failed:`, e));
+        }
+        catch (e) {
+            console.warn(`Error playing ${type} sound:`, e);
+        }
+    }
+    playStateSong() {
+        if (!this.currentState || !this.isAudioPlaying)
+            return;
+        const currentScreen = this.screenManager.currentScreen();
+        const screenConfig = this.songMap.get(currentScreen);
+        if (!screenConfig)
+            return;
+        const songKey = screenConfig.hasStates ? this.currentState : 'default';
+        const songPath = screenConfig.songs.get(songKey);
+        if (!songPath)
+            return;
+        const stateChanged = this.lastPlayedState !== this.currentState;
+        this.isStateChanged = stateChanged;
+        this.lastPlayedState = this.currentState;
+        try {
+            if (this.song.src !== songPath) {
+                this.song.src = songPath;
+                this.song.load();
+            }
+            this.song.loop = false;
+            this.song.onended = () => EventEmitter.emit('song-ended');
+            if (stateChanged || !this.isPaused) {
+                this.song.currentTime = 0;
+            }
+            else if (this.isPaused) {
+                this.song.currentTime = this.pausedTime;
+            }
+            this.song.play().catch(e => console.warn('Song play failed', e));
+            this.isPaused = false;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+    stopAudio(type) {
+        const sound = this.getSound(type);
+        if (!sound)
+            return;
+        sound.pause();
+        sound.currentTime = 0;
+        this.isPaused = false;
+        this.pausedTime = 0;
+        this.isStateChanged = true;
+    }
+    pauseAudio(type) {
+        if (type !== 'song')
+            return;
+        const sound = this.getSound(type);
+        if (!sound)
+            return;
+        this.isPaused = true;
+        this.pausedTime = sound.currentTime;
+        sound.pause();
+    }
+    resumeAudio(type) {
+        if (type !== 'song')
+            return;
+        const sound = this.getSound(type);
+        if (!sound)
+            return;
+        this.isPaused = false;
+        sound.currentTime = this.pausedTime;
+        sound.play().catch(e => console.warn('Resume failed', e));
+    }
+    handleScreenChange(updScreen) {
+        const screen = updScreen !== null && updScreen !== void 0 ? updScreen : this.screenManager.currentScreen();
+        this.stopAudio('song');
+        const screenConfig = this.songMap.get(screen);
+        if (!screenConfig)
+            return;
+        if (!screenConfig.hasStates)
+            this.currentSong = null;
+        if (this.isAudioPlaying)
+            this.playStateSong();
     }
     requestState() {
         EventEmitter.emit('req-current-level-state');
@@ -40,11 +208,58 @@ export class AudioManager {
             this.isAudioPlaying = isOn;
         });
     }
-    levelStateChange() {
-        EventEmitter.on('level-state-changed', (e) => {
-            this.currentState = e.newState;
+    emitSong() {
+        EventEmitter.on('toggle-song', ({ isOn, state }) => {
+            this.isAudioPlaying = isOn;
+            if (state !== undefined)
+                this.currentState = state;
+            if (isOn) {
+                const currentScreen = this.screenManager.currentScreen();
+                const screenConfig = this.songMap.get(currentScreen);
+                if (screenConfig) {
+                    const songKey = screenConfig.hasStates ? this.currentState : 'default';
+                    const songPath = screenConfig.songs.get(songKey);
+                    if (songPath) {
+                        const source = this.song.src.endsWith(songPath);
+                        if (this.isPaused && !this.isStateChanged && source) {
+                            this.resumeAudio('song');
+                        }
+                        else {
+                            this.isStateChanged = true;
+                            this.playStateSong();
+                        }
+                    }
+                }
+            }
+            else {
+                if (this.song.currentTime > 0 && !this.song.paused) {
+                    this.pauseAudio('song');
+                }
+                else {
+                    this.stopAudio('song');
+                }
+            }
+        });
+        EventEmitter.on('song-ended', () => {
+            this.isPaused = false;
+            this.pausedTime = 0;
+        });
+        EventEmitter.on('level-state-changed', () => {
+            this.isStateChanged = true;
         });
     }
+    levelStateChange() {
+        EventEmitter.on('level-state-changed', (e) => {
+            if (this.currentState !== e.newState) {
+                this.stopAudio('song');
+                this.isStateChanged = true;
+                this.currentState = e.newState;
+                if (this.isAudioPlaying)
+                    this.playStateSong();
+            }
+        });
+    }
+    //Button
     drawPlayPause(projectionMatrix) {
         var _a;
         const modelViewMatrix = mat4.create();

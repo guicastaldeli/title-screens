@@ -40,7 +40,7 @@ export class Options {
             this.createOption('1 PLAYER GAME B', 0, -0.15),
             this.createOption('2 PLAYER GAME A', 0, -0.30),
             this.createOption('2 PLAYER GAME B', 0, -0.45),
-            this.createOption(this.musicText, 0, -0.58)
+            this.createOption(this.musicText, 0, -0.60)
         ];
         this.copyrightText = [
             this.createOption('©1981 NINTENDO COZLTD.', 0, -0.75, true),
@@ -171,30 +171,29 @@ export class Options {
             this.selectionTimeout.set(option, this.intervalSelected);
         }
         if (option.text.startsWith('MUSIC')) {
-            const exTimeout = this.selectionTimeout.get(option);
-            if (exTimeout) {
-                clearTimeout(exTimeout);
-                this.selectionTimeout.delete(option);
-            }
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
             EventEmitter.emit('toggle-music', this.isMusicOn);
             if (this.isMusicOn) {
-                const timeoutId = setTimeout(() => {
-                    if (this.options[this.cursor.selectedIndex] === option) {
-                        option.color = this.cursor.selectedColor;
-                    }
-                    else {
-                        option.color = defaultColor;
-                    }
-                    option.selected = false;
-                    this.selectionTimeout.delete(option);
+                EventEmitter.on('song-ended', () => {
                     this.isMusicOn = false;
                     option.text = this.musicText;
+                    option.selected = false;
+                    option.color = defaultColor;
                     EventEmitter.emit('toggle-music', false);
-                }, this.intervalSelected);
-                this.selectionTimeout.set(option, timeoutId);
+                });
             }
+            const timeoutId = setTimeout(() => {
+                if (this.options[this.cursor.selectedIndex] === option) {
+                    option.color = this.cursor.selectedColor;
+                }
+                else {
+                    option.color = defaultColor;
+                }
+                option.selected = false;
+                this.selectionTimeout.delete(option);
+            }, this.intervalSelected);
+            this.selectionTimeout.set(option, timeoutId);
             return;
         }
         option.color = this.screen.parseColor('rgb(102, 102, 102)');

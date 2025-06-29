@@ -1,5 +1,5 @@
-import { State } from "./state";
-import { ScreenStates } from "./state";
+import { State } from "./state.js";
+import { ScreenStates } from "./state.js";
 import { intScreen } from "./screen.interface";
 import { ProgramInfo } from "./main";
 import { Buffers } from "./init-buffers";
@@ -8,6 +8,7 @@ import { EventEmitter } from "./event-emitter.js";
 
 export class ScreenManager {
     private screens: Map<ScreenStates, intScreen> = new Map();
+    public lastScreen: ScreenStates = ScreenStates.Dk;
 
     constructor(
         private state: State,
@@ -59,6 +60,12 @@ export class ScreenManager {
 
     public currentScreen(): ScreenStates {
         return this.state.getCurrentState();
+    }
+
+    public setCurrentScreen(screen: ScreenStates): void {
+        let currentScreen = this.state.getCurrentState();
+        this.lastScreen = currentScreen
+        currentScreen = screen;
     }
 
     public update(deltaTime: number): void {
