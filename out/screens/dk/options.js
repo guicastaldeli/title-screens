@@ -1,6 +1,7 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { LetterMap } from "./letter-map.js";
 import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -146,6 +147,7 @@ export class Options {
         }
     }
     handleSelection(option) {
+        EventEmitter.emit('stop-all-audio');
         const defaultColor = [...this.color];
         const exTimeout = this.selectionTimeout.get(option);
         if (exTimeout) {
@@ -173,10 +175,12 @@ export class Options {
         if (option.text.startsWith('MUSIC')) {
             this.isMusicOn = !this.isMusicOn;
             option.text = this.musicText;
+            EventEmitter.emit('play-audio', { type: 'selected', screen: ScreenStates.Dk });
             EventEmitter.emit('toggle-music', this.isMusicOn);
             EventEmitter.emit('toggle-song', {
                 isOn: this.isMusicOn,
-                state: 'default'
+                state: 'default',
+                screen: ScreenStates.Dk
             });
             if (this.isMusicOn) {
                 EventEmitter.on('song-ended', () => {
@@ -200,6 +204,8 @@ export class Options {
             this.selectionTimeout.set(option, timeoutId);
             return;
         }
+        if (option.text.includes('GAME'))
+            EventEmitter.emit('play-audio', { type: 'block', screen: ScreenStates.Dk });
         option.color = this.screen.parseColor('rgb(102, 102, 102)');
         option.selected = true;
     }

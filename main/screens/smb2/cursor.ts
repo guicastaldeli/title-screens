@@ -6,6 +6,7 @@ import { ProgramInfo } from "../../main.js";
 import { SheetProps } from "./sheet-props.js";
 import { ScreenSmb } from "./main.js";
 import { Options } from "./options.js";
+import { EventEmitter } from "../../event-emitter.js";
 
 export class Cursor {
     private gl: WebGLRenderingContext;
@@ -76,6 +77,7 @@ export class Cursor {
                 
                 this.cursorCurrentPosition = [...this.optionPosition[this.selectedIndex]];
                 this.cursorTargetPosition = [...this.optionPosition[this.selectedIndex]];
+                EventEmitter.emit('play-audio', 'option');
                 
                 this.position = [this.cursorOffsetX, this.optionPosition[this.selectedIndex][1]];
                 this.updateCursor();

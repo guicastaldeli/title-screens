@@ -11,6 +11,7 @@ import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
 import { TextureMap } from "./texture-map.js";
 import { States } from "./texture-map.interface.js";
 import { EventEmitter } from "../../event-emitter.js";
+import { ScreenStates } from "../../state.js";
 export class Options {
     get musicText() {
         return this.isMusicOn ? 'MUSIC ON' : 'MUSIC OFF';
@@ -228,6 +229,7 @@ export class Options {
         }
     }
     handleSelection(option) {
+        EventEmitter.emit('stop-all-audio');
         const defaultColor = [...this.color];
         const exTimeout = this.selectionTimeout.get(option);
         if (exTimeout) {
@@ -235,6 +237,7 @@ export class Options {
             this.selectionTimeout.delete(option);
         }
         if (option.text === 'MARIO GAME' || option.text === 'LUIGI GAME') {
+            const isAlreadySelected = option.selected;
             this.options.forEach(opt => {
                 if (opt.text === 'MARIO GAME' ||
                     opt.text === 'LUIGI GAME') {
@@ -244,19 +247,32 @@ export class Options {
             });
             option.selected = true;
             option.color = this.cursor.selectedColor;
-            if (option.text === 'MARIO GAME')
-                this.screen.setCurrentPlayer('mario');
-            if (option.text === 'LUIGI GAME')
-                this.screen.setCurrentPlayer('luigi');
+            if (!isAlreadySelected) {
+                const player = option.text === 'MARIO GAME' ? 'mario' : 'luigi';
+                this.screen.setCurrentPlayer(player);
+                EventEmitter.emit('play-audio', {
+                    type: 'player',
+                    screen: ScreenStates.Smb,
+                    player: player
+                });
+            }
+            else {
+                EventEmitter.emit('play-audio', {
+                    type: 'block',
+                    screen: ScreenStates.Smb
+                });
+            }
         }
         else {
             if (option.text.startsWith('MUSIC')) {
                 this.isMusicOn = !this.isMusicOn;
                 option.text = this.musicText;
+                EventEmitter.emit('play-audio', { type: 'selected', screen: ScreenStates.Smb });
                 EventEmitter.emit('toggle-music', this.isMusicOn);
                 EventEmitter.emit('toggle-song', {
                     isOn: this.isMusicOn,
-                    state: this.currentState
+                    state: this.currentState,
+                    screen: ScreenStates.Smb
                 });
                 if (this.isMusicOn) {
                     EventEmitter.on('song-ended', () => {

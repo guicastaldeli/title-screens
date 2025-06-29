@@ -16,13 +16,20 @@ type AudioType =
     'option' |
     'selected' | 
     'block' |
-    'hit'
+    'hit' |
+    'player'
 ;
 
 type ScreenAudioConfig = {
     hasStates: boolean;
     songs: Map<string, string>;
     currentState?: string | States;
+}
+
+interface AudioEvent {
+    type: AudioType,
+    screen: ScreenStates,
+    player?: string
 }
 
 export class AudioManager {
@@ -36,21 +43,24 @@ export class AudioManager {
     //Audio
     private isPlayed: Set<AudioType> = new Set();
     private songMap: Map<ScreenStates, ScreenAudioConfig> = new Map();
-    private song: HTMLAudioElement;
-    private isAudioPlaying: boolean = false;
-    private currentSong: HTMLAudioElement | null = null;
-    private optionSound: HTMLAudioElement;
-    private selectedSound: HTMLAudioElement;
-    private blockSound: HTMLAudioElement;
-    private hitSound: HTMLAudioElement;
+    private song!: HTMLAudioElement;
+    private audioStates: Map<ScreenStates, boolean> = new Map();
+    private hitSound!: HTMLAudioElement;
     private isPaused: boolean = false;
     private pausedTime: number = 0;
     private lastPlayedState: States | null = null;
     private isStateChanged: boolean = false;
+    
+    private currentSong: HTMLAudioElement | null = null;
+    private currentState: States | null = null;
+
+    private optionSound!: HTMLAudioElement;
+    private selectedSound!: HTMLAudioElement;
+    private blockSound!: HTMLAudioElement;
+    private playerSound: Map<string, HTMLAudioElement> = new Map();
 
     public texture: WebGLTexture | null = null
     private textureMap: TextureMap;
-    private currentState: States | null = null;
 
     constructor(
         gl: WebGLRenderingContext,
@@ -67,22 +77,29 @@ export class AudioManager {
         this.controller = controller;
         this.globalActions = globalActions;
 
+        this.initAudio();
+        this.requestState();
+        this.toggleAudio();
+        
+        this.levelStateChange();
+        this.handleScreenChange();
+        this.textureMap = new TextureMap();
+        
+        //Emits
+        this.emitScreenChange();
+        this.emitSound();
+        this.emitSong();
+    }
+
+    private initAudio(): void {
         this.song = new Audio();
         this.optionSound = new Audio();
         this.selectedSound = new Audio();
         this.blockSound = new Audio();
         this.hitSound = new Audio();
 
-        this.requestState();
-        this.emitSong();
-        this.toggleAudio();
         this.getSource();
         this.preloadAudio();
-
-        this.levelStateChange();
-        this.handleScreenChange();
-        this.emitScreenChange();
-        this.textureMap = new TextureMap();
     }
 
     private getSource(): void {
@@ -96,8 +113,11 @@ export class AudioManager {
             const dkSong = './screens/dk/assets/sounds/dk-song.ogg';
 
             //Smb
-            const marioSound = './screens/smb2/assets/sounds/player/mario-sound.ogg';
-            const luigiSound = './screens/smb2/assets/sounds/player/luigi-sound.ogg';
+            const playerSoundPath = new Map([
+                ['mario', './screens/smb2/assets/sounds/player/mario-sound.ogg'],
+                ['luigi', './screens/smb2/assets/sounds/player/luigi-sound.ogg']
+            ]);
+
             const overworldSong = './screens/smb2/assets/sounds/state/smb2-overworld-song.ogg';
             const undergroundSong = './screens/smb2/assets/sounds/state/smb2-underground-song.ogg';
             const underwaterSong = './screens/smb2/assets/sounds/state/smb2-underwater-song.ogg';
@@ -108,6 +128,10 @@ export class AudioManager {
         this.optionSound.src = optionSoundPath;
         this.blockSound.src = blockSoundPath;
         this.selectedSound.src = selectedSoundPath;
+        playerSoundPath.forEach((path, player) => {
+            const audio = new Audio(path);
+            this.playerSound.set(player, audio);
+        });
         this.songMap.set(ScreenStates.Dk, {
             hasStates: false,
             songs: new Map([['default', dkSong]])
@@ -123,7 +147,7 @@ export class AudioManager {
         });
     }
 
-    private getSound(type: AudioType): HTMLAudioElement | null {
+    private getSound(type: AudioType, player?: string): HTMLAudioElement | null {
         switch(type) {
             case 'song':
                 return this.song;
@@ -135,6 +159,9 @@ export class AudioManager {
                 return this.selectedSound;
             case 'hit':
                 return this.hitSound;
+            case 'player':
+                if(!player) return null;
+                return this.getPlayerSound(player);
             default:
                 console.warn(`Unknown sound type: ${type}`);
                 return null;
@@ -147,15 +174,19 @@ export class AudioManager {
         this.selectedSound.load();
         this.blockSound.load();
         this.hitSound.load();
+        this.playerSound.forEach(s => s.load());
     }
 
-    private playAudio(type: AudioType): void {
+    private playAudio(type: AudioType, player?: string): void {
         if(type === 'song') {
             this.playStateSong();
             return;
         }
 
-        const sound = this.getSound(type);
+        const sound = type === 'player' && player
+        ? this.playerSound.get(player)
+        : this.getSound(type);
+        
         if(!sound || this.isPlayed.has(type)) return;
 
         try {
@@ -173,13 +204,15 @@ export class AudioManager {
     }
 
     private playStateSong(): void {
-        if(!this.currentState || !this.isAudioPlaying) return;
+        if(!this.currentState || !this.audioStates) return;
 
         const currentScreen = this.screenManager.currentScreen();
         const screenConfig = this.songMap.get(currentScreen);
         if(!screenConfig) return;
 
-        const songKey = screenConfig.hasStates ? this.currentState : 'default';
+        const songKey = currentScreen === ScreenStates.Dk ? 'default' :
+        (screenConfig.hasStates ? this.currentState : 'default');
+
         const songPath = screenConfig.songs.get(songKey!);
         if(!songPath) return;
 
@@ -220,6 +253,23 @@ export class AudioManager {
         this.isStateChanged = true;
     }
 
+    private stopAllAudio(): void {
+        this.stopAudio('song');
+        this.optionSound.pause();
+        this.optionSound.currentTime = 0;
+        this.selectedSound.pause();
+        this.selectedSound.currentTime = 0;
+        this.blockSound.pause();
+        this.blockSound.currentTime = 0;
+        this.hitSound.pause();
+        this.hitSound.currentTime = 0;
+
+        this.playerSound.forEach(s => {
+            s.pause();
+            s.currentTime = 0;
+        });
+    }
+
     private pauseAudio(type: AudioType): void {
         if(type !== 'song') return;
 
@@ -243,23 +293,34 @@ export class AudioManager {
     }
 
     private handleScreenChange(updScreen?: ScreenStates): void {
-        this.stopAudio('song');
+        this.stopAllAudio();
         
         const screen = updScreen ?? this.screenManager.currentScreen();
         const screenConfig = this.songMap.get(screen);
         if(!screenConfig) return;
-
-        if(!screenConfig.hasStates) {
-            this.currentSong = null;
-            this.currentState = null;
-        }
-
+        
+        this.currentSong = null;
+        this.currentState = null;
         this.isStateChanged = true;
         this.lastPlayedState = null;
         this.isPaused = false;
         this.pausedTime = 0;
+        this.isPlayed.clear();
+        this.resetAudioElements();
 
-        if(this.isAudioPlaying) this.playStateSong();
+        const isAudioPlaying = this.audioStates.get(screen);
+        if(isAudioPlaying) this.playStateSong();
+    }
+
+    private resetAudioElements(): void {
+        this.song = new Audio();
+        this.optionSound = new Audio();
+        this.selectedSound = new Audio();
+        this.blockSound = new Audio();
+        this.hitSound = new Audio();
+
+        this.getSource();
+        this.preloadAudio();
     }
 
     private requestState(): void {
@@ -270,58 +331,93 @@ export class AudioManager {
     }
 
     private toggleAudio(): void {
+        const currentScreen = this.screenManager.currentScreen();
+        let isAudioPlaying = this.audioStates.get(currentScreen);
+
         EventEmitter.on('toggle-music', (isOn: boolean) => {
-            this.isAudioPlaying = isOn;
+            isAudioPlaying = isOn;
         });
     }
 
-    private emitSong(): void {
-        EventEmitter.on('toggle-song', ({ isOn, state }: { isOn: boolean; state: States }) => {
-            this.isAudioPlaying = isOn;
-            if(state !== undefined) this.currentState = state;
-
-            if(isOn) {
+    //Emits
+        private emitSong(): void {
+            EventEmitter.on('toggle-song', ({ isOn, state, screen }: { 
+                isOn: boolean; 
+                state: States,
+                screen: ScreenStates
+            }) => {
                 const currentScreen = this.screenManager.currentScreen();
                 const screenConfig = this.songMap.get(currentScreen);
-
-                if(screenConfig) {
-                    const songKey = screenConfig.hasStates ? this.currentState : 'default';
-                    const songPath = screenConfig.songs.get(songKey!);
-
-                    if(songPath) {
-                        const source = this.song.src.endsWith(songPath);
-
-                        if(this.isPaused && !this.isStateChanged && source) {
-                            this.resumeAudio('song');
+                let isAudioPlaying = this.audioStates.get(currentScreen);
+                
+                if(screen && screen !== currentScreen) {
+                    if(this.song.currentTime > 0 && !this.song.paused) this.stopAudio('song');
+                    return;
+                } else {
+                    if(state !== undefined) this.currentState = state;
+                    isAudioPlaying = isOn;
+    
+                    if(isOn) {
+                        if(screenConfig) {
+                            const songKey = screenConfig.hasStates ? this.currentState : 'default';
+                            const songPath = screenConfig.songs.get(songKey!);
+    
+                            if(songPath) {
+                                const source = this.song.src.endsWith(songPath);
+    
+                                if(this.isPaused && !this.isStateChanged && source) {
+                                    this.resumeAudio('song');
+                                } else {
+                                    this.isStateChanged = true;
+                                    this.playStateSong();
+                                }
+                            }
+                        }
+                    } else {
+                        if(this.song.currentTime > 0 && !this.song.paused) {
+                            this.pauseAudio('song');
                         } else {
-                            this.isStateChanged = true;
-                            this.playStateSong();
+                            this.stopAudio('song');
                         }
                     }
                 }
-            } else {
-                if(this.song.currentTime > 0 && !this.song.paused) {
-                    this.pauseAudio('song');
-                } else {
-                    this.stopAudio('song');
+            });
+
+            EventEmitter.on('song-ended', () => {
+                this.isPaused = false;
+                this.pausedTime = 0;
+            });
+
+            EventEmitter.on('level-state-changed', () => {
+                this.isStateChanged = true;
+            });
+        }
+
+        private emitScreenChange(): void {
+            EventEmitter.on('screen-changed', (newScreen: ScreenStates) => {
+                this.handleScreenChange(newScreen);
+            });
+        }
+
+        private emitSound(): void {
+            EventEmitter.on('play-audio', (e: AudioEvent | AudioType) => {
+                const type = typeof e === 'string' ? e : e.type;
+                const srcScreen = typeof e === 'object' ? e.screen : undefined;
+                const currentScreen = this.screenManager.currentScreen();
+
+                if(srcScreen && srcScreen !== currentScreen) return;
+                if(type === 'player' && currentScreen === ScreenStates.Smb) {
+                    const player = typeof e === 'object' && 'player' in e ? e.player : undefined;
+                    if(player) this.playAudio(type, player);
                 }
-            }
-        });
 
-        EventEmitter.on('song-ended', () => {
-            this.isPaused = false;
-            this.pausedTime = 0;
-        });
+                this.playAudio(type);
+            });
+        }
+    //
 
-        EventEmitter.on('level-state-changed', () => {
-            this.isStateChanged = true;
-        });
-    }
-
-    private emitScreenChange(): void {
-        EventEmitter.on('screen-changed', (newScreen: ScreenStates) => {
-            this.handleScreenChange(newScreen);
-        });
+    private getPlayerSound(player: string): HTMLAudioElement | null {
+        return this.playerSound.get(player) || null;
     }
 
     private levelStateChange(): void {
@@ -335,7 +431,10 @@ export class AudioManager {
                 this.stopAudio('song');
                 this.isStateChanged = true;
                 this.currentState = e.newState;
-                if(this.isAudioPlaying) this.playStateSong();
+
+                const currentScreen = this.screenManager.currentScreen();
+                let isAudioPlaying = this.audioStates.get(currentScreen);
+                if(isAudioPlaying) this.playStateSong();
             }
         });
     }
@@ -345,18 +444,19 @@ export class AudioManager {
         const modelViewMatrix = mat4.create();
     
         const currentScreen = this.screenManager.currentScreen();
+        const isAudioPlaying = this.audioStates.get(currentScreen);
         const map = this.textureMap.playPause[currentScreen];
         let spriteCoords: PlayPauseSingleCoord;
 
         if(currentScreen === ScreenStates.Dk) {
-            spriteCoords = this.isAudioPlaying
+            spriteCoords = isAudioPlaying
             ? (map as PlayPausePairedCoords).pause
             : (map as PlayPausePairedCoords).play;
         } else {
             const stateMap = (map as Record<States, PlayPausePairedCoords>);
             const currentState = this.currentState ?? States.Overworld;
 
-            spriteCoords = this.isAudioPlaying
+            spriteCoords = isAudioPlaying
             ? stateMap[currentState].pause
             : stateMap[currentState].play; 
         }
@@ -413,7 +513,6 @@ export class AudioManager {
 
     public async initAudioManager(): Promise<void> {
         const projectionMatrix = mat4.create();
-
         this.drawPlayPause(projectionMatrix);
         await this.getTex();
     }

@@ -1,4 +1,5 @@
 import { mat4 } from "../../../node_modules/gl-matrix/esm/index.js";
+import { EventEmitter } from "../../event-emitter.js";
 export class Cursor {
     constructor(gl, buffers, programInfo, screen, sheetProps, options) {
         this.position = [-0.52, 0];
@@ -31,6 +32,7 @@ export class Cursor {
                 this.cursorTargetPosition = [...this.optionPosition[0]];
                 this.selectedIndex = 0;
                 this.position = [this.cursorOffsetX, this.optionPosition[0][0]];
+                EventEmitter.emit('play-audio', 'option');
                 this.updateCursor();
             }
         }

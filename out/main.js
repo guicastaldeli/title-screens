@@ -16,6 +16,7 @@ import { Camera } from "./camera.js";
 import { GlobalActions } from "./screens/global-actions.js";
 import { ScreenDk } from "./screens/dk/main.js";
 import { ScreenSmb } from "./screens/smb2/main.js";
+import { EventEmitter } from "./event-emitter.js";
 const canvas = (document.getElementById('container'));
 const gl = (canvas.getContext('webgl'));
 canvas.width = window.innerWidth;
@@ -150,6 +151,7 @@ function main() {
     });
 }
 function initScene(gl, programInfo, buffers) {
+    EventEmitter.emit('stop-all-audio');
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
     gl.enable(gl.DEPTH_TEST);
